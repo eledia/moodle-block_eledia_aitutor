@@ -42,6 +42,7 @@ See the dedicated guides:
 - [User guide](docs/user_guide.md)
 - [Teacher / block configuration](docs/teacher_guide.md)
 - [MCP / RAG integration](docs/integration_guide.md)
+- [**RAG/Tutor MCP server specification**](docs/rag_server_spec.md) — the contract for building the RAG server
 - [Troubleshooting](docs/troubleshooting.md)
 - [Privacy](docs/privacy.md)
 - [Security notes](docs/security.md)

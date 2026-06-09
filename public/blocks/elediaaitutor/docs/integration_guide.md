@@ -3,6 +3,12 @@
 This block is an MCP **client**. It calls your RAG/Tutor server with a single
 JSON-RPC 2.0 `tools/call` over the MCP Streamable HTTP transport.
 
+> Building the RAG server itself? See the complete, authoritative contract in
+> [**rag_server_spec.md**](rag_server_spec.md) — it covers the tools you must
+> provide, the Moodle MCP tools you can call back into, framing, auth, the
+> conversation lifecycle, and an implementation checklist. This page is the
+> quick reference.
+
 ## Request
 
 `POST <RAG MCP server URL>`
