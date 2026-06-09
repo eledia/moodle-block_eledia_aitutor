@@ -1,0 +1,457 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+declare(strict_types=1);
+
+namespace block_elediaaitutor\local;
+
+use block_elediaaitutor\local\http\curl_transport;
+use block_elediaaitutor\local\http\transport;
+use moodle_url;
+
+/**
+ * Server-side client for the external RAG/Tutor MCP server.
+ *
+ * Speaks MCP over Streamable HTTP: a single JSON-RPC 2.0 {@code tools/call}
+ * request is POSTed to the configured endpoint, and the response is accepted as
+ * either a plain JSON body or a {@code text/event-stream} (SSE) body, per the
+ * MCP Streamable HTTP transport. The client normalises the tool result into a
+ * predictable shape — answer markdown, an optional server conversation id and a
+ * list of sources/citations — regardless of whether the server returns
+ * structured content or a text payload.
+ *
+ * This class never has any knowledge of the Moodle user beyond the values it is
+ * handed; the user-scoped Moodle MCP token is provisioned elsewhere
+ * ({@see token_provider}) and passed in as a tool argument. The token and any
+ * configured RAG authorization header are sent server-to-server only and are
+ * never returned to the caller or logged.
+ *
+ * @package     block_elediaaitutor
+ * @author      Christopher Reimann <christopher.reimann@eledia.de>
+ * @copyright   2026 eLeDia GmbH, Berlin
+ * @link        https://eledia.de
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class rag_client {
+    /** @var string MCP protocol version advertised on requests. */
+    private const MCP_PROTOCOL_VERSION = '2025-06-18';
+
+    /** @var moodle_url Validated RAG endpoint. */
+    private moodle_url $endpoint;
+
+    /** @var string|null Authorization header value, or null when none configured. */
+    private ?string $authheader;
+
+    /** @var transport HTTP transport. */
+    private transport $transport;
+
+    /** @var int Request timeout in seconds. */
+    private int $timeout;
+
+    /**
+     * Constructor.
+     *
+     * @param moodle_url $endpoint Validated RAG MCP endpoint.
+     * @param string|null $authheader Authorization header value to send, or null.
+     * @param transport $transport HTTP transport.
+     * @param int $timeout Request timeout in seconds.
+     */
+    public function __construct(moodle_url $endpoint, ?string $authheader, transport $transport, int $timeout) {
+        $this->endpoint = $endpoint;
+        $this->authheader = $authheader;
+        $this->transport = $transport;
+        $this->timeout = $timeout;
+    }
+
+    /**
+     * Build a client from plugin configuration and the default cURL transport.
+     *
+     * @param transport|null $transport Optional transport override (tests).
+     * @return self
+     * @throws \moodle_exception When the configured RAG URL is missing or invalid.
+     */
+    public static function create(?transport $transport = null): self {
+        $endpoint = security::validated_rag_url();
+
+        $authheader = null;
+        $method = (string) security::get_config('ragauthmethod', 'none');
+        $tokenvalue = trim((string) security::get_config('ragauthtoken', ''));
+        if ($tokenvalue !== '') {
+            $authheader = match ($method) {
+                'bearer' => 'Authorization: Bearer ' . $tokenvalue,
+                'header' => $tokenvalue, // Admin supplies a full "Name: value" header.
+                default => null,
+            };
+        }
+
+        return new self(
+            $endpoint,
+            $authheader,
+            $transport ?? new curl_transport(security::allow_private_network()),
+            security::request_timeout()
+        );
+    }
+
+    /**
+     * Send a chat turn to the RAG/Tutor server.
+     *
+     * @param string $systemurl This Moodle site's wwwroot.
+     * @param string $moodletoken User-scoped Moodle MCP token (server-to-server only).
+     * @param string $usermessage The validated user message.
+     * @param string|null $courseid Optional course context id.
+     * @param string|null $conversationid Optional existing conversation id.
+     * @param string $toolname Chat tool name to invoke.
+     * @return array{answer: string, conversation_id: ?string, sources: array, iserror: bool}
+     * @throws rag_exception On transport or protocol failure.
+     */
+    public function chat(
+        string $systemurl,
+        string $moodletoken,
+        string $usermessage,
+        ?string $courseid,
+        ?string $conversationid,
+        string $toolname
+    ): array {
+        $arguments = [
+            'system_url' => $systemurl,
+            'moodle_token' => $moodletoken,
+            'user_message' => $usermessage,
+        ];
+        if ($courseid !== null && $courseid !== '') {
+            $arguments['course_id'] = $courseid;
+        }
+        if ($conversationid !== null && $conversationid !== '') {
+            $arguments['conversation_id'] = $conversationid;
+        }
+
+        $result = $this->call_tool($toolname, $arguments);
+        return $this->normalise_tool_result($result);
+    }
+
+    /**
+     * Load history for a conversation via the configured history tool.
+     *
+     * @param string $systemurl This Moodle site's wwwroot.
+     * @param string $moodletoken User-scoped Moodle MCP token.
+     * @param string $conversationid Conversation id to load.
+     * @param string $toolname History tool name to invoke.
+     * @return array List of {role, content} message arrays.
+     * @throws rag_exception On transport or protocol failure.
+     */
+    public function get_history(
+        string $systemurl,
+        string $moodletoken,
+        string $conversationid,
+        string $toolname
+    ): array {
+        $result = $this->call_tool($toolname, [
+            'system_url' => $systemurl,
+            'moodle_token' => $moodletoken,
+            'conversation_id' => $conversationid,
+        ]);
+
+        $structured = $result['structuredContent'] ?? null;
+        $messages = [];
+        if (is_array($structured) && isset($structured['messages']) && is_array($structured['messages'])) {
+            $messages = $structured['messages'];
+        } else {
+            // Fall back to parsing a JSON text payload.
+            $decoded = json_decode($this->collect_text($result), true);
+            if (is_array($decoded) && isset($decoded['messages']) && is_array($decoded['messages'])) {
+                $messages = $decoded['messages'];
+            }
+        }
+
+        $clean = [];
+        foreach ($messages as $message) {
+            if (!is_array($message)) {
+                continue;
+            }
+            $role = (string) ($message['role'] ?? 'assistant');
+            $content = (string) ($message['content'] ?? ($message['text'] ?? ''));
+            if ($content === '') {
+                continue;
+            }
+            $clean[] = ['role' => $role === 'user' ? 'user' : 'assistant', 'content' => $content];
+        }
+        return $clean;
+    }
+
+    /**
+     * Ask the RAG server to delete a conversation it owns.
+     *
+     * Best-effort: throws {@see rag_exception} on transport/protocol failure so
+     * the caller can log it, but the caller should still remove its local record.
+     *
+     * @param string $systemurl This Moodle site's wwwroot.
+     * @param string $moodletoken User-scoped Moodle MCP token.
+     * @param string $conversationid Conversation id to delete.
+     * @param string $toolname Delete tool name to invoke.
+     * @return void
+     * @throws rag_exception On transport or protocol failure.
+     */
+    public function delete_conversation(
+        string $systemurl,
+        string $moodletoken,
+        string $conversationid,
+        string $toolname
+    ): void {
+        $this->call_tool($toolname, [
+            'system_url' => $systemurl,
+            'moodle_token' => $moodletoken,
+            'conversation_id' => $conversationid,
+        ]);
+    }
+
+    /**
+     * Execute a single MCP tools/call request and return the JSON-RPC result.
+     *
+     * @param string $toolname Tool name.
+     * @param array $arguments Tool arguments.
+     * @return array The {@code result} member of the JSON-RPC response.
+     * @throws rag_exception On any transport or protocol error.
+     */
+    private function call_tool(string $toolname, array $arguments): array {
+        $payload = [
+            'jsonrpc' => '2.0',
+            'id' => 1,
+            'method' => 'tools/call',
+            'params' => [
+                'name' => $toolname,
+                'arguments' => $arguments,
+            ],
+        ];
+
+        $headers = [
+            'Content-Type: application/json',
+            'Accept: application/json, text/event-stream',
+            'MCP-Protocol-Version: ' . self::MCP_PROTOCOL_VERSION,
+        ];
+        if ($this->authheader !== null) {
+            $headers[] = $this->authheader;
+        }
+
+        $body = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $response = $this->transport->post($this->endpoint->out(false), $headers, (string) $body, $this->timeout);
+
+        if ($response['error'] !== '') {
+            throw new rag_exception('error_rag_unavailable', 'transport: ' . $response['error']);
+        }
+        if ($response['status'] < 200 || $response['status'] >= 300) {
+            throw new rag_exception('error_rag_unavailable', 'http status ' . $response['status']);
+        }
+
+        $envelope = $this->decode_envelope($response);
+        if (isset($envelope['error'])) {
+            $code = $envelope['error']['code'] ?? '?';
+            throw new rag_exception('error_rag_unavailable', 'jsonrpc error ' . $code);
+        }
+        if (!isset($envelope['result']) || !is_array($envelope['result'])) {
+            throw new rag_exception('error_rag_bad_response', 'missing result');
+        }
+
+        return $envelope['result'];
+    }
+
+    /**
+     * Decode the response body, accepting either JSON or an SSE event stream.
+     *
+     * @param array{status: int, headers: array, body: string, error: string} $response Transport response.
+     * @return array Decoded JSON-RPC envelope.
+     * @throws rag_exception When no decodable JSON-RPC message is present.
+     */
+    private function decode_envelope(array $response): array {
+        $body = trim($response['body']);
+        if ($body === '') {
+            throw new rag_exception('error_rag_bad_response', 'empty body');
+        }
+
+        $contenttype = '';
+        foreach ($response['headers'] as $name => $value) {
+            if (strtolower((string) $name) === 'content-type') {
+                $contenttype = strtolower((string) $value);
+                break;
+            }
+        }
+
+        $isstream = str_contains($contenttype, 'text/event-stream')
+            || (str_starts_with($body, 'event:') || str_starts_with($body, 'data:'));
+
+        if ($isstream) {
+            $envelope = $this->parse_sse($body);
+            if ($envelope !== null) {
+                return $envelope;
+            }
+            throw new rag_exception('error_rag_bad_response', 'no json-rpc frame in sse stream');
+        }
+
+        $decoded = json_decode($body, true);
+        if (!is_array($decoded)) {
+            throw new rag_exception('error_rag_bad_response', 'invalid json');
+        }
+        return $decoded;
+    }
+
+    /**
+     * Extract the last JSON-RPC frame from an SSE body.
+     *
+     * Walks {@code data:} lines (concatenating multi-line data per the SSE spec)
+     * and returns the final frame that parses as a JSON-RPC message — that is the
+     * response to our request once any intermediate streaming events have passed.
+     *
+     * @param string $body Raw SSE body.
+     * @return array|null Decoded envelope, or null when none found.
+     */
+    private function parse_sse(string $body): ?array {
+        $found = null;
+        $datalines = [];
+        $lines = preg_split('/\r\n|\r|\n/', $body) ?: [];
+        $lines[] = ''; // Sentinel to flush the final event.
+
+        foreach ($lines as $line) {
+            if ($line === '') {
+                if ($datalines !== []) {
+                    $payload = implode("\n", $datalines);
+                    $datalines = [];
+                    $decoded = json_decode($payload, true);
+                    if (is_array($decoded) && (isset($decoded['result']) || isset($decoded['error']))) {
+                        $found = $decoded;
+                    }
+                }
+                continue;
+            }
+            if (str_starts_with($line, 'data:')) {
+                $datalines[] = ltrim(substr($line, 5), ' ');
+            }
+        }
+        return $found;
+    }
+
+    /**
+     * Normalise an MCP tool result into the block's answer shape.
+     *
+     * Prefers {@code structuredContent} when the server provides it, otherwise
+     * inspects the text content (treating it as JSON when it parses, else as
+     * markdown). Recognises a range of common key names for the answer body,
+     * conversation id and sources so the block works with differently-shaped
+     * RAG servers without configuration.
+     *
+     * @param array $result The JSON-RPC result.
+     * @return array{answer: string, conversation_id: ?string, sources: array, iserror: bool}
+     */
+    private function normalise_tool_result(array $result): array {
+        $iserror = !empty($result['isError']);
+        $structured = is_array($result['structuredContent'] ?? null) ? $result['structuredContent'] : null;
+        $text = $this->collect_text($result);
+
+        $payload = $structured;
+        if ($payload === null && $text !== '') {
+            $decoded = json_decode($text, true);
+            if (is_array($decoded)) {
+                $payload = $decoded;
+            }
+        }
+
+        $answer = '';
+        $conversationid = null;
+        $sources = [];
+
+        if (is_array($payload)) {
+            foreach (['answer', 'text', 'message', 'response', 'content', 'output'] as $key) {
+                if (isset($payload[$key]) && is_string($payload[$key]) && $payload[$key] !== '') {
+                    $answer = $payload[$key];
+                    break;
+                }
+            }
+            foreach (['conversation_id', 'conversationId', 'session_id', 'sessionId', 'thread_id'] as $key) {
+                if (!empty($payload[$key]) && is_scalar($payload[$key])) {
+                    $conversationid = (string) $payload[$key];
+                    break;
+                }
+            }
+            foreach (['sources', 'citations', 'documents', 'references'] as $key) {
+                if (isset($payload[$key]) && is_array($payload[$key])) {
+                    $sources = $this->normalise_sources($payload[$key]);
+                    break;
+                }
+            }
+        }
+
+        if ($answer === '') {
+            // No structured/JSON answer: fall back to the raw text content.
+            $answer = $text;
+        }
+        if ($answer === '' && $iserror) {
+            $answer = get_string('error_rag_tool_error', 'block_elediaaitutor');
+        }
+
+        return [
+            'answer' => $answer,
+            'conversation_id' => $conversationid,
+            'sources' => $sources,
+            'iserror' => $iserror,
+        ];
+    }
+
+    /**
+     * Concatenate the text parts of an MCP content array.
+     *
+     * @param array $result The JSON-RPC result.
+     * @return string
+     */
+    private function collect_text(array $result): string {
+        $parts = [];
+        $content = $result['content'] ?? [];
+        if (is_array($content)) {
+            foreach ($content as $item) {
+                if (is_array($item) && ($item['type'] ?? '') === 'text' && isset($item['text'])) {
+                    $parts[] = (string) $item['text'];
+                }
+            }
+        }
+        return trim(implode("\n\n", $parts));
+    }
+
+    /**
+     * Normalise a heterogeneous sources array into {title, url, snippet} rows.
+     *
+     * @param array $raw Raw sources from the RAG server.
+     * @return array<int, array{title: string, url: string, snippet: string}>
+     */
+    private function normalise_sources(array $raw): array {
+        $sources = [];
+        foreach ($raw as $item) {
+            if (is_string($item)) {
+                $sources[] = ['title' => $item, 'url' => '', 'snippet' => ''];
+                continue;
+            }
+            if (!is_array($item)) {
+                continue;
+            }
+            $title = (string) ($item['title'] ?? ($item['name'] ?? ($item['source'] ?? '')));
+            $url = (string) ($item['url'] ?? ($item['link'] ?? ($item['uri'] ?? '')));
+            $snippet = (string) ($item['snippet'] ?? ($item['text'] ?? ($item['excerpt'] ?? '')));
+            if ($title === '' && $url === '' && $snippet === '') {
+                continue;
+            }
+            if ($title === '') {
+                $title = $url !== '' ? $url : get_string('source', 'block_elediaaitutor');
+            }
+            $sources[] = ['title' => $title, 'url' => $url, 'snippet' => $snippet];
+        }
+        return $sources;
+    }
+}

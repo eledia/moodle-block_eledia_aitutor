@@ -1,0 +1,106 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+declare(strict_types=1);
+
+namespace block_elediaaitutor;
+
+use block_elediaaitutor\external\clear_conversation;
+use block_elediaaitutor\external\get_conversations;
+use block_elediaaitutor\external\send_message;
+use block_elediaaitutor\local\conversation_repository;
+use context_system;
+
+/**
+ * Tests for the external (AJAX) functions: validation, context and capability
+ * enforcement, and ownership scoping.
+ *
+ * @package     block_elediaaitutor
+ * @covers      \block_elediaaitutor\external\send_message
+ * @covers      \block_elediaaitutor\external\get_conversations
+ * @covers      \block_elediaaitutor\external\clear_conversation
+ * @author      Christopher Reimann <christopher.reimann@eledia.de>
+ * @copyright   2026 eLeDia GmbH, Berlin
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+final class external_test extends \advanced_testcase {
+    /**
+     * An invalid context id is rejected.
+     */
+    public function test_send_message_invalid_context(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $this->expectException(\moodle_exception::class);
+        send_message::execute(-9999, 'Hi', 0, '');
+    }
+
+    /**
+     * A user for whom the capability is prohibited cannot chat.
+     */
+    public function test_send_message_requires_capability(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $context = context_system::instance();
+        $roleid = $this->getDataGenerator()->create_role();
+        role_assign($roleid, $user->id, $context->id);
+        assign_capability('block/elediaaitutor:use', CAP_PROHIBIT, $roleid, $context->id, true);
+        accesslib_clear_all_caches_for_unit_testing();
+
+        $this->expectException(\required_capability_exception::class);
+        send_message::execute($context->id, 'Hi', 0, '');
+    }
+
+    /**
+     * get_conversations returns only the calling user's conversations.
+     */
+    public function test_get_conversations_scoped_to_user(): void {
+        $this->resetAfterTest();
+        $alice = $this->getDataGenerator()->create_user();
+        $bob = $this->getDataGenerator()->create_user();
+        conversation_repository::upsert((int) $alice->id, 'a-1', null, 'alice msg');
+        conversation_repository::upsert((int) $bob->id, 'b-1', null, 'bob msg');
+
+        $this->setUser($alice);
+        $result = get_conversations::execute(context_system::instance()->id, 0);
+        $result = \core_external\external_api::clean_returnvalue(get_conversations::execute_returns(), $result);
+
+        $this->assertCount(1, $result['conversations']);
+        $this->assertSame('a-1', $result['conversations'][0]['conversationid']);
+    }
+
+    /**
+     * A user cannot delete another user's conversation.
+     */
+    public function test_clear_conversation_enforces_ownership(): void {
+        $this->resetAfterTest();
+        $alice = $this->getDataGenerator()->create_user();
+        $bob = $this->getDataGenerator()->create_user();
+        $aliceconv = conversation_repository::upsert((int) $alice->id, 'a-1', null, 'alice msg');
+
+        $this->setUser($bob);
+        $result = clear_conversation::execute(context_system::instance()->id, (int) $aliceconv->id);
+        $result = \core_external\external_api::clean_returnvalue(clear_conversation::execute_returns(), $result);
+
+        // Nothing deleted: Bob does not own it.
+        $this->assertFalse($result['deleted']);
+        $this->assertCount(1, conversation_repository::list_for_user((int) $alice->id));
+    }
+}

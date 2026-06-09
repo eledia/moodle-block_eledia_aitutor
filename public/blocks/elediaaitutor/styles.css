@@ -1,0 +1,713 @@
+/*
+ * This file is part of Moodle - http://moodle.org/
+ *
+ * Moodle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * eLeDia.ai Tutor block styles.
+ *
+ * Everything is namespaced under .elediaaitutor-* so nothing leaks into the
+ * surrounding Moodle theme. Overlay modes are portalled to <body> by the AMD
+ * module and given a high z-index so chat menus/overlays are never clipped by
+ * block-container overflow (a known failure mode in similar blocks).
+ *
+ * @package   block_elediaaitutor
+ * @copyright 2026 eLeDia GmbH, Berlin
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/*
+ * Custom properties are declared on BOTH the root and the panel. Overlay modes
+ * (docked/modal/fullscreen) portal the panel to <body>, i.e. outside the root,
+ * so the panel must carry its own variables or it would render unstyled.
+ */
+.elediaaitutor-root,
+.elediaaitutor-panel {
+    /* Single accent (deep navy) carries primary actions and text. */
+    --eat-accent: #1e3f59;
+    --eat-accent-dark: #16314a;
+    --eat-accent-contrast: #fff;
+    /* eLeDia brand orange — used sparingly (logo only). */
+    --eat-brand: #ed7b2d;
+    /* Neutral surfaces and hairlines. */
+    --eat-surface: #ffffff;
+    --eat-body-bg: #f4f6f8;
+    --eat-line: #e7ebef;
+    /* Text. */
+    --eat-ink: #1e3f59;
+    --eat-muted: #748495;
+    --eat-header-fg: #1e3f59;
+    /* Bubbles: warm peach for the learner, clean white card for the tutor. */
+    --eat-user-bg: #fce9db;
+    --eat-user-fg: #1e3f59;
+    --eat-bot-bg: #ffffff;
+    --eat-bot-fg: #1e3f59;
+    /* Composer input text. */
+    --eat-assistant-bg: #fff;
+    --eat-assistant-fg: #1e3f59;
+    /* Shape + rhythm. */
+    --eat-radius: 18px;
+    --eat-bubble-radius: 16px;
+    --eat-gap: 0.8rem;
+    --eat-z: 1080;
+}
+
+/* --- Launch button (overlay modes). ----------------------------------- */
+/*
+ * Scoped under .elediaaitutor-root so the flex layout beats Bootstrap's
+ * `.btn { display: inline-block }` (equal specificity would otherwise leave the
+ * icon and label baseline-aligned instead of centred).
+ */
+.elediaaitutor-root .elediaaitutor-launch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.55rem 1.1rem;
+    background: var(--eat-surface);
+    border: 1px solid var(--eat-line);
+    color: var(--eat-accent);
+    box-shadow: 0 1px 2px rgba(30, 63, 89, 0.06), 0 10px 24px rgba(30, 63, 89, 0.10);
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.elediaaitutor-root .elediaaitutor-launch:hover,
+.elediaaitutor-root .elediaaitutor-launch:focus-visible {
+    background: var(--eat-surface);
+    border-color: #cfd6dd;
+    color: var(--eat-accent);
+    box-shadow: 0 2px 4px rgba(30, 63, 89, 0.08), 0 14px 30px rgba(30, 63, 89, 0.16);
+    transform: translateY(-1px);
+}
+
+.elediaaitutor-root .elediaaitutor-launch:active {
+    transform: translateY(1px);
+}
+
+.elediaaitutor-launch-icon,
+.elediaaitutor-launch-text {
+    vertical-align: middle;
+}
+
+.elediaaitutor-launch-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: transparent;
+    flex: 0 0 auto;
+}
+
+.elediaaitutor-launch-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* --- Panel base. ------------------------------------------------------- */
+.elediaaitutor-panel {
+    box-sizing: border-box;
+}
+
+.elediaaitutor-panel *,
+.elediaaitutor-panel *::before,
+.elediaaitutor-panel *::after {
+    box-sizing: border-box;
+}
+
+.elediaaitutor-window {
+    display: flex;
+    flex-direction: column;
+    background: var(--eat-bg, #fff);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--eat-radius);
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(16, 24, 40, 0.16);
+    min-height: 0;
+}
+
+/* Embedded: fills the block, no overlay chrome. */
+.elediaaitutor-embedded {
+    display: block;
+}
+
+.elediaaitutor-embedded .elediaaitutor-window {
+    height: clamp(380px, 60vh, 620px);
+    box-shadow: none;
+}
+
+/* --- Header. ----------------------------------------------------------- */
+.elediaaitutor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    background: var(--eat-surface);
+    color: var(--eat-header-fg);
+    border-bottom: 1px solid rgba(16, 24, 40, 0.06);
+    flex: 0 0 auto;
+}
+
+.elediaaitutor-identity {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.elediaaitutor-avatar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--eat-accent);
+    font-size: 1.1rem;
+    flex: 0 0 auto;
+    padding: 4px;
+    border: 1px solid rgba(16, 24, 40, 0.08);
+    box-shadow: 0 4px 12px rgba(16, 24, 40, 0.12);
+}
+
+.elediaaitutor-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    display: block;
+}
+
+.elediaaitutor-status-dot {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: #22c55e;
+    border: 2px solid var(--eat-surface);
+}
+
+.elediaaitutor-identity-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+}
+
+.elediaaitutor-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.elediaaitutor-presence {
+    font-size: 0.8rem;
+    color: var(--eat-muted);
+}
+
+.elediaaitutor-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    flex: 0 0 auto;
+}
+
+.elediaaitutor-iconbtn {
+    color: var(--eat-muted);
+    background: transparent;
+    border: 0;
+    padding: 0.35rem 0.5rem;
+    border-radius: 10px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.elediaaitutor-iconbtn:hover,
+.elediaaitutor-iconbtn:focus-visible {
+    background: rgba(16, 24, 40, 0.06);
+    color: var(--eat-header-fg);
+}
+
+.elediaaitutor-message-actions .elediaaitutor-iconbtn {
+    color: var(--eat-muted);
+}
+
+.elediaaitutor-message-actions .elediaaitutor-iconbtn:hover {
+    background: rgba(16, 24, 40, 0.06);
+}
+
+/* --- Message log. ------------------------------------------------------ */
+.elediaaitutor-log {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 1.1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--eat-gap);
+    background: var(--eat-body-bg);
+}
+
+.elediaaitutor-message {
+    display: flex;
+    flex-direction: column;
+    max-width: 90%;
+}
+
+.elediaaitutor-user {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.elediaaitutor-assistant {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+/* Sender meta row (avatar + name) above each bubble. */
+.elediaaitutor-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0.35rem 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--eat-muted);
+}
+
+.elediaaitutor-user .elediaaitutor-meta {
+    flex-direction: row-reverse;
+}
+
+.elediaaitutor-msg-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.45rem;
+    height: 1.45rem;
+    border-radius: 50%;
+    background: #fff;
+    flex: 0 0 auto;
+    padding: 2px;
+    border: 1px solid var(--eat-line);
+}
+
+.elediaaitutor-msg-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.elediaaitutor-bubble {
+    padding: 0.7rem 0.95rem;
+    border-radius: var(--eat-bubble-radius);
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.55;
+}
+
+/* Sides are distinguished by fill + alignment + a single soft shadow -- no
+   borders, to keep the conversation clean and quiet. */
+.elediaaitutor-user .elediaaitutor-bubble {
+    background: var(--eat-user-bg);
+    color: var(--eat-user-fg);
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 1px 2px rgba(30, 63, 89, 0.06);
+}
+
+.elediaaitutor-assistant .elediaaitutor-bubble {
+    background: var(--eat-bot-bg);
+    color: var(--eat-bot-fg);
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 1px 2px rgba(30, 63, 89, 0.05), 0 8px 24px rgba(30, 63, 89, 0.05);
+}
+
+.elediaaitutor-assistant:not(.elediaaitutor-failed) .elediaaitutor-bubble a {
+    color: var(--eat-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.elediaaitutor-failed .elediaaitutor-bubble {
+    background: #fdecec;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+}
+
+.elediaaitutor-markdown > *:first-child {
+    margin-top: 0;
+}
+
+.elediaaitutor-markdown > *:last-child {
+    margin-bottom: 0;
+}
+
+.elediaaitutor-markdown pre {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 0.6rem;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.elediaaitutor-markdown code {
+    word-break: break-word;
+}
+
+.elediaaitutor-markdown table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+/* --- Sources / citations. --------------------------------------------- */
+.elediaaitutor-sources {
+    margin-top: 0.5rem;
+    font-size: 0.82rem;
+}
+
+.elediaaitutor-sources-title {
+    font-weight: 600;
+    opacity: 0.75;
+    margin-bottom: 0.2rem;
+}
+
+.elediaaitutor-sources-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.elediaaitutor-source-snippet {
+    display: block;
+    opacity: 0.7;
+    font-size: 0.78rem;
+}
+
+.elediaaitutor-message-actions {
+    margin-top: 0.2rem;
+    display: flex;
+    gap: 0.25rem;
+}
+
+/* --- Typing indicator. ------------------------------------------------- */
+.elediaaitutor-typing .elediaaitutor-bubble {
+    display: inline-flex;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.elediaaitutor-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.4;
+    animation: elediaaitutor-bounce 1.2s infinite ease-in-out;
+}
+
+.elediaaitutor-dot:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.elediaaitutor-dot:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes elediaaitutor-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 0.9; }
+}
+
+/* --- Status live region. ----------------------------------------------- */
+.elediaaitutor-status {
+    min-height: 1.1rem;
+    padding: 0 0.85rem;
+    font-size: 0.78rem;
+    color: #5b6677;
+}
+
+.elediaaitutor-status:empty {
+    min-height: 0;
+}
+
+/* --- Composer. --------------------------------------------------------- */
+.elediaaitutor-composer {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid rgba(16, 24, 40, 0.06);
+    background: var(--eat-surface);
+    flex: 0 0 auto;
+}
+
+.elediaaitutor-input {
+    flex: 1 1 auto;
+    resize: none;
+    border: 0;
+    background: transparent;
+    border-radius: 12px;
+    padding: 0.55rem 0.4rem;
+    max-height: 160px;
+    line-height: 1.45;
+    font: inherit;
+    color: var(--eat-assistant-fg);
+}
+
+.elediaaitutor-input::placeholder {
+    color: var(--eat-muted);
+}
+
+.elediaaitutor-input:focus {
+    outline: 0;
+}
+
+.elediaaitutor-input:focus-visible {
+    outline: 2px solid var(--eat-accent);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.elediaaitutor-send {
+    flex: 0 0 auto;
+    border: 0;
+    background: var(--eat-accent);
+    color: #fff;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(30, 63, 89, 0.25);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.elediaaitutor-send:hover,
+.elediaaitutor-send:focus-visible {
+    background: var(--eat-accent-dark);
+    box-shadow: 0 3px 12px rgba(30, 63, 89, 0.35);
+}
+
+.elediaaitutor-send:active {
+    transform: scale(0.92);
+}
+
+/* --- Footer. ----------------------------------------------------------- */
+.elediaaitutor-footer {
+    flex: 0 0 auto;
+    text-align: center;
+    padding: 0.45rem;
+    font-size: 0.72rem;
+    color: var(--eat-muted);
+    background: var(--eat-surface);
+    border-top: 1px solid rgba(16, 24, 40, 0.04);
+}
+
+/* --- History panel. ---------------------------------------------------- */
+.elediaaitutor-history {
+    flex: 0 0 auto;
+    max-height: 40%;
+    overflow-y: auto;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    background: #fafbfd;
+    padding: 0.4rem;
+}
+
+.elediaaitutor-history-empty {
+    padding: 0.6rem;
+    color: #5b6677;
+    font-size: 0.85rem;
+}
+
+.elediaaitutor-history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.elediaaitutor-history-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 8px;
+    padding: 0.15rem 0.3rem;
+}
+
+.elediaaitutor-history-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.elediaaitutor-history-open {
+    flex: 1 1 auto;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    padding: 0.35rem 0.4rem;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.elediaaitutor-history-title {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.elediaaitutor-history-preview {
+    display: block;
+    font-size: 0.78rem;
+    color: #5b6677;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Overlay: docked (bottom-right). ----------------------------------- */
+.elediaaitutor-docked {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    width: 380px;
+    max-width: calc(100vw - 2rem);
+    z-index: var(--eat-z);
+}
+
+.elediaaitutor-docked .elediaaitutor-window {
+    height: min(70vh, 560px);
+}
+
+/* --- Overlay: modal (centered + backdrop). ----------------------------- */
+.elediaaitutor-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--eat-z);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.elediaaitutor-modal .elediaaitutor-window {
+    width: min(640px, 100%);
+    height: min(80vh, 720px);
+    position: relative;
+    z-index: 1;
+}
+
+.elediaaitutor-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(16, 24, 40, 0.45);
+    z-index: 0;
+}
+
+/* --- Overlay: fullscreen. ---------------------------------------------- */
+.elediaaitutor-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: var(--eat-z);
+}
+
+.elediaaitutor-fullscreen .elediaaitutor-window {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    border: 0;
+}
+
+/* Full-bleed chrome, but keep the conversation in a readable centred column. */
+.elediaaitutor-fullscreen .elediaaitutor-log,
+.elediaaitutor-fullscreen .elediaaitutor-composer,
+.elediaaitutor-fullscreen .elediaaitutor-status {
+    padding-left: max(1rem, calc(50% - 23rem));
+    padding-right: max(1rem, calc(50% - 23rem));
+}
+
+body.elediaaitutor-noscroll {
+    overflow: hidden;
+}
+
+/* --- Unavailable notice. ----------------------------------------------- */
+.elediaaitutor-unavailable {
+    font-size: 0.9rem;
+}
+
+/* --- Responsive. ------------------------------------------------------- */
+@media (max-width: 576px) {
+    .elediaaitutor-docked {
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: auto;
+        max-width: 100%;
+    }
+
+    .elediaaitutor-docked .elediaaitutor-window {
+        height: 80vh;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .elediaaitutor-modal {
+        padding: 0;
+    }
+
+    .elediaaitutor-modal .elediaaitutor-window {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+    }
+
+    .elediaaitutor-message {
+        max-width: 95%;
+    }
+}
+
+/* --- Reduced motion. --------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .elediaaitutor-dot {
+        animation: none;
+    }
+
+    .elediaaitutor-log {
+        scroll-behavior: auto;
+    }
+}
+
+/*
+ * The widget intentionally keeps its own light palette regardless of the OS
+ * colour scheme, so it reads as a clean, consistent product embedded in any
+ * Moodle theme rather than flipping to a dark card on a light page.
+ */

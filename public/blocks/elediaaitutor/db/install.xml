@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/elediaaitutor/db" VERSION="20260609" COMMENT="eLeDia.ai Tutor block database schema."
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="block_elediaaitutor_conv" COMMENT="Local conversation metadata for the eLeDia.ai Tutor. Full chat history is owned by the external RAG/Tutor server; this table only tracks the lightweight pointer (the server-issued conversation id) plus display metadata so a user can resume and list their own conversations. No full message content is stored here.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Owner of the conversation (the Moodle user)."/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Course context the conversation was started in, or null/0 for global chat."/>
+        <FIELD NAME="conversationid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Opaque conversation identifier issued by the external RAG/Tutor server."/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Optional display title for the conversation."/>
+        <FIELD NAME="lastpreview" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Short preview of the last message, for the conversation list. Truncated; not a full transcript."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Creation timestamp."/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Last-modified timestamp."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid-timemodified" UNIQUE="false" FIELDS="userid,timemodified" COMMENT="List a user's conversations newest-first."/>
+        <INDEX NAME="userid-conversationid" UNIQUE="true" FIELDS="userid,conversationid" COMMENT="Resolve a server conversation id within an owner, and guard against duplicates."/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
