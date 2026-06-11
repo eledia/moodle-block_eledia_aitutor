@@ -42,6 +42,7 @@ Tutor); the defaults are shown below.
 | `tutor_delete_conversation` | Optional | Delete tool name | Delete a single conversation server-side. |
 | `tutor_delete_user_data` | Optional, **recommended** | Delete user data tool name | Erase ALL data held for the authenticated user (transcripts + memory). |
 | `tutor_set_memory_optin` | Optional (required for memory) | Memory opt-in tool name | Record the user's long-term memory consent; erase memories on opt-out. |
+| `tutor_recluster_questions` | Optional | Recluster tool name | Nightly batch re-labelling of logged questions (analytics topic convergence); authenticated by the maintenance account's token. |
 
 If an optional tool name is left blank in the block, that feature is simply not used.
 
@@ -237,6 +238,7 @@ converging the *historical* analytics:
 { "name": "tutor_recluster_questions",
   "arguments": {
     "system_url": "https://moodle.example.com",
+    "moodle_token": "f9a8…",
     "course_id": "42",
     "existing_labels": ["Photosynthesis", "Assignment 2", "Enrolment & access"],
     "questions": [
@@ -259,10 +261,16 @@ supplied label set:
 
 Contract notes, fixed now so you can design toward them:
 
-- **Authentication differs from every other tool**: this is a site-level
-  service operation (the batch spans many users), so there is **no
-  `moodle_token`** — the request is authenticated solely by the transport-level
-  RAG authorization (B.4). Reject it when that is not configured.
+- **Authentication — maintenance account token.** The `moodle_token` belongs to
+  a dedicated, auto-provisioned **maintenance account**
+  (username `elediaaitutor_service`) — never to a learner or an administrator.
+  Validate it exactly like every other tool's token (a cheap callback into
+  Moodle, see C.1); no shared transport secret is required for this call.
+  The account is deliberately powerless inside Moodle (no roles, no
+  enrolments, no interactive login), so do **not** treat it as a person:
+  never create conversations, memories or any per-user state for it.
+  (Plugins ≤ 0.6.0 sent no `moodle_token`; if you must support those, fall
+  back to requiring the transport-level authorization of B.4.)
 - Batches are bounded (≤ 200 questions per call); the plugin may call
   repeatedly.
 - Idempotent: reclustering the same batch must yield the same labels.
@@ -350,7 +358,17 @@ Configured by the admin (block settings):
 
 This is **separate** from the `moodle_token` (which is a per-user argument, not a
 transport credential). Validate this however you like; it identifies the Moodle
-site/connector, not the end user.
+site/connector, not the end user. Since every tool call (including the nightly
+reclustering, as of 0.7.0) carries a verifiable `moodle_token`, transport-level
+authorization is **optional defence in depth**, not a requirement.
+
+**Direct MCP hosts (e.g. Claude Desktop).** Users may connect generic MCP
+clients straight to your server, and such hosts cannot inject per-call tool
+arguments. Support this by also accepting a Moodle MCP token as the transport
+bearer (`Authorization: Bearer <moodle_token>`) and mapping it to the
+`moodle_token` argument internally when the argument is absent. Users obtain
+their personal token from their Moodle profile (the elediamcp self-service
+token page).
 
 ---
 
@@ -536,6 +554,12 @@ Tools advertise MCP annotations (`readOnlyHint`, `destructiveHint`) via
       relevance (`sources[0]` = primary) so teacher analytics can aggregate.
 - [ ] Honour `answer_style` (`hint` must never reveal full solutions) and
       `user_lang`.
+- [ ] Optional `tutor_recluster_questions`: classify each batch into the
+      supplied label registry (mint sparingly), idempotent, ≤ 200/batch; its
+      `moodle_token` belongs to the `elediaaitutor_service` maintenance
+      account — validate it, but never create per-user state for it.
+- [ ] For direct MCP hosts (Claude Desktop etc.): accept a Moodle token as
+      transport bearer and map it to `moodle_token` when the argument is absent.
 
 ---
 
@@ -547,6 +571,7 @@ unless marked otherwise).
 
 | Plugin version | Change |
 |---|---|
+| 0.7.0 | **Reclustering now authenticates with a `moodle_token`** (A.6): the nightly task auto-provisions a powerless maintenance account (`elediaaitutor_service`) and sends its token, so the call is verifiable like every other tool and **no shared transport secret is needed**; B.4 transport auth is now optional defence in depth. New B.4 note: servers SHOULD accept a Moodle token as transport bearer for direct MCP hosts (Claude Desktop etc.) and map it to `moodle_token`. |
 | 0.6.0 | **`tutor_recluster_questions` is now LIVE** (A.6): when configured, a nightly Moodle task sends the last 30 days of questions per course (≤200/batch, service-level auth — no `moodle_token`) and applies the returned labels. The per-course label registry remains the primary mechanism. |
 | 0.5.0 (doc update) | **`tutor_recluster_questions`** reserved (A.6): per-course label registry declared the primary topic-quality mechanism; batch-reclustering contract fixed (service-level auth, ≤200/batch, idempotent). |
 | 0.5.0 | **`topic`** response field (canonical label for analytics clustering); `sources[0]` defined as the primary source and stored (title + cmid) for hotspot aggregation. |

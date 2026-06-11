@@ -22,14 +22,25 @@
     All visible text comes from language strings; the JS module wires up the
     toggle and the delete button after the modal is created.
 
+    When "hascustom" is set, "customtext" holds admin-provided, server-side
+    formatted HTML (institution-specific privacy guidelines) that replaces the
+    built-in informational sections. The long-term memory opt-in and the
+    deletion controls are always rendered.
+
     Example context (json):
     {
         "uniqid": "elediaaitutor_abc123",
         "ltmenabled": false,
-        "candelete": true
+        "candelete": true,
+        "hascustom": false,
+        "customtext": ""
     }
 }}
 <div class="elediaaitutor-privacy" data-region="privacy-info">
+    {{#hascustom}}
+        <div class="elediaaitutor-privacy-custom">{{{customtext}}}</div>
+    {{/hascustom}}
+    {{^hascustom}}
     <p>{{#str}}privacy_intro, block_elediaaitutor{{/str}}</p>
 
     <div class="alert alert-warning" role="alert">
@@ -42,6 +53,7 @@
 
     <h5>{{#str}}privacy_storage_title, block_elediaaitutor{{/str}}</h5>
     <p>{{#str}}privacy_storage_body, block_elediaaitutor{{/str}}</p>
+    {{/hascustom}}
 
     <h5>{{#str}}privacy_ltm_title, block_elediaaitutor{{/str}}</h5>
     <p>{{#str}}privacy_ltm_body, block_elediaaitutor{{/str}}</p>

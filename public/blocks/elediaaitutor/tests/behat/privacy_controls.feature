@@ -68,3 +68,29 @@ Feature: Privacy guidelines, long-term memory opt-in and data deletion
     And I click on "Yes, delete everything" "button"
     Then I should see "0 conversation(s) deleted."
     And I should see "does not support remote deletion"
+
+  @javascript
+  Scenario: First use requires acknowledging the privacy guidelines
+    Given I log in as "student1"
+    And I am on "Course 1" course homepage
+    Then I should see "Before you use the tutor for the first time"
+    And the "Your message to the tutor" "field" should be disabled
+    And the "Agree and start" "button" should be disabled
+    When I set the field "I acknowledge the privacy guidelines." to "1"
+    And I click on "Agree and start" "button"
+    Then I should not see "Before you use the tutor for the first time"
+    And the "Your message to the tutor" "field" should be enabled
+    When I reload the page
+    Then I should not see "Before you use the tutor for the first time"
+
+  @javascript
+  Scenario: Admin-defined privacy guidelines text replaces the default sections
+    Given the following config values are set as admin:
+      | privacyguidelinestext | <p>Institution privacy statement ABC.</p> | block_elediaaitutor |
+    And I log in as "student1"
+    And I am on "Course 1" course homepage
+    When I click on "[data-action=privacy]" "css_element"
+    Then I should see "Institution privacy statement ABC."
+    And I should not see "What is sent when you chat"
+    And I should see "Long-term memory"
+    And I should see "Delete all my tutor data"

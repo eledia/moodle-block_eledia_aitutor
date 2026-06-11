@@ -21,16 +21,19 @@ namespace block_elediaaitutor;
 use block_elediaaitutor\local\question_log;
 use block_elediaaitutor\local\rag_client;
 use block_elediaaitutor\local\recluster_service;
+use block_elediaaitutor\local\service_user;
 use moodle_url;
 
 /**
  * Unit tests for the batch topic reclustering service.
  *
- * Notably connector-independent: reclustering uses service-level auth (no user
- * token), so these tests run without webservice_elediamcp installed.
+ * Mostly connector-independent: the maintenance token is injected so these
+ * tests run without webservice_elediamcp installed; only the end-to-end token
+ * minting test requires the connector (and skips without it).
  *
  * @package     block_elediaaitutor
  * @covers      \block_elediaaitutor\local\recluster_service
+ * @covers      \block_elediaaitutor\local\service_user
  * @covers      \block_elediaaitutor\task\recluster_questions
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
@@ -58,8 +61,28 @@ final class recluster_service_test extends \advanced_testcase {
     }
 
     /**
-     * A configured run sends the batch (with the existing label registry, no
-     * user token) and applies the returned labels.
+     * The maintenance account is auto-created once and reused, with
+     * webservice-only auth and no interactive login.
+     */
+    public function test_service_user_autocreated_and_reused(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        $this->assertFalse($DB->record_exists('user', ['username' => service_user::USERNAME]));
+
+        $first = service_user::get_or_create();
+        $second = service_user::get_or_create();
+
+        $this->assertSame((int) $first->id, (int) $second->id);
+        $this->assertSame('webservice', $first->auth);
+        $this->assertEquals(1, $first->confirmed);
+        $this->assertEquals(0, $first->suspended);
+        $this->assertSame(1, $DB->count_records('user', ['username' => service_user::USERNAME]));
+    }
+
+    /**
+     * A configured run sends the batch (with the existing label registry and
+     * the maintenance token) and applies the returned labels.
      */
     public function test_run_converges_labels(): void {
         global $DB;
@@ -86,16 +109,16 @@ final class recluster_service_test extends \advanced_testcase {
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
         $this->assertTrue(recluster_service::is_configured());
-        $stats = recluster_service::run($client);
+        $stats = recluster_service::run($client, 'MAINT-TOKEN');
 
         $this->assertSame(1, $stats['courses']);
         $this->assertSame(1, $stats['batches']);
         $this->assertSame(3, $stats['updated']);
         $this->assertSame(0, $stats['failed']);
 
-        // The request carried the registry and no user token.
+        // The request carried the registry and the maintenance token.
         $args = $transport->last_payload()['params']['arguments'];
-        $this->assertArrayNotHasKey('moodle_token', $args);
+        $this->assertSame('MAINT-TOKEN', $args['moodle_token']);
         $this->assertSame(['Essay deadline (old)'], $args['existing_labels']);
         $this->assertCount(3, $args['questions']);
 
@@ -104,6 +127,52 @@ final class recluster_service_test extends \advanced_testcase {
         $this->assertCount(1, $hotspots);
         $this->assertSame('Assignments & deadlines', $hotspots[0]->label);
         $this->assertSame(3, $hotspots[0]->count);
+    }
+
+    /**
+     * Without an injected token, run() auto-provisions the maintenance account
+     * and mints a real component token for it (requires the connector).
+     */
+    public function test_run_mints_maintenance_token(): void {
+        global $DB, $CFG;
+        $this->resetAfterTest();
+
+        if (!class_exists('\\webservice_elediamcp\\api')) {
+            $this->markTestSkipped('webservice_elediamcp connector plugin is not installed.');
+        }
+        require_once($CFG->dirroot . '/webservice/lib.php');
+        $service = (object) [
+            'name' => 'MCP test service', 'shortname' => 'mcptest', 'enabled' => 1,
+            'restrictedusers' => 0, 'downloadfiles' => 0, 'uploadfiles' => 0,
+            'timecreated' => time(), 'timemodified' => time(),
+        ];
+        $service->id = $DB->insert_record('external_services', $service);
+        set_config('services', (string) $service->id, 'webservice_elediamcp');
+        set_config('mcpserviceid', $service->id, 'block_elediaaitutor');
+        set_config('ragserverurl', 'https://rag.example.com/mcp', 'block_elediaaitutor');
+        set_config('enableanalytics', 1, 'block_elediaaitutor');
+        set_config('reclustertoolname', 'tutor_recluster_questions', 'block_elediaaitutor');
+
+        $user = $this->getDataGenerator()->create_user();
+        question_log::log((int) $user->id, 7, 'a question', true, null);
+        $ids = array_keys($DB->get_records(question_log::TABLE, [], 'id ASC', 'id'));
+
+        $transport = fake_transport::json_result([
+            'structuredContent' => ['topics' => [['id' => (int) $ids[0], 'topic' => 'General']]],
+        ]);
+        $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
+
+        $stats = recluster_service::run($client);
+
+        $this->assertSame(1, $stats['updated']);
+        // The payload carried a real token belonging to the maintenance account.
+        $sent = $transport->last_payload()['params']['arguments']['moodle_token'];
+        $this->assertNotEmpty($sent);
+        $serviceuser = service_user::get_or_create();
+        $this->assertTrue($DB->record_exists('webservice_elediamcp_token', [
+            'userid' => $serviceuser->id,
+            'component' => 'block_elediaaitutor',
+        ]));
     }
 
     /**
@@ -123,7 +192,7 @@ final class recluster_service_test extends \advanced_testcase {
         ]);
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
-        $stats = recluster_service::run($client);
+        $stats = recluster_service::run($client, 'MAINT-TOKEN');
         $this->assertDebuggingCalled(null, DEBUG_DEVELOPER);
 
         $this->assertSame(1, $stats['courses']);

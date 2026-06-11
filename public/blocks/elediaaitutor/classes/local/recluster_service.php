@@ -28,8 +28,10 @@ namespace block_elediaaitutor\local;
  * server contract is idempotent, so repeated runs are safe and progressively
  * converge labels that drifted across model or prompt changes.
  *
- * This is a SITE-LEVEL service operation: requests carry no user token and are
- * authenticated by the transport-level RAG authorization only (see the spec,
+ * This is a SITE-LEVEL service operation: requests carry the MCP token of the
+ * auto-provisioned maintenance account ({@see service_user}) — never a real
+ * person's token — so the RAG server can authenticate the call exactly like
+ * every other tool, without any shared transport secret (see the spec,
  * section A.6). Question texts re-sent here already transited the same server
  * at chat time.
  *
@@ -65,9 +67,11 @@ class recluster_service {
      * (the next nightly run retries) but never the whole run.
      *
      * @param rag_client|null $client Optional injected client (tests).
+     * @param string|null $moodletoken Optional injected maintenance token (tests);
+     *                                 by default one is minted for the service account.
      * @return array{courses: int, batches: int, updated: int, failed: int}
      */
-    public static function run(?rag_client $client = null): array {
+    public static function run(?rag_client $client = null, ?string $moodletoken = null): array {
         global $CFG;
 
         $stats = ['courses' => 0, 'batches' => 0, 'updated' => 0, 'failed' => 0];
@@ -78,8 +82,14 @@ class recluster_service {
         $toolname = security::recluster_tool_name();
         try {
             $client ??= rag_client::create();
+            if ($moodletoken === null) {
+                // Authenticate like every other tool call: mint a component
+                // token for the maintenance account (auto-created on first run).
+                token_provider::require_available();
+                $moodletoken = token_provider::get_token((int) service_user::get_or_create()->id);
+            }
         } catch (\moodle_exception $e) {
-            debugging('block_elediaaitutor: recluster aborted (client): ' . $e->getMessage(),
+            debugging('block_elediaaitutor: recluster aborted (client/token): ' . $e->getMessage(),
                 DEBUG_DEVELOPER);
             $stats['failed']++;
             return $stats;
@@ -107,7 +117,7 @@ class recluster_service {
 
                 try {
                     $map = $client->recluster_questions($CFG->wwwroot, (string) $courseid,
-                        $labels, $questions, $toolname);
+                        $labels, $questions, $toolname, $moodletoken);
                 } catch (rag_exception $e) {
                     $stats['failed']++;
                     debugging("block_elediaaitutor: recluster batch failed (course $courseid): "

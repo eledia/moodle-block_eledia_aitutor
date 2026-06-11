@@ -64,6 +64,14 @@ $functions = [
         'capabilities' => 'block/elediaaitutor:deleteownhistory',
         'loginrequired' => true,
     ],
+    'block_elediaaitutor_give_consent' => [
+        'classname' => 'block_elediaaitutor\external\give_consent',
+        'description' => 'Record the current user\'s acknowledgement of the privacy guidelines.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'block/elediaaitutor:use',
+        'loginrequired' => true,
+    ],
     'block_elediaaitutor_set_ltm' => [
         'classname' => 'block_elediaaitutor\external\set_ltm',
         'description' => 'Set the current user\'s long-term memory opt-in preference.',

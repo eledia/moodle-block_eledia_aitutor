@@ -185,13 +185,14 @@ class question_log {
      * The most recent questions in a course, without asker identities.
      *
      * @param int $courseid The course id.
-     * @param int $limit Max rows.
+     * @param int $limit Max rows (page size).
+     * @param int $offset Number of rows to skip (page offset).
      * @return stdClass[] Rows with question, grounded, answerstyle, timecreated.
      */
-    public static function recent(int $courseid, int $limit = 50): array {
+    public static function recent(int $courseid, int $limit = 50, int $offset = 0): array {
         global $DB;
         return array_values($DB->get_records(self::TABLE, ['courseid' => $courseid],
-            'timecreated DESC, id DESC', 'id, question, grounded, answerstyle, timecreated', 0, $limit));
+            'timecreated DESC, id DESC', 'id, question, grounded, answerstyle, timecreated', $offset, $limit));
     }
 
     /**

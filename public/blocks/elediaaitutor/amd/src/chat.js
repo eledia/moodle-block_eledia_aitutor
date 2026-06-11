@@ -77,6 +77,7 @@ class TutorChat {
     constructor(root, config) {
         this.root = root;
         this.config = config;
+        this.consented = !!config.consented;
         this.ltmEnabled = !!config.ltmenabled;
         this.answerStyle = config.answerstyle || 'explain';
         this.conversationId = '';
@@ -168,6 +169,18 @@ class TutorChat {
             this.input.addEventListener('input', () => this.autoGrow());
         }
 
+        // The first-use consent checkbox arms the accept button. Bound directly
+        // (change events) within the panel, like the composer controls.
+        const consentCheck = this.panel.querySelector('[data-region="consent-checkbox"]');
+        if (consentCheck) {
+            consentCheck.addEventListener('change', () => {
+                const accept = this.panel.querySelector('[data-action="consent-accept"]');
+                if (accept) {
+                    accept.disabled = !consentCheck.checked;
+                }
+            });
+        }
+
         // Escape closes overlay modes and Tab is trapped while open. Bound to the
         // panel so it keeps working after the panel is portalled out of the root.
         this.panel.addEventListener('keydown', (e) => {
@@ -193,6 +206,7 @@ class TutorChat {
             case 'send': this.send(); break;
             case 'newconversation': this.newConversation(); break;
             case 'style': this.setStyle(el); break;
+            case 'consent-accept': this.giveConsent(el); break;
             case 'privacy': this.openPrivacy(); break;
             case 'history': this.toggleHistory(); break;
             case 'copy': this.copyAnswer(el); break;
@@ -307,7 +321,7 @@ class TutorChat {
      * @return {void}
      */
     send() {
-        if (this.busy) {
+        if (this.busy || !this.consented) {
             return;
         }
         const message = (this.input.value || '').trim();
@@ -586,6 +600,48 @@ class TutorChat {
     }
 
     /**
+     * Record the user's privacy-guidelines acknowledgement and unlock the chat.
+     *
+     * The server stores the documented consent (timestamped row + audit event)
+     * and enforces the gate independently of this UI.
+     *
+     * @param {HTMLElement} el The accept button.
+     * @return {void}
+     */
+    giveConsent(el) {
+        if (this.consented) {
+            return;
+        }
+        el.disabled = true;
+        Ajax.call([{
+            methodname: 'block_elediaaitutor_give_consent',
+            args: {contextid: this.config.contextid}
+        }])[0].then((response) => {
+            if (!response.consented) {
+                el.disabled = false;
+                return null;
+            }
+            this.consented = true;
+            const region = this.panel.querySelector('[data-region="consent"]');
+            if (region) {
+                region.remove();
+            }
+            if (this.input) {
+                this.input.removeAttribute('disabled');
+            }
+            const sendBtn = this.panel.querySelector('[data-action="send"]');
+            if (sendBtn) {
+                sendBtn.removeAttribute('disabled');
+            }
+            this.input.focus();
+            return null;
+        }).catch((error) => {
+            el.disabled = false;
+            Notification.exception(error);
+        });
+    }
+
+    /**
      * Open the privacy guidelines modal (accuracy warning, data flows,
      * long-term memory opt-in and the delete-my-data control).
      *
@@ -595,7 +651,11 @@ class TutorChat {
         Templates.render('block_elediaaitutor/privacy_info', {
             uniqid: this.config.uniqid,
             ltmenabled: this.ltmEnabled,
-            candelete: !!this.config.candelete
+            candelete: !!this.config.candelete,
+            // Institution-specific guidelines, already formatted/sanitised
+            // server-side; replaces the built-in informational sections.
+            hascustom: !!this.config.privacyhtml,
+            customtext: this.config.privacyhtml || ''
         }).then((html) => Modal.create({
             title: strings.privacytitle,
             body: html,

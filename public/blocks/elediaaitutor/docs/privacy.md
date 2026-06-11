@@ -20,6 +20,25 @@ access / erasure requests, scoped to the system context.
 > **Full chat transcripts are NOT stored in Moodle.** They live on the external
 > RAG/Tutor server.
 
+## First-use consent (documented)
+
+Before the first chat turn every user must acknowledge the privacy guidelines
+in the chat panel. The guidelines text shown can be replaced with
+institution-specific content via the **Privacy guidelines text** admin setting
+(the memory opt-in and deletion controls always remain). The acknowledgement
+is:
+
+- **Enforced server-side** — `chat_service` and the history endpoint refuse to
+  contact the RAG server without a consent record, so the UI gate cannot be
+  bypassed.
+- **Documented** in table `block_elediaaitutor_consent` (one row per user:
+  `userid`, `timecreated`) plus an auditable
+  `\block_elediaaitutor\event\consent_given` event in the standard log.
+- **Deleted with the user**: a `\core\event\user_deleted` observer erases the
+  record immediately when the account is deleted; the privacy provider also
+  exports it (timestamp) and deletes it on erasure requests. After erasure the
+  gate re-arms and the user is asked again.
+
 ## Sent to the external RAG server
 
 Declared as an external location (`rag_server`): your user identity (via a

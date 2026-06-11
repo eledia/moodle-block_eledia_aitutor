@@ -35,7 +35,8 @@
         "persona": "eLeDia.ai Tutor",
         "welcome": "<p>Hi! How can I help?</p>",
         "historyenabled": true,
-        "launchlabel": "Open the eLeDia.ai Tutor"
+        "launchlabel": "Open the eLeDia.ai Tutor",
+        "consented": true
     }
 }}
 <div class="elediaaitutor-root" data-region="elediaaitutor" id="{{uniqid}}"
@@ -126,6 +127,29 @@
 
             <div class="elediaaitutor-status" data-region="status" role="status" aria-live="polite"></div>
 
+            {{^consented}}
+                <div class="elediaaitutor-consent" data-region="consent">
+                    <p class="elediaaitutor-consent-text">
+                        <i class="fa fa-shield" aria-hidden="true"></i>
+                        {{#str}}consent_intro, block_elediaaitutor{{/str}}
+                    </p>
+                    <button type="button" class="btn btn-link p-0 elediaaitutor-consent-link" data-action="privacy">
+                        {{#str}}privacyguidelines, block_elediaaitutor{{/str}}
+                    </button>
+                    <div class="form-check elediaaitutor-consent-check">
+                        <input type="checkbox" class="form-check-input" id="{{uniqid}}_consent"
+                               data-region="consent-checkbox">
+                        <label class="form-check-label" for="{{uniqid}}_consent">
+                            {{#str}}consent_checkbox, block_elediaaitutor{{/str}}
+                        </label>
+                    </div>
+                    <button type="button" class="btn btn-primary elediaaitutor-consent-accept"
+                            data-action="consent-accept" disabled>
+                        {{#str}}consent_accept, block_elediaaitutor{{/str}}
+                    </button>
+                </div>
+            {{/consented}}
+
             {{#stylechoice}}
                 <div class="elediaaitutor-styles" data-region="styles" role="radiogroup"
                      aria-label="{{#str}}answerstyle, block_elediaaitutor{{/str}}">
@@ -150,9 +174,10 @@
                     {{#str}}messagelabel, block_elediaaitutor{{/str}}
                 </label>
                 <textarea id="{{uniqid}}_input" class="elediaaitutor-input" data-region="input"
-                          rows="1" autocomplete="off"
+                          rows="1" autocomplete="off" {{^consented}}disabled{{/consented}}
                           placeholder="{{#str}}inputplaceholder, block_elediaaitutor{{/str}}"></textarea>
                 <button type="submit" class="elediaaitutor-send" data-action="send"
+                        {{^consented}}disabled{{/consented}}
                         aria-label="{{#str}}send, block_elediaaitutor{{/str}}">
                     <i class="fa fa-paper-plane" aria-hidden="true"></i>
                 </button>

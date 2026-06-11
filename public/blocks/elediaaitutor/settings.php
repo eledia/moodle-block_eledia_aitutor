@@ -244,6 +244,20 @@ if ($hassiteconfig) {
         PARAM_ALPHANUMEXT
     ));
 
+    // --- Privacy. -----------------------------------------------------------.
+    $settings->add(new admin_setting_heading(
+        'block_elediaaitutor/headerprivacy',
+        get_string('setting_header_privacy', 'block_elediaaitutor'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_confightmleditor(
+        'block_elediaaitutor/privacyguidelinestext',
+        get_string('setting_privacyguidelinestext', 'block_elediaaitutor'),
+        get_string('setting_privacyguidelinestext_desc', 'block_elediaaitutor'),
+        ''
+    ));
+
     $settings->add(new admin_setting_configselect(
         'block_elediaaitutor/loggingverbosity',
         get_string('setting_loggingverbosity', 'block_elediaaitutor'),

@@ -187,8 +187,8 @@ final class rag_client_test extends \advanced_testcase {
     }
 
     /**
-     * Reclustering is a service-level call: no moodle_token, registry + batch in,
-     * an id=>topic map out (trimmed and capped).
+     * Reclustering authenticates with the maintenance-account token: registry +
+     * batch in, an id=>topic map out (trimmed and capped).
      */
     public function test_recluster_questions(): void {
         $this->resetAfterTest();
@@ -204,17 +204,23 @@ final class rag_client_test extends \advanced_testcase {
 
         $map = $client->recluster_questions('https://m', '7', ['Photosynthesis'],
             [['id' => 17, 'text' => 'essay due?'], ['id' => 18, 'text' => 'how do plants eat light']],
-            'tutor_recluster_questions');
+            'tutor_recluster_questions', 'MAINT-TOKEN');
 
         $payload = $transport->last_payload();
         $this->assertSame('tutor_recluster_questions', $payload['params']['name']);
         $args = $payload['params']['arguments'];
-        $this->assertArrayNotHasKey('moodle_token', $args);
+        // The maintenance-account token authenticates the call like any other tool.
+        $this->assertSame('MAINT-TOKEN', $args['moodle_token']);
         $this->assertSame('7', $args['course_id']);
         $this->assertSame(['Photosynthesis'], $args['existing_labels']);
         $this->assertCount(2, $args['questions']);
 
         $this->assertSame([17 => 'Assignment 2', 18 => 'Photosynthesis'], $map);
+
+        // Without a token (transport-auth-only setups) none is sent.
+        $client->recluster_questions('https://m', '7', [], [['id' => 1, 'text' => 'q']],
+            'tutor_recluster_questions');
+        $this->assertArrayNotHasKey('moodle_token', $transport->last_payload()['params']['arguments']);
     }
 
     /**

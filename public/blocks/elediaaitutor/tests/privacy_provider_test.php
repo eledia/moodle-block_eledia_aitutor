@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_elediaaitutor;
 
+use block_elediaaitutor\local\consent;
 use block_elediaaitutor\local\conversation_repository;
 use block_elediaaitutor\privacy\provider;
 use context_system;
@@ -99,6 +100,31 @@ final class privacy_provider_test extends \core_privacy\tests\provider_testcase 
 
         provider::delete_data_for_all_users_in_context(context_system::instance());
         $this->assertCount(0, conversation_repository::list_for_user((int) $user->id));
+    }
+
+    /**
+     * The consent record is reported, exported and erased like any other
+     * personal data (and erasure re-arms the first-use gate).
+     */
+    public function test_consent_record_covered(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        consent::give((int) $user->id, context_system::instance());
+
+        // A consent-only user is reported at the system context.
+        $contextlist = provider::get_contexts_for_userid((int) $user->id);
+        $this->assertCount(1, $contextlist);
+
+        // Export contains the consent timestamp.
+        $approved = new approved_contextlist($user, 'block_elediaaitutor', [context_system::instance()->id]);
+        provider::export_user_data($approved);
+        $writer = writer::with_context(context_system::instance());
+        $exported = $writer->get_data([get_string('privacy:consent', 'block_elediaaitutor')]);
+        $this->assertNotEmpty($exported->timeconsented);
+
+        // Erasure removes the record.
+        provider::delete_data_for_user($approved);
+        $this->assertFalse(consent::has_consented((int) $user->id));
     }
 
     /**

@@ -14,8 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+declare(strict_types=1);
+
+namespace block_elediaaitutor;
+
+use block_elediaaitutor\local\consent;
+
 /**
- * eLeDia.ai Tutor block version information.
+ * Core event observers.
  *
  * @package     block_elediaaitutor
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
@@ -23,14 +29,19 @@
  * @link        https://eledia.de
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->version = 2026061108;
-$plugin->requires = 2023041800;
-$plugin->component = 'block_elediaaitutor';
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = '0.7.0';
-// Soft dependency on the MCP web service plugin is enforced at runtime so the
-// block degrades gracefully (admin error + user-facing unavailable message)
-// rather than refusing to install. See token_provider::is_connector_available().
+class observer {
+    /**
+     * When a user account is deleted, erase their consent record immediately.
+     *
+     * The consent row exists solely to document the (now deleted) user's
+     * acknowledgement, so it must not outlive the account. Conversation
+     * pointers and analytics rows are handled by the Privacy API on data
+     * deletion requests.
+     *
+     * @param \core\event\user_deleted $event The deletion event.
+     * @return void
+     */
+    public static function user_deleted(\core\event\user_deleted $event): void {
+        consent::delete_for_user((int) $event->objectid);
+    }
+}

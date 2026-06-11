@@ -33,13 +33,15 @@ use block_elediaaitutor\local\question_log;
 require(__DIR__ . '/../../config.php');
 
 $courseid = required_param('courseid', PARAM_INT);
+$page = optional_param('page', 0, PARAM_INT);
 $course = get_course($courseid);
 
 require_login($course, false);
 $context = context_course::instance($course->id);
 require_capability('block/elediaaitutor:viewreports', $context);
 
-$PAGE->set_url(new moodle_url('/blocks/elediaaitutor/report.php', ['courseid' => $course->id]));
+$PAGE->set_url(new moodle_url('/blocks/elediaaitutor/report.php',
+    ['courseid' => $course->id, 'page' => $page]));
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('report');
 $PAGE->set_title(get_string('report_title', 'block_elediaaitutor'));
@@ -114,9 +116,9 @@ if (!empty($hotspots)) {
     echo html_writer::tag('table', html_writer::tag('tbody', $rows), ['class' => 'table table-sm mb-4']);
 }
 
-// Questions per day (last 14 days) as a simple bar list.
+// Questions per day (last 14 days, newest first) as a simple bar list.
 echo $OUTPUT->heading(get_string('report_byday', 'block_elediaaitutor'), 3);
-$perday = question_log::per_day($course->id, 14);
+$perday = array_reverse(question_log::per_day($course->id, 14), true);
 $max = max(1, max($perday));
 $rows = '';
 foreach ($perday as $day => $count) {
@@ -133,8 +135,12 @@ foreach ($perday as $day => $count) {
 }
 echo html_writer::tag('table', html_writer::tag('tbody', $rows), ['class' => 'table table-sm mb-4']);
 
-// Recent questions (no asker identities, by design).
+// Recent questions (no asker identities, by design), paginated.
 echo $OUTPUT->heading(get_string('report_recent', 'block_elediaaitutor'), 3);
+$perpage = 20;
+$lastpage = max(0, (int) ceil($summary->total / $perpage) - 1);
+$page = min($page, $lastpage);
+echo $OUTPUT->paging_bar($summary->total, $page, $perpage, $PAGE->url);
 $table = new html_table();
 $table->head = [
     get_string('report_when', 'block_elediaaitutor'),
@@ -143,7 +149,7 @@ $table->head = [
     get_string('report_style', 'block_elediaaitutor'),
 ];
 $table->attributes['class'] = 'table generaltable';
-foreach (question_log::recent($course->id, 50) as $row) {
+foreach (question_log::recent($course->id, $perpage, $page * $perpage) as $row) {
     $stylelabel = '';
     if (!empty($row->answerstyle) && in_array($row->answerstyle, ['explain', 'hint', 'quiz'], true)) {
         $stylelabel = get_string('answerstyle_' . $row->answerstyle, 'block_elediaaitutor');
@@ -158,5 +164,6 @@ foreach (question_log::recent($course->id, 50) as $row) {
     ];
 }
 echo html_writer::table($table);
+echo $OUTPUT->paging_bar($summary->total, $page, $perpage, $PAGE->url);
 
 echo $OUTPUT->footer();

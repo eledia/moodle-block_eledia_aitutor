@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace block_elediaaitutor;
 
 use block_elediaaitutor\local\chat_service;
+use block_elediaaitutor\local\consent;
 use block_elediaaitutor\local\conversation_repository;
 use block_elediaaitutor\local\rag_client;
 use context_system;
@@ -79,6 +80,39 @@ final class chat_service_test extends \advanced_testcase {
     }
 
     /**
+     * Create a user who has already passed the first-use consent gate.
+     *
+     * @return \stdClass The user record.
+     */
+    private function create_consented_user(): \stdClass {
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        consent::give((int) $user->id, context_system::instance());
+        return $user;
+    }
+
+    /**
+     * Without a documented consent record no message leaves Moodle.
+     */
+    public function test_send_requires_consent(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $transport = fake_transport::json_result(['structuredContent' => ['answer' => 'never sent']]);
+        $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
+
+        try {
+            chat_service::send((int) $user->id, 'Hi tutor', null, null, context_system::instance(), $client);
+            $this->fail('Expected the consent gate to throw.');
+        } catch (\moodle_exception $e) {
+            $this->assertSame('error_consentrequired', $e->errorcode);
+        }
+        // The RAG server was never contacted.
+        $this->assertNull($transport->lastbody);
+    }
+
+    /**
      * A full chat turn provisions a token, calls the RAG server and persists
      * the conversation pointer.
      */
@@ -87,8 +121,7 @@ final class chat_service_test extends \advanced_testcase {
         $this->resetAfterTest();
         $this->configure_mcp_service();
 
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $user = $this->create_consented_user();
 
         $transport = fake_transport::json_result([
             'structuredContent' => ['answer' => 'Hello **world**', 'conversation_id' => 'conv-77'],
@@ -125,8 +158,7 @@ final class chat_service_test extends \advanced_testcase {
         $this->configure_mcp_service();
         set_config('enableanalytics', 1, 'block_elediaaitutor');
 
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $user = $this->create_consented_user();
 
         global $CFG;
         $transport = fake_transport::json_result([
@@ -172,8 +204,7 @@ final class chat_service_test extends \advanced_testcase {
     public function test_send_fires_events(): void {
         $this->resetAfterTest();
         $this->configure_mcp_service();
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $user = $this->create_consented_user();
 
         $transport = fake_transport::json_result(['structuredContent' => ['answer' => 'ok']]);
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
@@ -193,8 +224,7 @@ final class chat_service_test extends \advanced_testcase {
     public function test_send_logs_failure_and_throws(): void {
         $this->resetAfterTest();
         $this->configure_mcp_service();
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $user = $this->create_consented_user();
 
         $transport = new fake_transport([
             'status' => 502, 'headers' => ['content-type' => 'text/plain'], 'body' => 'nope', 'error' => '',

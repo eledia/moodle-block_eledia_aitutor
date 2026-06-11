@@ -90,6 +90,30 @@ final class question_log_test extends \advanced_testcase {
     }
 
     /**
+     * recent() pages through the log newest-first via limit/offset.
+     */
+    public function test_recent_pagination(): void {
+        $this->resetAfterTest();
+        set_config('enableanalytics', 1, 'block_elediaaitutor');
+        $user = $this->getDataGenerator()->create_user();
+
+        foreach (['q1', 'q2', 'q3', 'q4', 'q5'] as $question) {
+            question_log::log((int) $user->id, 7, $question, true, null);
+        }
+
+        $page1 = question_log::recent(7, 2, 0);
+        $this->assertSame(['q5', 'q4'], array_column($page1, 'question'));
+
+        $page2 = question_log::recent(7, 2, 2);
+        $this->assertSame(['q3', 'q2'], array_column($page2, 'question'));
+
+        $page3 = question_log::recent(7, 2, 4);
+        $this->assertSame(['q1'], array_column($page3, 'question'));
+
+        $this->assertSame([], question_log::recent(7, 2, 6));
+    }
+
+    /**
      * Pruning removes only rows past the retention window; the task wires the
      * configured retention through.
      */

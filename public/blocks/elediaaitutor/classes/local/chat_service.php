@@ -60,6 +60,10 @@ class chat_service {
     ): array {
         global $CFG;
 
+        // First-use consent gate: no message ever leaves Moodle before the user
+        // has acknowledged the privacy guidelines (documented acknowledgement).
+        consent::require_consent($userid);
+
         $message = security::validate_message($message);
         security::enforce_rate_limit($userid);
         token_provider::require_available();

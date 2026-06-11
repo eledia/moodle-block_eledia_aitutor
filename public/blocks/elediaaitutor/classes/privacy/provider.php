@@ -87,6 +87,12 @@ class provider implements
             'timecreated' => 'privacy:metadata:block_elediaaitutor_qlog:timecreated',
         ], 'privacy:metadata:block_elediaaitutor_qlog');
 
+        // Documented first-use acknowledgement of the privacy guidelines.
+        $collection->add_database_table('block_elediaaitutor_consent', [
+            'userid' => 'privacy:metadata:block_elediaaitutor_consent:userid',
+            'timecreated' => 'privacy:metadata:block_elediaaitutor_consent:timecreated',
+        ], 'privacy:metadata:block_elediaaitutor_consent');
+
         // The long-term memory opt-in (a user preference; off by default).
         $collection->add_user_preference(
             \block_elediaaitutor\local\ltm::PREF,
@@ -141,6 +147,7 @@ class provider implements
         }
         $userlist->add_from_sql('userid', 'SELECT userid FROM {block_elediaaitutor_conv}', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {block_elediaaitutor_qlog}', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {block_elediaaitutor_consent}', []);
     }
 
     /**
@@ -195,6 +202,14 @@ class provider implements
                 (object) ['questions' => $data]
             );
         }
+
+        $consenttime = \block_elediaaitutor\local\consent::time_consented((int) $userid);
+        if ($consenttime !== null) {
+            writer::with_context(context_system::instance())->export_data(
+                [get_string('privacy:consent', 'block_elediaaitutor')],
+                (object) ['timeconsented' => transform::datetime($consenttime)]
+            );
+        }
     }
 
     /**
@@ -210,6 +225,7 @@ class provider implements
         }
         $DB->delete_records('block_elediaaitutor_conv');
         $DB->delete_records('block_elediaaitutor_qlog');
+        $DB->delete_records('block_elediaaitutor_consent');
     }
 
     /**
@@ -225,6 +241,7 @@ class provider implements
         }
         $DB->delete_records('block_elediaaitutor_conv', ['userid' => (int) $contextlist->get_user()->id]);
         $DB->delete_records('block_elediaaitutor_qlog', ['userid' => (int) $contextlist->get_user()->id]);
+        $DB->delete_records('block_elediaaitutor_consent', ['userid' => (int) $contextlist->get_user()->id]);
     }
 
     /**
@@ -245,6 +262,7 @@ class provider implements
         [$insql, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
         $DB->delete_records_select('block_elediaaitutor_conv', "userid $insql", $params);
         $DB->delete_records_select('block_elediaaitutor_qlog', "userid $insql", $params);
+        $DB->delete_records_select('block_elediaaitutor_consent', "userid $insql", $params);
     }
 
     /**
@@ -256,7 +274,8 @@ class provider implements
     protected static function user_has_data(int $userid): bool {
         global $DB;
         return $DB->record_exists('block_elediaaitutor_conv', ['userid' => $userid])
-            || $DB->record_exists('block_elediaaitutor_qlog', ['userid' => $userid]);
+            || $DB->record_exists('block_elediaaitutor_qlog', ['userid' => $userid])
+            || $DB->record_exists('block_elediaaitutor_consent', ['userid' => $userid]);
     }
 
     /**

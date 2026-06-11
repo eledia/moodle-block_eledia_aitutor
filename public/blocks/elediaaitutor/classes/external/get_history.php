@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_elediaaitutor\external;
 
+use block_elediaaitutor\local\consent;
 use block_elediaaitutor\local\conversation_repository;
 use block_elediaaitutor\local\markdown_renderer;
 use block_elediaaitutor\local\rag_client;
@@ -76,6 +77,8 @@ class get_history extends external_api {
         require_login();
         self::validate_context($context);
         require_capability('block/elediaaitutor:viewhistory', $context);
+        // History calls the external RAG server too, so the consent gate applies.
+        consent::require_consent((int) $USER->id);
 
         // Ownership: the user may only load a conversation they own locally.
         $owned = conversation_repository::get_by_conversationid($params['conversationid'], (int) $USER->id);

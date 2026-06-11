@@ -195,7 +195,7 @@ $string['privacy_accuracy_body'] = 'The tutor generates answers using artificial
 $string['privacy_sent_title'] = 'What is sent when you chat';
 $string['privacy_sent_body'] = 'Your message, the course context (when available) and your Moodle identity (via a short-lived, user-scoped token) are sent to the external tutor service so it can answer on your behalf. The tutor can only access what you yourself are allowed to see in Moodle.';
 $string['privacy_storage_title'] = 'What is stored';
-$string['privacy_storage_body'] = 'Moodle stores only lightweight conversation metadata (a conversation reference, a short preview and timestamps). Full transcripts are stored by the external tutor service according to its retention policy.';
+$string['privacy_storage_body'] = 'Moodle stores only lightweight conversation metadata (a conversation reference, a short preview and timestamps) and the timestamp of your acknowledgement of these guidelines. Full transcripts are stored by the external tutor service according to its retention policy.';
 $string['privacy_ltm_title'] = 'Long-term memory (optional, coming soon)';
 $string['privacy_ltm_body'] = 'In a future update the tutor will be able to remember helpful facts across conversations to personalise its support. This is switched off by default and is only ever used if you opt in below. No memory data is collected or sent yet.';
 $string['ltm_optin'] = 'Allow the tutor to remember information across conversations (long-term memory)';
@@ -212,6 +212,22 @@ $string['deleteall_external_unsupported'] = 'The external tutor service does not
 $string['event_data_deletion_requested'] = 'Tutor data deletion requested';
 $string['event_ltm_preference_changed'] = 'Tutor long-term memory preference changed';
 $string['privacy:metadata:preference:ltm'] = 'Whether the user has opted in to the tutor\'s long-term memory.';
+
+// Institution-specific privacy guidelines.
+$string['setting_header_privacy'] = 'Privacy';
+$string['setting_privacyguidelinestext'] = 'Privacy guidelines text';
+$string['setting_privacyguidelinestext_desc'] = 'Institution-specific text shown in the privacy guidelines dialogue (also linked from the first-use consent gate). Leave empty to use the built-in default. When set, this text replaces the default informational sections — including the AI accuracy notice and the descriptions of what is sent and stored — so make sure your text covers them. The long-term memory opt-in and the data deletion controls always remain available. Multilang filters are applied.';
+
+// First-use privacy consent.
+$string['consent_intro'] = 'Before you use the tutor for the first time, please read the privacy guidelines and confirm that you acknowledge them.';
+$string['consent_checkbox'] = 'I acknowledge the privacy guidelines.';
+$string['consent_accept'] = 'Agree and start';
+$string['error_consentrequired'] = 'Please acknowledge the privacy guidelines before using the tutor.';
+$string['event_consent_given'] = 'Tutor privacy guidelines acknowledged';
+$string['privacy:consent'] = 'eLeDia.ai Tutor privacy consent';
+$string['privacy:metadata:block_elediaaitutor_consent'] = 'Your documented acknowledgement of the tutor\'s privacy guidelines (first-use consent). Removed automatically when your account is deleted.';
+$string['privacy:metadata:block_elediaaitutor_consent:userid'] = 'The user who acknowledged the privacy guidelines.';
+$string['privacy:metadata:block_elediaaitutor_consent:timecreated'] = 'When the privacy guidelines were acknowledged.';
 
 // Grounding transparency.
 $string['groundedbadge'] = 'Based on course materials';

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * eLeDia.ai Tutor block version information.
+ * Event observers for the eLeDia.ai Tutor block.
  *
  * @package     block_elediaaitutor
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
@@ -26,11 +26,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2026061108;
-$plugin->requires = 2023041800;
-$plugin->component = 'block_elediaaitutor';
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = '0.7.0';
-// Soft dependency on the MCP web service plugin is enforced at runtime so the
-// block degrades gracefully (admin error + user-facing unavailable message)
-// rather than refusing to install. See token_provider::is_connector_available().
+$observers = [
+    // Erase the documented privacy consent when the user account is deleted.
+    [
+        'eventname' => '\core\event\user_deleted',
+        'callback' => '\block_elediaaitutor\observer::user_deleted',
+    ],
+];

@@ -239,16 +239,19 @@ class rag_client {
     /**
      * Re-derive canonical topic labels for a batch of logged questions.
      *
-     * A SITE-LEVEL service operation: unlike every other tool there is no
-     * moodle_token — the request is authenticated solely by the configured
-     * transport-level RAG authorization. The supplied existing labels form the
-     * registry the server should classify into.
+     * A SITE-LEVEL service operation: the moodle_token belongs to the tutor's
+     * auto-provisioned maintenance account ({@see service_user}) — never to a
+     * real person — and exists so the server can authenticate the call exactly
+     * like every other tool, with no shared transport secret required. The
+     * supplied existing labels form the registry the server should classify
+     * into.
      *
      * @param string $systemurl This Moodle site's wwwroot.
      * @param string $courseid The course the questions belong to.
      * @param string[] $existinglabels Current topic labels for the course.
      * @param array $questions List of ['id' => int, 'text' => string] entries.
      * @param string $toolname Recluster tool name to invoke.
+     * @param string|null $moodletoken Maintenance-account MCP token, if available.
      * @return array<int, string> Map of question id => topic label.
      * @throws rag_exception On transport or protocol failure.
      */
@@ -257,14 +260,19 @@ class rag_client {
         string $courseid,
         array $existinglabels,
         array $questions,
-        string $toolname
+        string $toolname,
+        ?string $moodletoken = null
     ): array {
-        $result = $this->call_tool($toolname, [
+        $args = [
             'system_url' => $systemurl,
             'course_id' => $courseid,
             'existing_labels' => array_values($existinglabels),
             'questions' => array_values($questions),
-        ]);
+        ];
+        if ($moodletoken !== null && $moodletoken !== '') {
+            $args['moodle_token'] = $moodletoken;
+        }
+        $result = $this->call_tool($toolname, $args);
 
         $structured = $result['structuredContent'] ?? null;
         $topics = null;

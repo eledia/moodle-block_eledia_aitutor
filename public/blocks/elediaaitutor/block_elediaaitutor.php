@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+use block_elediaaitutor\local\consent;
 use block_elediaaitutor\local\ltm;
 use block_elediaaitutor\local\security;
 use block_elediaaitutor\local\token_provider;
@@ -148,6 +149,15 @@ class block_elediaaitutor extends block_base {
             $answerstyle = 'explain';
         }
         $allowstylechange = (int) $this->get_instance_config('allowstylechange', 1) === 1;
+        $consented = consent::has_consented((int) $USER->id);
+
+        // Institution-specific privacy guidelines (admin setting). When set, the
+        // formatted text replaces the built-in informational sections of the
+        // privacy dialogue; filters (e.g. multilang) apply at render time.
+        $privacytext = (string) get_config('block_elediaaitutor', 'privacyguidelinestext');
+        $privacyhtml = trim(strip_tags($privacytext)) !== ''
+            ? format_text($privacytext, FORMAT_HTML, ['context' => $context])
+            : '';
         $styles = [];
         foreach (['explain', 'hint', 'quiz'] as $style) {
             $styles[] = [
@@ -171,6 +181,7 @@ class block_elediaaitutor extends block_base {
             'styles' => $styles,
             'stylelocked' => !$allowstylechange && $answerstyle !== 'explain',
             'lockedlabel' => get_string('answerstyle_' . $answerstyle, 'block_elediaaitutor'),
+            'consented' => $consented,
         ];
 
         $this->content->text = $OUTPUT->render_from_template('block_elediaaitutor/launcher', $templatecontext);
@@ -190,18 +201,12 @@ class block_elediaaitutor extends block_base {
             'candelete' => has_capability('block/elediaaitutor:deleteownhistory', $context),
             'answerstyle' => $answerstyle,
             'allowstylechange' => $allowstylechange,
+            'consented' => $consented,
+            'privacyhtml' => $privacyhtml,
         ]]);
 
-        // Teachers get a footer link to the course question-analytics report.
-        if ($courseid > 0 && \block_elediaaitutor\local\question_log::is_enabled()) {
-            $coursecontext = context_course::instance($courseid, IGNORE_MISSING);
-            if ($coursecontext && has_capability('block/elediaaitutor:viewreports', $coursecontext)) {
-                $this->content->footer = html_writer::link(
-                    new moodle_url('/blocks/elediaaitutor/report.php', ['courseid' => $courseid]),
-                    get_string('report_link', 'block_elediaaitutor')
-                );
-            }
-        }
+        // Teachers reach the question-analytics report via the course
+        // navigation; see block_elediaaitutor_extend_navigation_course().
 
         return $this->content;
     }

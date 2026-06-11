@@ -195,7 +195,7 @@ $string['privacy_accuracy_body'] = 'Der Tutor erzeugt Antworten mit künstlicher
 $string['privacy_sent_title'] = 'Was beim Chatten gesendet wird';
 $string['privacy_sent_body'] = 'Ihre Nachricht, der Kurskontext (falls vorhanden) und Ihre Moodle-Identität (über einen kurzlebigen, nutzerbezogenen Token) werden an den externen Tutor-Dienst gesendet, damit er in Ihrem Namen antworten kann. Der Tutor kann nur auf das zugreifen, was Sie selbst in Moodle sehen dürfen.';
 $string['privacy_storage_title'] = 'Was gespeichert wird';
-$string['privacy_storage_body'] = 'Moodle speichert nur schlanke Gesprächs-Metadaten (eine Gesprächsreferenz, eine kurze Vorschau und Zeitstempel). Vollständige Transkripte speichert der externe Tutor-Dienst gemäß seiner Aufbewahrungsrichtlinie.';
+$string['privacy_storage_body'] = 'Moodle speichert nur schlanke Gesprächs-Metadaten (eine Gesprächsreferenz, eine kurze Vorschau und Zeitstempel) sowie den Zeitpunkt Ihrer Bestätigung dieser Hinweise. Vollständige Transkripte speichert der externe Tutor-Dienst gemäß seiner Aufbewahrungsrichtlinie.';
 $string['privacy_ltm_title'] = 'Langzeitgedächtnis (optional, demnächst)';
 $string['privacy_ltm_body'] = 'In einem zukünftigen Update kann sich der Tutor hilfreiche Fakten über Gespräche hinweg merken, um Sie persönlicher zu unterstützen. Dies ist standardmäßig deaktiviert und wird nur genutzt, wenn Sie unten ausdrücklich zustimmen. Es werden noch keine Gedächtnisdaten erhoben oder gesendet.';
 $string['ltm_optin'] = 'Dem Tutor erlauben, sich Informationen über Gespräche hinweg zu merken (Langzeitgedächtnis)';
@@ -212,6 +212,22 @@ $string['deleteall_external_unsupported'] = 'Der externe Tutor-Dienst unterstüt
 $string['event_data_deletion_requested'] = 'Löschung der Tutor-Daten angefordert';
 $string['event_ltm_preference_changed'] = 'Einstellung zum Langzeitgedächtnis des Tutors geändert';
 $string['privacy:metadata:preference:ltm'] = 'Ob die Person dem Langzeitgedächtnis des Tutors zugestimmt hat.';
+
+// Institution-specific privacy guidelines.
+$string['setting_header_privacy'] = 'Datenschutz';
+$string['setting_privacyguidelinestext'] = 'Text der Datenschutzhinweise';
+$string['setting_privacyguidelinestext_desc'] = 'Einrichtungsspezifischer Text, der im Dialog der Datenschutzhinweise angezeigt wird (auch über die Einwilligung bei der ersten Nutzung verlinkt). Leer lassen, um den eingebauten Standard zu verwenden. Wenn gesetzt, ersetzt dieser Text die Standard-Informationsabschnitte — einschließlich des Hinweises zur KI-Genauigkeit und der Beschreibungen, was gesendet und gespeichert wird — stellen Sie daher sicher, dass Ihr Text diese abdeckt. Die Opt-in-Einstellung für das Langzeitgedächtnis und die Funktionen zur Datenlöschung bleiben immer verfügbar. Multilang-Filter werden angewendet.';
+
+// First-use privacy consent.
+$string['consent_intro'] = 'Bevor Sie den Tutor zum ersten Mal nutzen, lesen Sie bitte die Datenschutzhinweise und bestätigen Sie, dass Sie diese zur Kenntnis genommen haben.';
+$string['consent_checkbox'] = 'Ich habe die Datenschutzhinweise zur Kenntnis genommen.';
+$string['consent_accept'] = 'Zustimmen und starten';
+$string['error_consentrequired'] = 'Bitte bestätigen Sie zuerst die Datenschutzhinweise, bevor Sie den Tutor nutzen.';
+$string['event_consent_given'] = 'Datenschutzhinweise des Tutors bestätigt';
+$string['privacy:consent'] = 'eLeDia.ai Tutor Datenschutz-Einwilligung';
+$string['privacy:metadata:block_elediaaitutor_consent'] = 'Ihre dokumentierte Bestätigung der Datenschutzhinweise des Tutors (Einwilligung bei der ersten Nutzung). Wird beim Löschen Ihres Kontos automatisch entfernt.';
+$string['privacy:metadata:block_elediaaitutor_consent:userid'] = 'Die Person, die die Datenschutzhinweise bestätigt hat.';
+$string['privacy:metadata:block_elediaaitutor_consent:timecreated'] = 'Wann die Datenschutzhinweise bestätigt wurden.';
 
 // Grounding transparency.
 $string['groundedbadge'] = 'Basierend auf Kursmaterialien';

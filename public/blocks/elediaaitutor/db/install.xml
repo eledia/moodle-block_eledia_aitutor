@@ -48,5 +48,16 @@
         <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated" COMMENT="Retention pruning."/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="block_elediaaitutor_consent" COMMENT="Documented privacy-guidelines acknowledgements: one timestamped row per user, written the first time they confirm the privacy guidelines before using the tutor. Erased when the user account is deleted (event observer) and covered by the privacy provider.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The consenting user."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="When the user acknowledged the privacy guidelines."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign-unique" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="At most one consent record per user."/>
+      </KEYS>
+    </TABLE>
   </TABLES>
 </XMLDB>

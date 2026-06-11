@@ -41,14 +41,25 @@ short-lived application cache (never the database) and reused until it expires.
 | Rate limit (messages/minute/user) | 20 (0 disables) |
 | Question analytics | Off (opt-in; logs learner questions for the course report — see privacy.md) |
 | Question analytics retention (days) | 180 (daily prune task) |
-| Recluster tool name | Empty (optional; e.g. `tutor_recluster_questions` — a nightly task converges hotspot topic labels via the RAG server) |
+| Recluster tool name | Empty (optional; e.g. `tutor_recluster_questions` — a nightly task converges hotspot topic labels via the RAG server). The task auto-provisions a powerless maintenance account (`elediaaitutor_service`, webservice-only auth, no roles/enrolments) and authenticates with its MCP token, so no shared transport secret is required for this call. |
 | Logging verbosity | Normal |
 
+Every user must acknowledge the privacy guidelines once before their first chat
+turn (enforced server-side; documented in `block_elediaaitutor_consent` and the
+event log, erased automatically when the account is deleted — see privacy.md).
+
+The guidelines text itself is editable: **Privacy guidelines text** (HTML
+editor, under the *Privacy* heading) replaces the built-in informational
+sections with institution-specific content — including the AI accuracy notice
+and the what-is-sent/stored descriptions, so the custom text must cover them.
+The long-term memory opt-in and data deletion controls always remain, and
+multilang filters are applied. Leave empty for the built-in default.
+
 When question analytics is enabled, teachers with
-`block/elediaaitutor:viewreports` get a **Tutor analytics** link in the block
-footer leading to `/blocks/elediaaitutor/report.php?courseid=N` — aggregated,
-name-free views of asked questions (totals, per-day, grounded share, recent
-questions).
+`block/elediaaitutor:viewreports` get a **Tutor analytics** entry in the course
+navigation ("More" menu) leading to `/blocks/elediaaitutor/report.php?courseid=N`
+— aggregated, name-free views of asked questions (totals, hotspots, per-day,
+grounded share, paginated recent questions).
 
 ## 4. Capabilities
 
