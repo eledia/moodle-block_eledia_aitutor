@@ -275,6 +275,9 @@ a.elediaaitutor-avatar:focus-visible {
 .elediaaitutor-log {
     flex: 1 1 auto;
     overflow-y: auto;
+    /* Never scroll the conversation sideways: wide content (code blocks,
+       tables) scrolls inside its own element instead. */
+    overflow-x: hidden;
     padding: 1.1rem 1rem;
     display: flex;
     flex-direction: column;
@@ -286,6 +289,7 @@ a.elediaaitutor-avatar:focus-visible {
     display: flex;
     flex-direction: column;
     max-width: 90%;
+    min-width: 0;
 }
 
 .elediaaitutor-user {
@@ -339,6 +343,8 @@ a.elediaaitutor-avatar:focus-visible {
     word-wrap: break-word;
     overflow-wrap: anywhere;
     line-height: 1.55;
+    max-width: 100%;
+    min-width: 0;
 }
 
 /* Sides are distinguished by fill + alignment + a single soft shadow -- no
@@ -391,6 +397,16 @@ a.elediaaitutor-avatar:focus-visible {
 .elediaaitutor-markdown table {
     display: block;
     overflow-x: auto;
+    max-width: 100%;
+}
+
+.elediaaitutor-markdown img {
+    max-width: 100%;
+    height: auto;
+}
+
+.elediaaitutor-markdown pre,
+.elediaaitutor-markdown blockquote {
     max-width: 100%;
 }
 
