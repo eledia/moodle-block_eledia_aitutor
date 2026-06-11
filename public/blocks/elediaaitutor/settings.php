@@ -236,6 +236,14 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
+    $settings->add(new admin_setting_configtext(
+        'block_elediaaitutor/reclustertoolname',
+        get_string('setting_reclustertoolname', 'block_elediaaitutor'),
+        get_string('setting_reclustertoolname_desc', 'block_elediaaitutor'),
+        '',
+        PARAM_ALPHANUMEXT
+    ));
+
     $settings->add(new admin_setting_configselect(
         'block_elediaaitutor/loggingverbosity',
         get_string('setting_loggingverbosity', 'block_elediaaitutor'),

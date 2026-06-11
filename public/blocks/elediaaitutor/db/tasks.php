@@ -36,4 +36,13 @@ $tasks = [
         'month' => '*',
         'dayofweek' => '*',
     ],
+    [
+        'classname' => 'block_elediaaitutor\\task\\recluster_questions',
+        'blocking' => 0,
+        'minute' => 'R',
+        'hour' => '3',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
 ];

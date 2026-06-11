@@ -233,6 +233,8 @@ $string['setting_enableanalytics'] = 'Fragen-Analyse';
 $string['setting_enableanalytics_desc'] = 'Protokolliert die Fragen der Lernenden an den Tutor (mit Kurs und fragender Person), damit Lehrkräfte Verständnisprobleme im Kursbericht erkennen können. Antworten werden nie gespeichert. Standardmäßig deaktiviert: Die Aktivierung ist eine datenschutzrelevante Entscheidung — protokollierte Fragen sind über die Privacy-API abgedeckt, hinter einer Lehrkraft-Berechtigung verborgen, werden ohne Namen angezeigt und nach Ablauf der Aufbewahrungsfrist gelöscht.';
 $string['setting_analyticsretention'] = 'Aufbewahrung der Fragen-Analyse (Tage)';
 $string['setting_analyticsretention_desc'] = 'Protokollierte Fragen, die älter sind, werden von einer täglichen geplanten Aufgabe gelöscht. 0 bewahrt sie unbegrenzt auf (nicht empfohlen).';
+$string['setting_reclustertoolname'] = 'Name des Recluster-Tools';
+$string['setting_reclustertoolname_desc'] = 'Optionales MCP-Tool, das kanonische Themenlabels für Stapel protokollierter Fragen neu ableitet, z. B. tutor_recluster_questions. Wenn gesetzt (und die Fragen-Analyse aktiviert ist), sendet eine nächtliche Aufgabe die Fragen der letzten 30 Tage pro Kurs in Stapeln von bis zu 200 — authentifiziert nur über die RAG-Autorisierung, ohne Nutzer-Token — und aktualisiert die gespeicherten Themen, sodass der Schwerpunkte-Bericht auch bei abweichenden Einzellabels konvergiert. Leer lassen, um das Reclustern zu überspringen.';
 $string['elediaaitutor:viewreports'] = 'eLeDia.ai Tutor-Kursberichte ansehen';
 $string['report_link'] = 'Tutor-Analyse';
 $string['report_title'] = 'eLeDia.ai Tutor — Fragen-Analyse';
@@ -251,6 +253,7 @@ $string['report_hotspots'] = 'Schwerpunkte (letzte 30 Tage)';
 $string['report_topic'] = 'Thema / Material';
 $string['report_none'] = 'Noch keine Fragen protokolliert.';
 $string['task_prune_question_log'] = 'Alte Tutor-Fragen-Analysen bereinigen';
+$string['task_recluster_questions'] = 'Themen der Tutor-Fragen neu clustern';
 
 // Question log privacy.
 $string['privacy:questions'] = 'eLeDia.ai Tutor-Fragen';

@@ -41,6 +41,7 @@ short-lived application cache (never the database) and reused until it expires.
 | Rate limit (messages/minute/user) | 20 (0 disables) |
 | Question analytics | Off (opt-in; logs learner questions for the course report — see privacy.md) |
 | Question analytics retention (days) | 180 (daily prune task) |
+| Recluster tool name | Empty (optional; e.g. `tutor_recluster_questions` — a nightly task converges hotspot topic labels via the RAG server) |
 | Logging verbosity | Normal |
 
 When question analytics is enabled, teachers with

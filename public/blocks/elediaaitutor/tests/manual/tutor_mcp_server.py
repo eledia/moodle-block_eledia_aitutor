@@ -324,6 +324,21 @@ def handle_tools_list(_params):
                     "required": ["moodle_token", "enabled"],
                 },
             },
+            {
+                "name": "tutor_recluster_questions",
+                "description": "Re-derive canonical topic labels for a batch of "
+                               "logged questions (service-level; no user token).",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "system_url": {"type": "string"},
+                        "course_id": {"type": "string"},
+                        "existing_labels": {"type": "array", "items": {"type": "string"}},
+                        "questions": {"type": "array", "items": {"type": "object"}},
+                    },
+                    "required": ["questions"],
+                },
+            },
         ]
     }
 
@@ -414,6 +429,24 @@ def tool_tutor_delete_conversation(arguments):
     }
 
 
+def tool_tutor_recluster_questions(arguments):
+    """Implement the tutor_recluster_questions tool (demo registry: derive_topic)."""
+    questions = arguments.get("questions") or []
+    labels = arguments.get("existing_labels") or []
+    topics = []
+    for question in questions:
+        if not isinstance(question, dict) or "id" not in question:
+            continue
+        topics.append({"id": question["id"], "topic": derive_topic(str(question.get("text", "")))})
+    log(f"tutor_recluster_questions course={arguments.get('course_id', '-')} "
+        f"batch={len(questions)} existing_labels={len(labels)} -> {len(topics)} label(s)")
+    return {
+        "content": [{"type": "text", "text": json.dumps({"topics": topics})}],
+        "structuredContent": {"topics": topics},
+        "isError": False,
+    }
+
+
 def tool_tutor_delete_user_data(arguments):
     """Implement the tutor_delete_user_data tool (demo: wipes everything)."""
     conv_count = len(CONVERSATIONS)
@@ -465,6 +498,8 @@ def handle_tools_call(params):
         return tool_tutor_delete_user_data(arguments)
     if name == "tutor_set_memory_optin":
         return tool_tutor_set_memory_optin(arguments)
+    if name == "tutor_recluster_questions":
+        return tool_tutor_recluster_questions(arguments)
     raise ValueError(f"Unknown tool: {name}")
 
 

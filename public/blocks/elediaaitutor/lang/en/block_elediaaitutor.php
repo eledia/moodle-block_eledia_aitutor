@@ -233,6 +233,8 @@ $string['setting_enableanalytics'] = 'Question analytics';
 $string['setting_enableanalytics_desc'] = 'Log the questions learners ask the tutor (with course and asker) so teachers can spot confusion hotspots in the course report. Answers are never stored. Disabled by default: enabling this is a privacy-relevant decision — logged questions are covered by the privacy API, hidden behind a teacher capability, displayed without names, and pruned after the retention period.';
 $string['setting_analyticsretention'] = 'Question analytics retention (days)';
 $string['setting_analyticsretention_desc'] = 'Logged questions older than this are deleted by a daily scheduled task. 0 keeps them forever (not recommended).';
+$string['setting_reclustertoolname'] = 'Recluster tool name';
+$string['setting_reclustertoolname_desc'] = 'Optional MCP tool that re-derives canonical topic labels for batches of logged questions, e.g. tutor_recluster_questions. When set (and question analytics is enabled), a nightly task sends the last 30 days of questions per course in batches of up to 200 — authenticated by the RAG authorization only, no user token — and updates the stored topics, converging the hotspot report even when per-answer labels drifted. Leave empty to skip reclustering.';
 $string['elediaaitutor:viewreports'] = 'View eLeDia.ai Tutor course reports';
 $string['report_link'] = 'Tutor analytics';
 $string['report_title'] = 'eLeDia.ai Tutor — question analytics';
@@ -251,6 +253,7 @@ $string['report_hotspots'] = 'Hotspots (last 30 days)';
 $string['report_topic'] = 'Topic / material';
 $string['report_none'] = 'No questions logged yet.';
 $string['task_prune_question_log'] = 'Prune old tutor question analytics';
+$string['task_recluster_questions'] = 'Recluster tutor question topics';
 
 // Question log privacy.
 $string['privacy:questions'] = 'eLeDia.ai Tutor questions';

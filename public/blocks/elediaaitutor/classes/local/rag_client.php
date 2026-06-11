@@ -237,6 +237,63 @@ class rag_client {
     }
 
     /**
+     * Re-derive canonical topic labels for a batch of logged questions.
+     *
+     * A SITE-LEVEL service operation: unlike every other tool there is no
+     * moodle_token — the request is authenticated solely by the configured
+     * transport-level RAG authorization. The supplied existing labels form the
+     * registry the server should classify into.
+     *
+     * @param string $systemurl This Moodle site's wwwroot.
+     * @param string $courseid The course the questions belong to.
+     * @param string[] $existinglabels Current topic labels for the course.
+     * @param array $questions List of ['id' => int, 'text' => string] entries.
+     * @param string $toolname Recluster tool name to invoke.
+     * @return array<int, string> Map of question id => topic label.
+     * @throws rag_exception On transport or protocol failure.
+     */
+    public function recluster_questions(
+        string $systemurl,
+        string $courseid,
+        array $existinglabels,
+        array $questions,
+        string $toolname
+    ): array {
+        $result = $this->call_tool($toolname, [
+            'system_url' => $systemurl,
+            'course_id' => $courseid,
+            'existing_labels' => array_values($existinglabels),
+            'questions' => array_values($questions),
+        ]);
+
+        $structured = $result['structuredContent'] ?? null;
+        $topics = null;
+        if (is_array($structured) && isset($structured['topics']) && is_array($structured['topics'])) {
+            $topics = $structured['topics'];
+        } else {
+            $decoded = json_decode($this->collect_text($result), true);
+            if (is_array($decoded) && isset($decoded['topics']) && is_array($decoded['topics'])) {
+                $topics = $decoded['topics'];
+            }
+        }
+        if ($topics === null) {
+            throw new rag_exception('error_rag_bad_response', 'recluster: no topics in result');
+        }
+
+        $map = [];
+        foreach ($topics as $entry) {
+            if (!is_array($entry) || !isset($entry['id'])) {
+                continue;
+            }
+            $topic = \core_text::substr(trim((string) ($entry['topic'] ?? '')), 0, 100);
+            if ($topic !== '') {
+                $map[(int) $entry['id']] = $topic;
+            }
+        }
+        return $map;
+    }
+
+    /**
      * Ask the RAG server to delete ALL data it holds for the authenticated user.
      *
      * Covers every conversation/transcript and any long-term memory — complete

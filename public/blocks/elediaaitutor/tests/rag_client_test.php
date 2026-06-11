@@ -187,6 +187,37 @@ final class rag_client_test extends \advanced_testcase {
     }
 
     /**
+     * Reclustering is a service-level call: no moodle_token, registry + batch in,
+     * an id=>topic map out (trimmed and capped).
+     */
+    public function test_recluster_questions(): void {
+        $this->resetAfterTest();
+        $transport = fake_transport::json_result([
+            'structuredContent' => ['topics' => [
+                ['id' => 17, 'topic' => '  Assignment 2  '],
+                ['id' => 18, 'topic' => 'Photosynthesis'],
+                ['id' => 19, 'topic' => ''],          // Empty: dropped.
+                ['broken' => true],                    // Malformed: dropped.
+            ]],
+        ]);
+        $client = $this->client($transport);
+
+        $map = $client->recluster_questions('https://m', '7', ['Photosynthesis'],
+            [['id' => 17, 'text' => 'essay due?'], ['id' => 18, 'text' => 'how do plants eat light']],
+            'tutor_recluster_questions');
+
+        $payload = $transport->last_payload();
+        $this->assertSame('tutor_recluster_questions', $payload['params']['name']);
+        $args = $payload['params']['arguments'];
+        $this->assertArrayNotHasKey('moodle_token', $args);
+        $this->assertSame('7', $args['course_id']);
+        $this->assertSame(['Photosynthesis'], $args['existing_labels']);
+        $this->assertCount(2, $args['questions']);
+
+        $this->assertSame([17 => 'Assignment 2', 18 => 'Photosynthesis'], $map);
+    }
+
+    /**
      * The user-level delete tool is called with token only (no conversation id).
      */
     public function test_delete_user_data_payload(): void {

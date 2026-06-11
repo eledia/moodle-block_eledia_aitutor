@@ -112,6 +112,20 @@ class security {
     }
 
     /**
+     * The configured RAG question-reclustering tool name (optional feature).
+     *
+     * When set (and question analytics is enabled), a nightly task sends recent
+     * logged questions per course to the RAG server and updates their canonical
+     * topic labels, converging the hotspot analytics even when per-answer
+     * labels drifted.
+     *
+     * @return string Empty string when not configured.
+     */
+    public static function recluster_tool_name(): string {
+        return trim((string) self::get_config('reclustertoolname', ''));
+    }
+
+    /**
      * The configured RAG memory opt-in tool name (optional feature).
      *
      * A non-empty value declares that the RAG server supports long-term memory:

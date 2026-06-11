@@ -195,6 +195,84 @@ class question_log {
     }
 
     /**
+     * Courses with logged questions inside the window.
+     *
+     * @param int $days Look-back window in days.
+     * @return int[] Course ids (excluding global chat).
+     */
+    public static function active_courses(int $days): array {
+        global $DB;
+        $rows = $DB->get_records_sql(
+            'SELECT DISTINCT courseid FROM {' . self::TABLE . '}
+              WHERE timecreated >= :since AND courseid > 0',
+            ['since' => time() - $days * DAYSECS]);
+        return array_map('intval', array_keys($rows));
+    }
+
+    /**
+     * The distinct topic labels currently used in a course (the label registry
+     * snapshot supplied to the recluster tool).
+     *
+     * @param int $courseid The course id.
+     * @param int $limit Max labels.
+     * @return string[]
+     */
+    public static function distinct_topics(int $courseid, int $limit = 100): array {
+        global $DB;
+        $rows = $DB->get_records_sql(
+            'SELECT DISTINCT topic FROM {' . self::TABLE . '}
+              WHERE courseid = :courseid AND topic IS NOT NULL',
+            ['courseid' => $courseid], 0, $limit);
+        return array_values(array_map('strval', array_keys($rows)));
+    }
+
+    /**
+     * Fetch a batch of questions for reclustering (id + text only).
+     *
+     * @param int $courseid The course id.
+     * @param int $days Look-back window in days.
+     * @param int $limit Batch size.
+     * @param int $offset Batch offset.
+     * @return stdClass[] Rows with id and question, oldest first.
+     */
+    public static function fetch_for_recluster(int $courseid, int $days, int $limit, int $offset): array {
+        global $DB;
+        return array_values($DB->get_records_select(self::TABLE,
+            'courseid = :courseid AND timecreated >= :since',
+            ['courseid' => $courseid, 'since' => time() - $days * DAYSECS],
+            'id ASC', 'id, question', $offset, $limit));
+    }
+
+    /**
+     * Apply reclustered topic labels.
+     *
+     * Defensive by construction: only ids that were actually sent in the batch
+     * (and belong to the course) are updatable — a misbehaving server cannot
+     * relabel arbitrary rows.
+     *
+     * @param array<int, string> $map Question id => topic label.
+     * @param int $courseid The course the batch belongs to.
+     * @param int[] $allowedids The ids that were sent in the batch.
+     * @return int Number of rows updated.
+     */
+    public static function apply_topics(array $map, int $courseid, array $allowedids): int {
+        global $DB;
+
+        $allowed = array_flip(array_map('intval', $allowedids));
+        $updated = 0;
+        foreach ($map as $id => $topic) {
+            $id = (int) $id;
+            $topic = \core_text::substr(trim((string) $topic), 0, 100);
+            if (!isset($allowed[$id]) || $topic === '') {
+                continue;
+            }
+            $DB->set_field(self::TABLE, 'topic', $topic, ['id' => $id, 'courseid' => $courseid]);
+            $updated++;
+        }
+        return $updated;
+    }
+
+    /**
      * Delete every logged question of a user (privacy / delete-my-data).
      *
      * @param int $userid The asker.

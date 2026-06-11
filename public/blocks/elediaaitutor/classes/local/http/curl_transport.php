@@ -60,6 +60,11 @@ class curl_transport implements transport {
      * @return array{status: int, headers: array<string, string>, body: string, error: string}
      */
     public function post(string $url, array $headers, string $body, int $timeout): array {
+        global $CFG;
+        // The curl wrapper lives in filelib, which is not preloaded in CLI /
+        // scheduled-task contexts.
+        require_once($CFG->libdir . '/filelib.php');
+
         $curl = new curl($this->ignoresecurity ? ['ignoresecurity' => true] : []);
         $options = [
             'CURLOPT_TIMEOUT' => $timeout,

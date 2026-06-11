@@ -149,6 +149,35 @@ final class question_log_test extends \advanced_testcase {
     }
 
     /**
+     * apply_topics only relabels ids that were actually sent, scoped to the course.
+     */
+    public function test_apply_topics_scoped(): void {
+        global $DB;
+        $this->resetAfterTest();
+        set_config('enableanalytics', 1, 'block_elediaaitutor');
+        $user = $this->getDataGenerator()->create_user();
+        $uid = (int) $user->id;
+
+        question_log::log($uid, 7, 'q-a', true, null);
+        question_log::log($uid, 7, 'q-b', true, null);
+        question_log::log($uid, 8, 'other course', true, null);
+        [$a, $b, $other] = array_values($DB->get_records(question_log::TABLE, [], 'id ASC', 'id'));
+
+        $updated = question_log::apply_topics([
+            (int) $a->id => 'Topic A',
+            (int) $other->id => 'Should not apply',   // Not in the sent batch.
+            999999 => 'Ghost',                          // Unknown id.
+        ], 7, [(int) $a->id, (int) $b->id]);
+
+        $this->assertSame(1, $updated);
+        $this->assertSame('Topic A', $DB->get_field(question_log::TABLE, 'topic', ['id' => $a->id]));
+        $this->assertNull($DB->get_field(question_log::TABLE, 'topic', ['id' => $other->id]));
+
+        $this->assertSame(['Topic A'], question_log::distinct_topics(7));
+        $this->assertEqualsCanonicalizing([7, 8], question_log::active_courses(30));
+    }
+
+    /**
      * delete_all_for_user erases only that user's rows.
      */
     public function test_delete_all_for_user(): void {

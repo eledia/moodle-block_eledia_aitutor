@@ -44,6 +44,13 @@ pruned by a daily scheduled task after the configurable retention (default
 180 days), are included in privacy export/delete, and are wiped by the user's
 own "Delete all my tutor data" action. Collection is **off by default**.
 
+When the **Recluster tool name** is additionally configured, a nightly task
+re-sends recent logged question texts (without user identities) to the RAG
+server to converge their topic labels. This transmits no new data category —
+the same question texts already transited the same processor at chat time —
+and the server must not retain the batches beyond processing (see the RAG
+server specification, section A.6).
+
 ## User preferences
 
 One user preference is stored: `block_elediaaitutor_ltm_enabled` — the explicit
