@@ -37,6 +37,9 @@ use moodle_exception;
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class send_message extends external_api {
+    /** @var string[] Accepted answer styles ('' = use the instance default). */
+    private const ANSWER_STYLES = ['', 'explain', 'hint', 'quiz'];
+
     /**
      * Parameter definition.
      *
@@ -48,6 +51,8 @@ class send_message extends external_api {
             'message' => new external_value(PARAM_RAW, 'The user message'),
             'courseid' => new external_value(PARAM_INT, 'Course context id, or 0 for global', VALUE_DEFAULT, 0),
             'conversationid' => new external_value(PARAM_RAW, 'Existing conversation id, or empty', VALUE_DEFAULT, ''),
+            'answerstyle' => new external_value(PARAM_ALPHA, 'Requested answer style, or empty for the default',
+                VALUE_DEFAULT, ''),
         ]);
     }
 
@@ -58,16 +63,23 @@ class send_message extends external_api {
      * @param string $message Raw user message.
      * @param int $courseid Course id, or 0.
      * @param string $conversationid Existing conversation id, or ''.
+     * @param string $answerstyle Requested answer style, or '' for the instance default.
      * @return array Response structure.
      * @throws moodle_exception
      */
-    public static function execute(int $contextid, string $message, int $courseid, string $conversationid): array {
+    public static function execute(int $contextid, string $message, int $courseid, string $conversationid,
+            string $answerstyle = ''): array {
         $params = self::validate_parameters(self::execute_parameters(), [
             'contextid' => $contextid,
             'message' => $message,
             'courseid' => $courseid,
             'conversationid' => $conversationid,
+            'answerstyle' => $answerstyle,
         ]);
+
+        if (!in_array($params['answerstyle'], self::ANSWER_STYLES, true)) {
+            throw new \invalid_parameter_exception('Invalid answer style.');
+        }
 
         global $USER;
         $context = helper::resolve_context($params['contextid']);
@@ -92,7 +104,20 @@ class send_message extends external_api {
         $conv = $params['conversationid'] !== '' ? $params['conversationid'] : null;
         $courseid = $params['courseid'] > 0 ? $params['courseid'] : null;
 
-        $result = chat_service::send((int) $USER->id, $params['message'], $courseid, $conv, $context);
+        // Resolve the effective answer style server-side: the client's choice is
+        // honoured only when the teacher allows style changes on this instance —
+        // a locked instance always uses its configured default, whatever the
+        // client sent.
+        $blockconfig = helper::block_config($context);
+        $default = $blockconfig->answerstyle ?? 'explain';
+        if (!in_array($default, self::ANSWER_STYLES, true) || $default === '') {
+            $default = 'explain';
+        }
+        $allowchange = !isset($blockconfig->allowstylechange) || (int) $blockconfig->allowstylechange === 1;
+        $effectivestyle = ($allowchange && $params['answerstyle'] !== '') ? $params['answerstyle'] : $default;
+
+        $result = chat_service::send((int) $USER->id, $params['message'], $courseid, $conv, $context, null,
+            $effectivestyle);
 
         return [
             'answerhtml' => $result['answerhtml'],

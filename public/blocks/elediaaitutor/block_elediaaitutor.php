@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+use block_elediaaitutor\local\ltm;
 use block_elediaaitutor\local\security;
 use block_elediaaitutor\local\token_provider;
 
@@ -141,6 +142,21 @@ class block_elediaaitutor extends block_base {
 
         $avatarurl = $OUTPUT->image_url('logo', 'block_elediaaitutor')->out(false);
 
+        // Pedagogical answer style: instance default plus whether learners may switch.
+        $answerstyle = (string) $this->get_instance_config('answerstyle', 'explain');
+        if (!in_array($answerstyle, ['explain', 'hint', 'quiz'], true)) {
+            $answerstyle = 'explain';
+        }
+        $allowstylechange = (int) $this->get_instance_config('allowstylechange', 1) === 1;
+        $styles = [];
+        foreach (['explain', 'hint', 'quiz'] as $style) {
+            $styles[] = [
+                'key' => $style,
+                'label' => get_string('answerstyle_' . $style, 'block_elediaaitutor'),
+                'active' => $style === $answerstyle,
+            ];
+        }
+
         $templatecontext = [
             'uniqid' => $uniqid,
             'instanceid' => (int) $this->instance->id,
@@ -151,6 +167,10 @@ class block_elediaaitutor extends block_base {
             'welcome' => format_text($welcome, FORMAT_MOODLE, ['context' => $context, 'filter' => false]),
             'historyenabled' => $historyenabled,
             'launchlabel' => get_string('launch', 'block_elediaaitutor'),
+            'stylechoice' => $allowstylechange,
+            'styles' => $styles,
+            'stylelocked' => !$allowstylechange && $answerstyle !== 'explain',
+            'lockedlabel' => get_string('answerstyle_' . $answerstyle, 'block_elediaaitutor'),
         ];
 
         $this->content->text = $OUTPUT->render_from_template('block_elediaaitutor/launcher', $templatecontext);
@@ -166,7 +186,22 @@ class block_elediaaitutor extends block_base {
             'maxlength' => security::max_message_length(),
             'persona' => format_string($persona),
             'avatarurl' => $avatarurl,
+            'ltmenabled' => ltm::is_enabled((int) $USER->id),
+            'candelete' => has_capability('block/elediaaitutor:deleteownhistory', $context),
+            'answerstyle' => $answerstyle,
+            'allowstylechange' => $allowstylechange,
         ]]);
+
+        // Teachers get a footer link to the course question-analytics report.
+        if ($courseid > 0 && \block_elediaaitutor\local\question_log::is_enabled()) {
+            $coursecontext = context_course::instance($courseid, IGNORE_MISSING);
+            if ($coursecontext && has_capability('block/elediaaitutor:viewreports', $coursecontext)) {
+                $this->content->footer = html_writer::link(
+                    new moodle_url('/blocks/elediaaitutor/report.php', ['courseid' => $courseid]),
+                    get_string('report_link', 'block_elediaaitutor')
+                );
+            }
+        }
 
         return $this->content;
     }
@@ -227,9 +262,9 @@ class block_elediaaitutor extends block_base {
     }
 
     /**
-     * Allow HTML in the block title/config as needed.
+     * Add the block's distinguishing CSS class to the container attributes.
      *
-     * @return bool
+     * @return array
      */
     public function html_attributes(): array {
         $attributes = parent::html_attributes();

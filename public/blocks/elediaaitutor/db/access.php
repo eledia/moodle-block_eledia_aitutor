@@ -85,6 +85,16 @@ $capabilities = [
         ],
     ],
 
+    // View the course-level question analytics report.
+    'block/elediaaitutor:viewreports' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
     // Delete one's own stored conversations.
     'block/elediaaitutor:deleteownhistory' => [
         'captype' => 'write',

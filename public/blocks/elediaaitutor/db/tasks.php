@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * eLeDia.ai Tutor block version information.
+ * Scheduled task definitions for the eLeDia.ai Tutor block.
  *
  * @package     block_elediaaitutor
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
@@ -26,11 +26,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2026061103;
-$plugin->requires = 2023041800;
-$plugin->component = 'block_elediaaitutor';
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = '0.5.0';
-// Soft dependency on the MCP web service plugin is enforced at runtime so the
-// block degrades gracefully (admin error + user-facing unavailable message)
-// rather than refusing to install. See token_provider::is_connector_available().
+$tasks = [
+    [
+        'classname' => 'block_elediaaitutor\\task\\prune_question_log',
+        'blocking' => 0,
+        'minute' => 'R',
+        'hour' => '4',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
+];

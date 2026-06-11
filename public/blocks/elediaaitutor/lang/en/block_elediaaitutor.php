@@ -103,6 +103,10 @@ $string['setting_historytoolname'] = 'History tool name';
 $string['setting_historytoolname_desc'] = 'Optional MCP tool that returns previous messages for a conversation, e.g. tutor_get_history. Leave empty if the server does not support it.';
 $string['setting_deletetoolname'] = 'Delete tool name';
 $string['setting_deletetoolname_desc'] = 'Optional MCP tool that deletes a conversation on the RAG server, e.g. tutor_delete_conversation. When set, deleting a conversation in Moodle also removes it on the RAG server. Leave empty to delete only the local pointer.';
+$string['setting_deleteusertoolname'] = 'Delete user data tool name';
+$string['setting_deleteusertoolname_desc'] = 'Optional MCP tool that deletes ALL data the RAG server holds for the authenticated user (every transcript and any long-term memory), e.g. tutor_delete_user_data. When set, it is preferred over the per-conversation delete tool for "delete all my data" requests and is complete even when Moodle no longer holds conversation references. Leave empty if the server does not support it.';
+$string['setting_memoryoptintoolname'] = 'Memory opt-in tool name';
+$string['setting_memoryoptintoolname_desc'] = 'Optional MCP tool that records the user\'s long-term memory consent on the RAG server, e.g. tutor_set_memory_optin. Setting this declares the server memory-capable: opt-in changes are pushed immediately, every chat message carries the current consent as ltm_enabled, and opting out instructs the server to erase stored memories. Leave empty while the server has no memory support — no consent data is transmitted then.';
 $string['setting_allowinsecuretransport'] = 'Allow insecure (HTTP) transport';
 $string['setting_allowinsecuretransport_desc'] = 'Permit a plain http:// RAG URL. Strongly discouraged; for local development only.';
 $string['setting_allowprivatenetwork'] = 'Allow private / internal RAG host';
@@ -182,6 +186,84 @@ $string['privacy:metadata:rag_server:userid'] = 'Your Moodle user identity (via 
 $string['privacy:metadata:rag_server:message'] = 'The message text you send to the tutor.';
 $string['privacy:metadata:rag_server:courseid'] = 'The course context, when provided.';
 $string['privacy:metadata:rag_server:conversationid'] = 'The conversation identifier, to maintain context across turns.';
+
+// Privacy guidelines and user data controls.
+$string['privacyguidelines'] = 'Privacy guidelines';
+$string['privacy_intro'] = 'How the eLeDia.ai Tutor handles your data.';
+$string['privacy_accuracy_title'] = 'AI answers can be wrong';
+$string['privacy_accuracy_body'] = 'The tutor generates answers using artificial intelligence. Answers can be incomplete or incorrect — always check important information against your course materials or ask your teacher.';
+$string['privacy_sent_title'] = 'What is sent when you chat';
+$string['privacy_sent_body'] = 'Your message, the course context (when available) and your Moodle identity (via a short-lived, user-scoped token) are sent to the external tutor service so it can answer on your behalf. The tutor can only access what you yourself are allowed to see in Moodle.';
+$string['privacy_storage_title'] = 'What is stored';
+$string['privacy_storage_body'] = 'Moodle stores only lightweight conversation metadata (a conversation reference, a short preview and timestamps). Full transcripts are stored by the external tutor service according to its retention policy.';
+$string['privacy_ltm_title'] = 'Long-term memory (optional, coming soon)';
+$string['privacy_ltm_body'] = 'In a future update the tutor will be able to remember helpful facts across conversations to personalise its support. This is switched off by default and is only ever used if you opt in below. No memory data is collected or sent yet.';
+$string['ltm_optin'] = 'Allow the tutor to remember information across conversations (long-term memory)';
+$string['ltm_saved'] = 'Preference saved.';
+$string['privacy_deletion_title'] = 'Deleting your data';
+$string['privacy_deletion_body'] = 'You can delete your tutor conversations at any time using the button below. Local records are removed immediately. Where the external tutor service supports remote deletion, your transcripts are deleted there as well; otherwise they remain subject to that service\'s retention policy — contact your administrator if you need them removed.';
+$string['deletealldata'] = 'Delete all my tutor data';
+$string['deleteall_confirm_title'] = 'Delete all tutor data?';
+$string['deleteall_confirm'] = 'This removes all of your saved tutor conversations. This cannot be undone. Do you want to continue?';
+$string['deleteall_confirmbutton'] = 'Yes, delete everything';
+$string['deleteall_done'] = '{$a} conversation(s) deleted.';
+$string['deleteall_external_done'] = 'Deletion was also requested from the external tutor service.';
+$string['deleteall_external_unsupported'] = 'The external tutor service does not support remote deletion; transcripts stored there remain subject to its retention policy.';
+$string['event_data_deletion_requested'] = 'Tutor data deletion requested';
+$string['event_ltm_preference_changed'] = 'Tutor long-term memory preference changed';
+$string['privacy:metadata:preference:ltm'] = 'Whether the user has opted in to the tutor\'s long-term memory.';
+
+// Grounding transparency.
+$string['groundedbadge'] = 'Based on course materials';
+$string['ungroundedbadge'] = 'General answer';
+$string['groundedbadge_title'] = 'This answer cites your course materials.';
+$string['ungroundedbadge_title'] = 'This answer is not based on your course materials — double-check important facts.';
+
+// Answer styles.
+$string['answerstyle'] = 'Answer style';
+$string['answerstyle_explain'] = 'Explain';
+$string['answerstyle_hint'] = 'Hints only';
+$string['answerstyle_quiz'] = 'Quiz me';
+$string['config_answerstyle'] = 'Default answer style';
+$string['config_answerstyle_help'] = 'How the tutor responds by default: full explanations, guiding hints without final solutions, or practice questions. Learners can switch styles unless you lock the choice below.';
+$string['config_allowstylechange'] = 'Learners may change the answer style';
+
+// Question analytics.
+$string['setting_enableanalytics'] = 'Question analytics';
+$string['setting_enableanalytics_desc'] = 'Log the questions learners ask the tutor (with course and asker) so teachers can spot confusion hotspots in the course report. Answers are never stored. Disabled by default: enabling this is a privacy-relevant decision — logged questions are covered by the privacy API, hidden behind a teacher capability, displayed without names, and pruned after the retention period.';
+$string['setting_analyticsretention'] = 'Question analytics retention (days)';
+$string['setting_analyticsretention_desc'] = 'Logged questions older than this are deleted by a daily scheduled task. 0 keeps them forever (not recommended).';
+$string['elediaaitutor:viewreports'] = 'View eLeDia.ai Tutor course reports';
+$string['report_link'] = 'Tutor analytics';
+$string['report_title'] = 'eLeDia.ai Tutor — question analytics';
+$string['report_intro'] = 'Questions learners asked the tutor in this course. Askers are not shown: the report exists to reveal confusion hotspots, not to monitor individuals.';
+$string['report_disabled'] = 'Question analytics is disabled on this site. An administrator can enable it in the eLeDia.ai Tutor settings.';
+$string['report_total'] = 'Questions (total)';
+$string['report_last7'] = 'Last 7 days';
+$string['report_grounded'] = 'Answered from course materials';
+$string['report_byday'] = 'Questions per day (last 14 days)';
+$string['report_recent'] = 'Recent questions';
+$string['report_question'] = 'Question';
+$string['report_when'] = 'When';
+$string['report_style'] = 'Style';
+$string['report_groundedcol'] = 'Grounded';
+$string['report_hotspots'] = 'Hotspots (last 30 days)';
+$string['report_topic'] = 'Topic / material';
+$string['report_none'] = 'No questions logged yet.';
+$string['task_prune_question_log'] = 'Prune old tutor question analytics';
+
+// Question log privacy.
+$string['privacy:questions'] = 'eLeDia.ai Tutor questions';
+$string['privacy:metadata:block_elediaaitutor_qlog'] = 'Questions you asked the tutor, logged for course-level analytics when enabled by the administrator. Answers are not stored.';
+$string['privacy:metadata:block_elediaaitutor_qlog:userid'] = 'The user who asked the question.';
+$string['privacy:metadata:block_elediaaitutor_qlog:courseid'] = 'The course the question was asked in, if any.';
+$string['privacy:metadata:block_elediaaitutor_qlog:question'] = 'The question text (truncated).';
+$string['privacy:metadata:block_elediaaitutor_qlog:grounded'] = 'Whether the answer cited course materials.';
+$string['privacy:metadata:block_elediaaitutor_qlog:answerstyle'] = 'The answer style used.';
+$string['privacy:metadata:block_elediaaitutor_qlog:topic'] = 'The canonical topic label supplied by the tutor service.';
+$string['privacy:metadata:block_elediaaitutor_qlog:sourcetitle'] = 'The title of the primary cited course material.';
+$string['privacy:metadata:block_elediaaitutor_qlog:cmid'] = 'The course module the primary citation points at.';
+$string['privacy:metadata:block_elediaaitutor_qlog:timecreated'] = 'When the question was asked.';
 
 // Cache definitions.
 $string['cachedef_usertoken'] = 'Short-lived per-user Moodle MCP token store';

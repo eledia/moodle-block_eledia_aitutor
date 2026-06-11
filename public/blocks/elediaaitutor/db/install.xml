@@ -25,5 +25,28 @@
         <INDEX NAME="userid-conversationid" UNIQUE="true" FIELDS="userid,conversationid" COMMENT="Resolve a server conversation id within an owner, and guard against duplicates."/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="block_elediaaitutor_qlog" COMMENT="Opt-in question analytics: learner questions (never answers) logged per course so teachers can spot confusion hotspots. Collection is disabled by default; rows are pruned by a scheduled task after the configured retention and are covered by the privacy provider.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The asker. Stored so privacy export/erasure works; never displayed in reports."/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Course the question was asked in, or 0 for global chat."/>
+        <FIELD NAME="question" TYPE="char" LENGTH="1000" NOTNULL="true" SEQUENCE="false" COMMENT="The question text, truncated."/>
+        <FIELD NAME="grounded" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 when the answer cited course materials."/>
+        <FIELD NAME="answerstyle" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Effective answer style (explain|hint|quiz), if any."/>
+        <FIELD NAME="topic" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Canonical topic label supplied by the RAG server, used to cluster questions in the teacher report."/>
+        <FIELD NAME="sourcetitle" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Title of the primary cited source (sources[0]); hotspot fallback when no topic was supplied."/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Course module id resolved from the primary source URL, when it points at this site."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="When the question was asked."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="courseid-timecreated" UNIQUE="false" FIELDS="courseid,timecreated" COMMENT="Course report queries."/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated" COMMENT="Retention pruning."/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

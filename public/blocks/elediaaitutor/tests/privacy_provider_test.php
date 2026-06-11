@@ -100,4 +100,39 @@ final class privacy_provider_test extends \core_privacy\tests\provider_testcase 
         provider::delete_data_for_all_users_in_context(context_system::instance());
         $this->assertCount(0, conversation_repository::list_for_user((int) $user->id));
     }
+
+    /**
+     * The long-term memory opt-in is exported as a user preference.
+     */
+    public function test_export_user_preferences(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        \block_elediaaitutor\local\ltm::set_enabled((int) $user->id, true);
+
+        provider::export_user_preferences((int) $user->id);
+
+        $writer = writer::with_context(context_system::instance());
+        $prefs = $writer->get_user_preferences('block_elediaaitutor');
+        $prefname = \block_elediaaitutor\local\ltm::PREF;
+        $this->assertNotEmpty($prefs->$prefname);
+        $this->assertEquals(
+            get_string('privacy:metadata:preference:ltm', 'block_elediaaitutor'),
+            $prefs->$prefname->description
+        );
+    }
+
+    /**
+     * A user without the preference set exports nothing for it.
+     */
+    public function test_export_user_preferences_unset(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+
+        provider::export_user_preferences((int) $user->id);
+
+        $writer = writer::with_context(context_system::instance());
+        $prefs = $writer->get_user_preferences('block_elediaaitutor');
+        $prefname = \block_elediaaitutor\local\ltm::PREF;
+        $this->assertTrue(empty($prefs->$prefname));
+    }
 }

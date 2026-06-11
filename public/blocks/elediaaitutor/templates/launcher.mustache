@@ -84,6 +84,12 @@
                             title="{{#str}}newconversation, block_elediaaitutor{{/str}}">
                         <i class="fa fa-plus" aria-hidden="true"></i>
                     </button>
+                    <button type="button" class="btn btn-icon elediaaitutor-iconbtn"
+                            data-action="privacy" aria-label="{{#str}}privacyguidelines, block_elediaaitutor{{/str}}"
+                            title="{{#str}}privacyguidelines, block_elediaaitutor{{/str}}"
+                            aria-haspopup="dialog">
+                        <i class="fa fa-shield" aria-hidden="true"></i>
+                    </button>
                     {{^embedded}}
                         <button type="button" class="btn btn-icon elediaaitutor-iconbtn"
                                 data-action="close" aria-label="{{#str}}close, block_elediaaitutor{{/str}}"
@@ -119,6 +125,25 @@
             </div>
 
             <div class="elediaaitutor-status" data-region="status" role="status" aria-live="polite"></div>
+
+            {{#stylechoice}}
+                <div class="elediaaitutor-styles" data-region="styles" role="radiogroup"
+                     aria-label="{{#str}}answerstyle, block_elediaaitutor{{/str}}">
+                    {{#styles}}
+                        <button type="button" class="elediaaitutor-stylechip{{#active}} elediaaitutor-stylechip-active{{/active}}"
+                                role="radio" aria-checked="{{#active}}true{{/active}}{{^active}}false{{/active}}"
+                                data-action="style" data-style="{{key}}">{{label}}</button>
+                    {{/styles}}
+                </div>
+            {{/stylechoice}}
+            {{#stylelocked}}
+                <div class="elediaaitutor-styles">
+                    <span class="elediaaitutor-stylechip elediaaitutor-stylechip-locked"
+                          title="{{#str}}answerstyle, block_elediaaitutor{{/str}}">
+                        <i class="fa fa-lock" aria-hidden="true"></i> {{lockedlabel}}
+                    </span>
+                </div>
+            {{/stylelocked}}
 
             <form class="elediaaitutor-composer" data-region="composer">
                 <label class="sr-only" for="{{uniqid}}_input">

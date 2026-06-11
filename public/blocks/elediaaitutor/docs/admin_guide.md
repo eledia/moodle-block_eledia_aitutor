@@ -12,6 +12,8 @@ All settings live at **Site administration ▸ Plugins ▸ Blocks ▸ eLeDia.ai 
 | **Chat tool name** | MCP tool invoked via `tools/call`. Default `tutor_chat`. |
 | **History tool name** | Optional; e.g. `tutor_get_history`. Leave empty to disable history loading. |
 | **Delete tool name** | Optional; e.g. `tutor_delete_conversation`. When set, deleting a conversation in Moodle also deletes it on the RAG server (best-effort). Leave empty to delete only the local pointer. |
+| **Delete user data tool name** | Optional, recommended; e.g. `tutor_delete_user_data`. One call erases ALL data the RAG server holds for the user (transcripts + long-term memory). Preferred over per-conversation deletion for "delete all my data". |
+| **Memory opt-in tool name** | Optional; e.g. `tutor_set_memory_optin`. Setting it declares the RAG server memory-capable: consent changes are pushed immediately, every chat carries `ltm_enabled`, opt-out erases stored memories. Leave empty while the server has no memory support. |
 | **Allow insecure transport** | Permits `http://`. Local development only. |
 | **Allow private / internal RAG host** | Bypasses Moodle's cURL security (blocked private hosts / non-standard ports) **for the configured RAG host only**. Enable for an internal-network or local-dev RAG server (e.g. `host.docker.internal`). Off by default — keep it off in production. |
 | **Request timeout** | Seconds to wait for a RAG response. |
@@ -37,7 +39,15 @@ short-lived application cache (never the database) and reused until it expires.
 | Enable course chat | Yes |
 | Maximum message length | 4000 |
 | Rate limit (messages/minute/user) | 20 (0 disables) |
+| Question analytics | Off (opt-in; logs learner questions for the course report — see privacy.md) |
+| Question analytics retention (days) | 180 (daily prune task) |
 | Logging verbosity | Normal |
+
+When question analytics is enabled, teachers with
+`block/elediaaitutor:viewreports` get a **Tutor analytics** link in the block
+footer leading to `/blocks/elediaaitutor/report.php?courseid=N` — aggregated,
+name-free views of asked questions (totals, per-day, grounded share, recent
+questions).
 
 ## 4. Capabilities
 

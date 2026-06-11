@@ -51,4 +51,28 @@ class helper {
         }
         return $context;
     }
+
+    /**
+     * Load the per-instance block configuration for a block context.
+     *
+     * Used to enforce instance settings server-side (e.g. the answer-style
+     * lock) — client-supplied values are never trusted. Returns an empty
+     * object for non-block contexts or unconfigured instances.
+     *
+     * @param context $context The context the request was made in.
+     * @return \stdClass The instance configuration (possibly empty).
+     */
+    public static function block_config(context $context): \stdClass {
+        global $DB;
+
+        if ($context->contextlevel !== CONTEXT_BLOCK) {
+            return new \stdClass();
+        }
+        $instance = $DB->get_record('block_instances', ['id' => $context->instanceid]);
+        if (!$instance || $instance->configdata === null || $instance->configdata === '') {
+            return new \stdClass();
+        }
+        $config = unserialize_object(base64_decode($instance->configdata));
+        return $config instanceof \stdClass ? $config : new \stdClass();
+    }
 }

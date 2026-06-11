@@ -39,7 +39,9 @@ Tutor); the defaults are shown below.
 |---|---|---|---|
 | `tutor_chat` | **Required** | Chat tool name | Answer a learner message. |
 | `tutor_get_history` | Optional | History tool name | Return earlier messages of a conversation. |
-| `tutor_delete_conversation` | Optional | Delete tool name | Delete a conversation server-side. |
+| `tutor_delete_conversation` | Optional | Delete tool name | Delete a single conversation server-side. |
+| `tutor_delete_user_data` | Optional, **recommended** | Delete user data tool name | Erase ALL data held for the authenticated user (transcripts + memory). |
+| `tutor_set_memory_optin` | Optional (required for memory) | Memory opt-in tool name | Record the user's long-term memory consent; erase memories on opt-out. |
 
 If an optional tool name is left blank in the block, that feature is simply not used.
 
@@ -54,6 +56,9 @@ If an optional tool name is left blank in the block, that feature is simply not 
 | `user_message` | string | yes | The learner's message (already length-validated, ≤ configured max, default 4000 chars). |
 | `course_id` | string | only in course context | Moodle course id the chat is attached to. Omitted for global chat. |
 | `conversation_id` | string | only on follow-ups | Your own conversation id from a previous turn. **Absent ⇒ start a new conversation.** |
+| `ltm_enabled` | boolean | only when memory is configured | The user's long-term-memory consent **for this request**. Only sent when the Moodle admin has configured the memory opt-in tool (i.e. your server declared memory support). **Absent ⇒ treat as `false`**: do not read or write memory. Gate every memory read AND write on this request's value — it is the authoritative per-request consent signal. |
+| `answer_style` | string | yes (server-side enforced) | Pedagogical style: `explain` (full explanations, the default), `hint` (guide step by step, **never give the final solution**), or `quiz` (respond with practice questions and check the learner's answers). Absent ⇒ `explain`. The value is validated and lock-enforced by Moodle (teachers can pin a style per block), so honour it as authoritative. |
+| `user_lang` | string | yes | The learner's Moodle language code (e.g. `de`, `en`). Answer in this language unless the learner explicitly asks otherwise. |
 
 **Response the block expects** — return an MCP tool result. The block reads, in
 order of preference:
@@ -69,9 +74,28 @@ Recognised fields (several aliases accepted, so you can keep your own naming):
 | Answer body (Markdown) | `answer`, `text`, `message`, `response`, `content`, `output` |
 | Conversation id | `conversation_id`, `conversationId`, `session_id`, `sessionId`, `thread_id` |
 | Sources / citations | `sources`, `citations`, `documents`, `references` |
+| Topic label | `topic`, `subject` |
 
 A **source** entry may be a plain string, or an object with any of:
 `title`/`name`/`source`, `url`/`link`/`uri`, `snippet`/`text`/`excerpt`.
+**Order sources by relevance: `sources[0]` is treated as the PRIMARY source**
+and is stored (title + resolved Moodle cmid) for the teacher analytics
+hotspots.
+
+**`topic` (strongly recommended):** a short canonical label (≤ 100 chars) used
+to cluster questions in the teacher analytics dashboard. Without it, two
+phrasings of the same question ("When is the essay due?" / "essay deadline?")
+never aggregate and the statistics stay uselessly granular. Rules:
+
+- **Stable across rephrasings**: the same concept must always yield the same
+  label. Derive it from your retrieval (e.g. the dominant chunk's
+  section/concept) or a cheap classification step — not from the user's wording.
+- Keep the label set small and human-readable (course-section or concept
+  granularity, e.g. `Photosynthesis`, `Assignment 2`, `Enrolment & access`).
+- Use the course's language consistently; do not vary the label by the
+  learner's `user_lang`.
+- Omit the field when you genuinely cannot classify; Moodle then falls back to
+  grouping by the primary source's title.
 
 > The answer is rendered as **Markdown** and sanitised by Moodle's HTML purifier
 > before display, so Markdown (headings, lists, code fences, links, tables) is
@@ -136,6 +160,58 @@ messages and return success:
 - The block treats **any non-error result** as success. It's best-effort: if your
   server errors, the block still removes its local pointer and logs the failure,
   so the learner can always erase their own copy.
+- For "delete all my data" requests this tool is only the **fallback** (called
+  once per conversation Moodle still knows about). Implement A.4 for complete
+  erasure.
+
+### A.4 `tutor_delete_user_data` (optional, **recommended**)
+
+Called when the learner uses "Delete all my tutor data" (and by GDPR erasure
+flows). Arguments: `system_url`, `moodle_token` — no conversation ids, because
+the point of this tool is to be **complete by definition**: erase *everything*
+your server holds for the authenticated user, including
+
+- every conversation/transcript (also ones Moodle no longer has pointers to), and
+- all long-term memory stored for the user (A.5).
+
+```json
+{ "structuredContent": { "deleted": true, "conversations_deleted": 12, "memories_deleted": 4 } }
+```
+
+The counts are optional; any non-error result is treated as success. When this
+tool is configured in the block it is **preferred** over per-conversation
+deletion and is invoked even when Moodle holds zero local pointers. Identify the
+user via the token (e.g. by calling `moodle_me` / `moodle_verify_user_context`
+back on the Moodle MCP server, or by your own token→user mapping established
+during chats).
+
+### A.5 `tutor_set_memory_optin` (optional — required for memory support)
+
+Long-term memory lets the tutor remember helpful facts about a learner across
+conversations. **Consent rules are strict**:
+
+1. **Default off.** Never read or write memory for a user unless consent is
+   present.
+2. **Per-request gate.** Every `tutor_chat` call carries the current consent as
+   `ltm_enabled` (A.1). Gate each memory read and write on *that request's*
+   value — this keeps behaviour correct even if a consent push was missed.
+3. **Opt-out = erasure.** When this tool is called with `enabled: false`, delete
+   all memory already stored for the user, not just stop collecting.
+
+Arguments: `system_url`, `moodle_token`, `enabled` (boolean). Called immediately
+whenever the user toggles the opt-in in Moodle; treat it as idempotent.
+
+```json
+{ "structuredContent": { "accepted": true, "enabled": false, "memories_deleted": 4 } }
+```
+
+Any non-error result is treated as success. The call is best-effort from
+Moodle's side (rule 2 is the safety net), so do not rely on it as the *only*
+consent signal.
+
+> Moodle never transmits memory **content** — only the consent boolean. What you
+> store as memory, you own; include it in A.4 deletion and document its
+> retention.
 
 ---
 
@@ -313,8 +389,13 @@ Tools advertise MCP annotations (`readOnlyHint`, `destructiveHint`) via
   + a short preview) and enforces that a user can only read/delete their own.
   Your server owns the full transcript and its retention policy — **document it**;
   it is declared to learners via the block's Privacy API as an external location.
-- **Deletion / GDPR:** implement `tutor_delete_conversation` so erasure propagates.
-  Without it, deleting in Moodle removes only the local pointer.
+- **Deletion / GDPR:** implement `tutor_delete_user_data` (preferred — complete,
+  includes memory) and/or `tutor_delete_conversation` so erasure propagates.
+  Without them, deleting in Moodle removes only the local pointer.
+- **Long-term memory:** off by default, gated per-request by `ltm_enabled`,
+  erased on opt-out (`tutor_set_memory_optin` with `enabled: false`) and by
+  `tutor_delete_user_data`. Never store memory from a request without
+  `ltm_enabled: true`.
 - **Secrets:** `moodle_token`, `system_url` and any RAG auth token are server-side
   only — the block never exposes them to the browser, and neither should you.
 - **Errors:** distinguish *handled* tool errors (`"isError": true` in the result,
@@ -382,6 +463,10 @@ Tools advertise MCP annotations (`readOnlyHint`, `destructiveHint`) via
 - [ ] Always return a `conversation_id`; treat a missing one as "new conversation".
 - [ ] Answer as Markdown in `structuredContent.answer` (+ a `content[]` text part).
 - [ ] Optional `tutor_get_history` and `tutor_delete_conversation`.
+- [ ] Recommended `tutor_delete_user_data`: erase ALL user data (transcripts +
+      memory) for the authenticated token, even without conversation ids.
+- [ ] For memory support: `tutor_set_memory_optin`; memory off by default, every
+      read/write gated on the request's `ltm_enabled`, erase on opt-out.
 - [ ] Use `Authorization: Bearer {moodle_token}` against
       `{system_url}/webservice/elediamcp/server.php`; call
       `moodle_verify_user_context` first.
@@ -390,3 +475,23 @@ Tools advertise MCP annotations (`readOnlyHint`, `destructiveHint`) via
 - [ ] Never log or leak the token; document your transcript retention.
 - [ ] Respect the block's timeout (default 30 s) — stream long answers.
 - [ ] Use `"isError": true` for handled failures; JSON-RPC `error` for outages.
+- [ ] Return a stable `topic` label with each answer and order `sources` by
+      relevance (`sources[0]` = primary) so teacher analytics can aggregate.
+- [ ] Honour `answer_style` (`hint` must never reveal full solutions) and
+      `user_lang`.
+
+---
+
+## Contract changelog
+
+The plugin version (in `version.php`) that introduced each contract change.
+Build against the newest row; all fields remain backwards-compatible (optional
+unless marked otherwise).
+
+| Plugin version | Change |
+|---|---|
+| 0.5.0 | **`topic`** response field (canonical label for analytics clustering); `sources[0]` defined as the primary source and stored (title + cmid) for hotspot aggregation. |
+| 0.4.0 | **`answer_style`** chat argument (`explain`/`hint`/`quiz`, server-side lock-enforced — the UI's pedagogy chips) and **`user_lang`** chat argument (answer in the learner's language). |
+| 0.3.0 | Long-term memory consent: **`ltm_enabled`** chat argument (per-request gate) and **`tutor_set_memory_optin`** tool (erase-on-revoke); **`tutor_delete_user_data`** tool (complete user-level erasure, preferred for "delete all my data"). |
+| 0.2.0 | **`tutor_delete_conversation`** tool wired to per-conversation deletion; "new conversation" defined as a `tutor_chat` call without `conversation_id`. |
+| 0.1.0 | Initial contract: `tutor_chat` (+`system_url`, `moodle_token`, `user_message`, `course_id`, `conversation_id`), `tutor_get_history`, JSON/SSE framing, Moodle MCP callback (Part C). |

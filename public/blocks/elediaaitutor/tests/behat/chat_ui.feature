@@ -33,6 +33,17 @@ Feature: eLeDia.ai Tutor chat block UI
     And "textarea[data-region=input]" "css_element" should exist
     And ".elediaaitutor-log[role=log]" "css_element" should exist
 
+  Scenario: Learners are offered the pedagogical answer styles
+    Given I log in as "teacher1"
+    And I am on "Course 1" course homepage with editing mode on
+    And I add the "eLeDia.ai Tutor" block
+    And I log out
+    When I log in as "student1"
+    And I am on "Course 1" course homepage
+    Then I should see "Explain" in the ".elediaaitutor-styles" "css_element"
+    And I should see "Hints only" in the ".elediaaitutor-styles" "css_element"
+    And I should see "Quiz me" in the ".elediaaitutor-styles" "css_element"
+
   Scenario: A misconfigured connector shows an admin-facing error to managers
     Given the following config values are set as admin:
       | mcpserviceid | 0 | block_elediaaitutor |

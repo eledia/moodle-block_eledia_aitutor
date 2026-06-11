@@ -44,6 +44,8 @@ class chat_service {
      * @param string|null $conversationid Existing server conversation id, or null.
      * @param context $context Context used for safe Markdown rendering.
      * @param rag_client|null $client Optional injected client (tests).
+     * @param string|null $answerstyle Effective answer style (explain|hint|quiz), already
+     *                                 validated and lock-enforced by the caller.
      * @return array{answerhtml: string, answermarkdown: string, conversationid: ?string, sources: array, iserror: bool}
      * @throws \moodle_exception On validation, configuration or RAG failure.
      */
@@ -53,7 +55,8 @@ class chat_service {
         ?int $courseid,
         ?string $conversationid,
         context $context,
-        ?rag_client $client = null
+        ?rag_client $client = null,
+        ?string $answerstyle = null
     ): array {
         global $CFG;
 
@@ -72,16 +75,24 @@ class chat_service {
         $systemurl = $CFG->wwwroot;
         $courseparam = $courseid ? (string) $courseid : null;
 
+        // The consent flag is only transmitted when the admin has declared the
+        // RAG server memory-capable (memory opt-in tool configured); servers
+        // without memory support never receive it.
+        $ltmflag = security::memory_optin_tool_name() !== '' ? ltm::is_enabled($userid) : null;
+        $userlang = current_language();
+
         try {
             $token = token_provider::get_token($userid);
-            $result = $client->chat($systemurl, $token, $message, $courseparam, $conversationid, $toolname);
+            $result = $client->chat($systemurl, $token, $message, $courseparam, $conversationid, $toolname,
+                $ltmflag, $answerstyle, $userlang);
         } catch (rag_exception $e) {
             // The cached token may have been revoked/expired server-side: drop it,
             // mint a fresh one and retry exactly once before giving up.
             token_provider::forget_cached_token($userid);
             try {
                 $token = token_provider::get_token($userid);
-                $result = $client->chat($systemurl, $token, $message, $courseparam, $conversationid, $toolname);
+                $result = $client->chat($systemurl, $token, $message, $courseparam, $conversationid, $toolname,
+                    $ltmflag, $answerstyle, $userlang);
             } catch (rag_exception $retry) {
                 self::log_failure($userid, $context, 'rag_error');
                 throw $retry;
@@ -106,6 +117,20 @@ class chat_service {
             'other' => ['sources' => count($result['sources']), 'iserror' => (int) $result['iserror']],
         ])->trigger();
 
+        // Opt-in question analytics (question text only — never the answer).
+        // The server-supplied topic and the primary cited source anchor the
+        // hotspot clustering. Never let an analytics hiccup break the chat.
+        try {
+            $primary = $result['sources'][0] ?? null;
+            $sourcetitle = is_array($primary) && !empty($primary['title']) ? (string) $primary['title'] : null;
+            $cmid = is_array($primary) ? self::extract_cmid((string) ($primary['url'] ?? '')) : null;
+            question_log::log($userid, $courseid, $message, !empty($result['sources']), $answerstyle,
+                $result['topic'] ?? null, $sourcetitle, $cmid);
+        } catch (\moodle_exception $e) {
+            debugging('block_elediaaitutor: question analytics logging failed: ' . $e->getMessage(),
+                DEBUG_DEVELOPER);
+        }
+
         return [
             'answerhtml' => $answerhtml,
             'answermarkdown' => $result['answer'],
@@ -113,6 +138,33 @@ class chat_service {
             'sources' => $result['sources'],
             'iserror' => $result['iserror'],
         ];
+    }
+
+    /**
+     * Resolve a course module id from a primary-source URL.
+     *
+     * Only URLs on this site that follow the /mod/<name>/view.php?id=N pattern
+     * resolve; anything else (external links, non-module pages) returns null.
+     *
+     * @param string $url The source URL.
+     * @return int|null The cmid, or null when not a local module URL.
+     */
+    private static function extract_cmid(string $url): ?int {
+        global $CFG;
+
+        if ($url === '') {
+            return null;
+        }
+        $site = parse_url($CFG->wwwroot);
+        $parts = parse_url($url);
+        if (!is_array($parts) || ($parts['host'] ?? '') !== ($site['host'] ?? '')) {
+            return null;
+        }
+        if (!str_contains($parts['path'] ?? '', '/mod/')) {
+            return null;
+        }
+        parse_str($parts['query'] ?? '', $query);
+        return isset($query['id']) ? (int) $query['id'] : null;
     }
 
     /**

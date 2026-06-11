@@ -64,4 +64,20 @@ $functions = [
         'capabilities' => 'block/elediaaitutor:deleteownhistory',
         'loginrequired' => true,
     ],
+    'block_elediaaitutor_set_ltm' => [
+        'classname' => 'block_elediaaitutor\external\set_ltm',
+        'description' => 'Set the current user\'s long-term memory opt-in preference.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'block/elediaaitutor:use',
+        'loginrequired' => true,
+    ],
+    'block_elediaaitutor_delete_my_data' => [
+        'classname' => 'block_elediaaitutor\external\delete_my_data',
+        'description' => 'Delete all of the current user\'s own tutor data.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'block/elediaaitutor:deleteownhistory',
+        'loginrequired' => true,
+    ],
 ];

@@ -114,7 +114,14 @@ class rag_client {
      * @param string|null $courseid Optional course context id.
      * @param string|null $conversationid Optional existing conversation id.
      * @param string $toolname Chat tool name to invoke.
-     * @return array{answer: string, conversation_id: ?string, sources: array, iserror: bool}
+     * @param bool|null $ltmenabled The user's long-term memory consent, or null
+     *                              to omit the flag entirely (server without
+     *                              memory support; strict schemas stay happy).
+     * @param string|null $answerstyle Pedagogical answer style (explain|hint|quiz),
+     *                                 or null/empty to omit (server default: explain).
+     * @param string|null $userlang The user's Moodle language code (e.g. "de"),
+     *                              or null/empty to omit.
+     * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, iserror: bool}
      * @throws rag_exception On transport or protocol failure.
      */
     public function chat(
@@ -123,7 +130,10 @@ class rag_client {
         string $usermessage,
         ?string $courseid,
         ?string $conversationid,
-        string $toolname
+        string $toolname,
+        ?bool $ltmenabled = null,
+        ?string $answerstyle = null,
+        ?string $userlang = null
     ): array {
         $arguments = [
             'system_url' => $systemurl,
@@ -135,6 +145,15 @@ class rag_client {
         }
         if ($conversationid !== null && $conversationid !== '') {
             $arguments['conversation_id'] = $conversationid;
+        }
+        if ($ltmenabled !== null) {
+            $arguments['ltm_enabled'] = $ltmenabled;
+        }
+        if ($answerstyle !== null && $answerstyle !== '') {
+            $arguments['answer_style'] = $answerstyle;
+        }
+        if ($userlang !== null && $userlang !== '') {
+            $arguments['user_lang'] = $userlang;
         }
 
         $result = $this->call_tool($toolname, $arguments);
@@ -188,6 +207,56 @@ class rag_client {
             $clean[] = ['role' => $role === 'user' ? 'user' : 'assistant', 'content' => $content];
         }
         return $clean;
+    }
+
+    /**
+     * Record the user's long-term memory consent on the RAG server.
+     *
+     * Sent immediately when the user toggles the opt-in. Per the integration
+     * contract, enabled=false also instructs the server to erase any memory it
+     * has already stored for the user (consent revocation = erasure).
+     *
+     * @param string $systemurl This Moodle site's wwwroot.
+     * @param string $moodletoken User-scoped Moodle MCP token.
+     * @param bool $enabled The user's consent state.
+     * @param string $toolname Memory opt-in tool name to invoke.
+     * @return void
+     * @throws rag_exception On transport or protocol failure.
+     */
+    public function set_memory_optin(
+        string $systemurl,
+        string $moodletoken,
+        bool $enabled,
+        string $toolname
+    ): void {
+        $this->call_tool($toolname, [
+            'system_url' => $systemurl,
+            'moodle_token' => $moodletoken,
+            'enabled' => $enabled,
+        ]);
+    }
+
+    /**
+     * Ask the RAG server to delete ALL data it holds for the authenticated user.
+     *
+     * Covers every conversation/transcript and any long-term memory — complete
+     * by definition, even for conversations Moodle no longer has pointers to.
+     *
+     * @param string $systemurl This Moodle site's wwwroot.
+     * @param string $moodletoken User-scoped Moodle MCP token.
+     * @param string $toolname User-level delete tool name to invoke.
+     * @return void
+     * @throws rag_exception On transport or protocol failure.
+     */
+    public function delete_user_data(
+        string $systemurl,
+        string $moodletoken,
+        string $toolname
+    ): void {
+        $this->call_tool($toolname, [
+            'system_url' => $systemurl,
+            'moodle_token' => $moodletoken,
+        ]);
     }
 
     /**
@@ -350,7 +419,7 @@ class rag_client {
      * RAG servers without configuration.
      *
      * @param array $result The JSON-RPC result.
-     * @return array{answer: string, conversation_id: ?string, sources: array, iserror: bool}
+     * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, iserror: bool}
      */
     private function normalise_tool_result(array $result): array {
         $iserror = !empty($result['isError']);
@@ -368,6 +437,7 @@ class rag_client {
         $answer = '';
         $conversationid = null;
         $sources = [];
+        $topic = null;
 
         if (is_array($payload)) {
             foreach (['answer', 'text', 'message', 'response', 'content', 'output'] as $key) {
@@ -388,6 +458,13 @@ class rag_client {
                     break;
                 }
             }
+            // Canonical topic label for analytics clustering (see the spec).
+            foreach (['topic', 'subject'] as $key) {
+                if (!empty($payload[$key]) && is_string($payload[$key])) {
+                    $topic = \core_text::substr(trim($payload[$key]), 0, 100);
+                    break;
+                }
+            }
         }
 
         if ($answer === '') {
@@ -402,6 +479,7 @@ class rag_client {
             'answer' => $answer,
             'conversation_id' => $conversationid,
             'sources' => $sources,
+            'topic' => $topic,
             'iserror' => $iserror,
         ];
     }

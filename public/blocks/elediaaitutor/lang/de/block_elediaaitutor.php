@@ -103,6 +103,10 @@ $string['setting_historytoolname'] = 'Name des Verlauf-Tools';
 $string['setting_historytoolname_desc'] = 'Optionales MCP-Tool, das frühere Nachrichten eines Gesprächs zurückgibt, z. B. tutor_get_history. Leer lassen, wenn der Server dies nicht unterstützt.';
 $string['setting_deletetoolname'] = 'Name des Lösch-Tools';
 $string['setting_deletetoolname_desc'] = 'Optionales MCP-Tool, das ein Gespräch auf dem RAG-Server löscht, z. B. tutor_delete_conversation. Wenn gesetzt, wird beim Löschen eines Gesprächs in Moodle dieses auch auf dem RAG-Server entfernt. Leer lassen, um nur den lokalen Verweis zu löschen.';
+$string['setting_deleteusertoolname'] = 'Name des Tools zur Nutzerdaten-Löschung';
+$string['setting_deleteusertoolname_desc'] = 'Optionales MCP-Tool, das ALLE Daten löscht, die der RAG-Server für die authentifizierte Person hält (alle Transkripte und ein etwaiges Langzeitgedächtnis), z. B. tutor_delete_user_data. Wenn gesetzt, wird es bei „Alle meine Daten löschen“-Anfragen dem Tool für einzelne Gespräche vorgezogen und ist auch dann vollständig, wenn Moodle keine Gesprächsreferenzen mehr besitzt. Leer lassen, wenn der Server es nicht unterstützt.';
+$string['setting_memoryoptintoolname'] = 'Name des Gedächtnis-Zustimmungs-Tools';
+$string['setting_memoryoptintoolname_desc'] = 'Optionales MCP-Tool, das die Zustimmung zum Langzeitgedächtnis auf dem RAG-Server festhält, z. B. tutor_set_memory_optin. Das Setzen erklärt den Server als gedächtnisfähig: Änderungen der Zustimmung werden sofort übertragen, jede Chat-Nachricht trägt die aktuelle Zustimmung als ltm_enabled, und ein Widerruf weist den Server an, gespeicherte Erinnerungen zu löschen. Leer lassen, solange der Server kein Gedächtnis unterstützt — dann werden keine Zustimmungsdaten übertragen.';
 $string['setting_allowinsecuretransport'] = 'Unsicheren (HTTP-)Transport erlauben';
 $string['setting_allowinsecuretransport_desc'] = 'Erlaubt eine einfache http://-RAG-URL. Dringend abzuraten; nur für die lokale Entwicklung.';
 $string['setting_allowprivatenetwork'] = 'Privaten/internen RAG-Host erlauben';
@@ -182,6 +186,84 @@ $string['privacy:metadata:rag_server:userid'] = 'Ihre Moodle-Nutzeridentität (�
 $string['privacy:metadata:rag_server:message'] = 'Der Nachrichtentext, den Sie an den Tutor senden.';
 $string['privacy:metadata:rag_server:courseid'] = 'Der Kurskontext, sofern angegeben.';
 $string['privacy:metadata:rag_server:conversationid'] = 'Die Gesprächskennung, um den Kontext über mehrere Beiträge hinweg zu erhalten.';
+
+// Privacy guidelines and user data controls.
+$string['privacyguidelines'] = 'Datenschutzhinweise';
+$string['privacy_intro'] = 'So geht der eLeDia.ai Tutor mit Ihren Daten um.';
+$string['privacy_accuracy_title'] = 'KI-Antworten können falsch sein';
+$string['privacy_accuracy_body'] = 'Der Tutor erzeugt Antworten mit künstlicher Intelligenz. Antworten können unvollständig oder falsch sein — prüfen Sie wichtige Informationen immer anhand Ihrer Kursmaterialien oder fragen Sie Ihre Lehrkraft.';
+$string['privacy_sent_title'] = 'Was beim Chatten gesendet wird';
+$string['privacy_sent_body'] = 'Ihre Nachricht, der Kurskontext (falls vorhanden) und Ihre Moodle-Identität (über einen kurzlebigen, nutzerbezogenen Token) werden an den externen Tutor-Dienst gesendet, damit er in Ihrem Namen antworten kann. Der Tutor kann nur auf das zugreifen, was Sie selbst in Moodle sehen dürfen.';
+$string['privacy_storage_title'] = 'Was gespeichert wird';
+$string['privacy_storage_body'] = 'Moodle speichert nur schlanke Gesprächs-Metadaten (eine Gesprächsreferenz, eine kurze Vorschau und Zeitstempel). Vollständige Transkripte speichert der externe Tutor-Dienst gemäß seiner Aufbewahrungsrichtlinie.';
+$string['privacy_ltm_title'] = 'Langzeitgedächtnis (optional, demnächst)';
+$string['privacy_ltm_body'] = 'In einem zukünftigen Update kann sich der Tutor hilfreiche Fakten über Gespräche hinweg merken, um Sie persönlicher zu unterstützen. Dies ist standardmäßig deaktiviert und wird nur genutzt, wenn Sie unten ausdrücklich zustimmen. Es werden noch keine Gedächtnisdaten erhoben oder gesendet.';
+$string['ltm_optin'] = 'Dem Tutor erlauben, sich Informationen über Gespräche hinweg zu merken (Langzeitgedächtnis)';
+$string['ltm_saved'] = 'Einstellung gespeichert.';
+$string['privacy_deletion_title'] = 'Ihre Daten löschen';
+$string['privacy_deletion_body'] = 'Sie können Ihre Tutor-Gespräche jederzeit über die Schaltfläche unten löschen. Lokale Einträge werden sofort entfernt. Unterstützt der externe Tutor-Dienst die Fernlöschung, werden Ihre Transkripte auch dort gelöscht; andernfalls unterliegen sie weiterhin der Aufbewahrungsrichtlinie des Dienstes — wenden Sie sich an Ihre Administration, wenn sie entfernt werden sollen.';
+$string['deletealldata'] = 'Alle meine Tutor-Daten löschen';
+$string['deleteall_confirm_title'] = 'Alle Tutor-Daten löschen?';
+$string['deleteall_confirm'] = 'Damit werden alle Ihre gespeicherten Tutor-Gespräche entfernt. Dies kann nicht rückgängig gemacht werden. Möchten Sie fortfahren?';
+$string['deleteall_confirmbutton'] = 'Ja, alles löschen';
+$string['deleteall_done'] = '{$a} Gespräch(e) gelöscht.';
+$string['deleteall_external_done'] = 'Die Löschung wurde auch beim externen Tutor-Dienst angefordert.';
+$string['deleteall_external_unsupported'] = 'Der externe Tutor-Dienst unterstützt keine Fernlöschung; dort gespeicherte Transkripte unterliegen weiterhin seiner Aufbewahrungsrichtlinie.';
+$string['event_data_deletion_requested'] = 'Löschung der Tutor-Daten angefordert';
+$string['event_ltm_preference_changed'] = 'Einstellung zum Langzeitgedächtnis des Tutors geändert';
+$string['privacy:metadata:preference:ltm'] = 'Ob die Person dem Langzeitgedächtnis des Tutors zugestimmt hat.';
+
+// Grounding transparency.
+$string['groundedbadge'] = 'Basierend auf Kursmaterialien';
+$string['ungroundedbadge'] = 'Allgemeine Antwort';
+$string['groundedbadge_title'] = 'Diese Antwort zitiert Ihre Kursmaterialien.';
+$string['ungroundedbadge_title'] = 'Diese Antwort basiert nicht auf Ihren Kursmaterialien — prüfen Sie wichtige Fakten nach.';
+
+// Answer styles.
+$string['answerstyle'] = 'Antwortstil';
+$string['answerstyle_explain'] = 'Erklären';
+$string['answerstyle_hint'] = 'Nur Hinweise';
+$string['answerstyle_quiz'] = 'Abfragen';
+$string['config_answerstyle'] = 'Standard-Antwortstil';
+$string['config_answerstyle_help'] = 'Wie der Tutor standardmäßig antwortet: vollständige Erklärungen, leitende Hinweise ohne fertige Lösungen oder Übungsfragen. Lernende können den Stil wechseln, sofern Sie die Auswahl unten nicht sperren.';
+$string['config_allowstylechange'] = 'Lernende dürfen den Antwortstil ändern';
+
+// Question analytics.
+$string['setting_enableanalytics'] = 'Fragen-Analyse';
+$string['setting_enableanalytics_desc'] = 'Protokolliert die Fragen der Lernenden an den Tutor (mit Kurs und fragender Person), damit Lehrkräfte Verständnisprobleme im Kursbericht erkennen können. Antworten werden nie gespeichert. Standardmäßig deaktiviert: Die Aktivierung ist eine datenschutzrelevante Entscheidung — protokollierte Fragen sind über die Privacy-API abgedeckt, hinter einer Lehrkraft-Berechtigung verborgen, werden ohne Namen angezeigt und nach Ablauf der Aufbewahrungsfrist gelöscht.';
+$string['setting_analyticsretention'] = 'Aufbewahrung der Fragen-Analyse (Tage)';
+$string['setting_analyticsretention_desc'] = 'Protokollierte Fragen, die älter sind, werden von einer täglichen geplanten Aufgabe gelöscht. 0 bewahrt sie unbegrenzt auf (nicht empfohlen).';
+$string['elediaaitutor:viewreports'] = 'eLeDia.ai Tutor-Kursberichte ansehen';
+$string['report_link'] = 'Tutor-Analyse';
+$string['report_title'] = 'eLeDia.ai Tutor — Fragen-Analyse';
+$string['report_intro'] = 'Fragen, die Lernende dem Tutor in diesem Kurs gestellt haben. Fragende werden nicht angezeigt: Der Bericht dient dem Erkennen von Verständnisproblemen, nicht der Überwachung Einzelner.';
+$string['report_disabled'] = 'Die Fragen-Analyse ist auf dieser Website deaktiviert. Eine Administratorin oder ein Administrator kann sie in den Einstellungen des eLeDia.ai Tutors aktivieren.';
+$string['report_total'] = 'Fragen (gesamt)';
+$string['report_last7'] = 'Letzte 7 Tage';
+$string['report_grounded'] = 'Aus Kursmaterialien beantwortet';
+$string['report_byday'] = 'Fragen pro Tag (letzte 14 Tage)';
+$string['report_recent'] = 'Neueste Fragen';
+$string['report_question'] = 'Frage';
+$string['report_when'] = 'Wann';
+$string['report_style'] = 'Stil';
+$string['report_groundedcol'] = 'Fundiert';
+$string['report_hotspots'] = 'Schwerpunkte (letzte 30 Tage)';
+$string['report_topic'] = 'Thema / Material';
+$string['report_none'] = 'Noch keine Fragen protokolliert.';
+$string['task_prune_question_log'] = 'Alte Tutor-Fragen-Analysen bereinigen';
+
+// Question log privacy.
+$string['privacy:questions'] = 'eLeDia.ai Tutor-Fragen';
+$string['privacy:metadata:block_elediaaitutor_qlog'] = 'Fragen, die Sie dem Tutor gestellt haben, protokolliert für die Kursanalyse, sofern vom Administrator aktiviert. Antworten werden nicht gespeichert.';
+$string['privacy:metadata:block_elediaaitutor_qlog:userid'] = 'Die Person, die die Frage gestellt hat.';
+$string['privacy:metadata:block_elediaaitutor_qlog:courseid'] = 'Der Kurs, in dem die Frage gestellt wurde, sofern vorhanden.';
+$string['privacy:metadata:block_elediaaitutor_qlog:question'] = 'Der Fragetext (gekürzt).';
+$string['privacy:metadata:block_elediaaitutor_qlog:grounded'] = 'Ob die Antwort Kursmaterialien zitierte.';
+$string['privacy:metadata:block_elediaaitutor_qlog:answerstyle'] = 'Der verwendete Antwortstil.';
+$string['privacy:metadata:block_elediaaitutor_qlog:topic'] = 'Das vom Tutor-Dienst gelieferte kanonische Themenlabel.';
+$string['privacy:metadata:block_elediaaitutor_qlog:sourcetitle'] = 'Der Titel des primär zitierten Kursmaterials.';
+$string['privacy:metadata:block_elediaaitutor_qlog:cmid'] = 'Das Kursmodul, auf das die primäre Quellenangabe verweist.';
+$string['privacy:metadata:block_elediaaitutor_qlog:timecreated'] = 'Wann die Frage gestellt wurde.';
 
 // Cache definitions.
 $string['cachedef_usertoken'] = 'Kurzlebiger Speicher für nutzerbezogene Moodle-MCP-Tokens';

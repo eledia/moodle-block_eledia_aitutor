@@ -34,7 +34,31 @@ The user-scoped Moodle MCP token's own metadata is owned by
 `webservice_elediamcp` and is exported/erased by *that* plugin's privacy
 provider. The token secret is never persisted by either plugin.
 
+## Question analytics (opt-in)
+
+When the administrator enables **Question analytics**, the questions learners
+ask (never the answers) are stored in `block_elediaaitutor_qlog` together with
+course, asker, grounding flag and answer style. The asker id exists so privacy
+export/erasure works — teacher reports never display identities. Rows are
+pruned by a daily scheduled task after the configurable retention (default
+180 days), are included in privacy export/delete, and are wiped by the user's
+own "Delete all my tutor data" action. Collection is **off by default**.
+
 ## User preferences
 
-The block stores no personal user preferences of its own beyond the conversation
-metadata above.
+One user preference is stored: `block_elediaaitutor_ltm_enabled` — the explicit
+opt-in to the (future) long-term memory feature. It defaults to **off**, is only
+ever changed by the user themselves (audited via the *long-term memory
+preference changed* event), and is declared and exported through the Privacy
+API. No memory data is collected or transmitted yet; the preference only records
+consent for when the feature ships.
+
+## In-product privacy controls
+
+The chat header has a **Privacy guidelines** button that shows learners an AI
+accuracy warning, what is sent and stored, the long-term memory opt-in, and a
+**Delete all my tutor data** action. Deletion always removes the local
+conversation metadata; when the admin has configured a RAG delete tool it is
+propagated to the external server too, otherwise the dialog states honestly that
+external transcripts remain subject to the RAG service's retention policy. Every
+deletion request is recorded via the *tutor data deletion requested* event.

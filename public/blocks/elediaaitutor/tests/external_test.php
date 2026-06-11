@@ -19,9 +19,12 @@ declare(strict_types=1);
 namespace block_elediaaitutor;
 
 use block_elediaaitutor\external\clear_conversation;
+use block_elediaaitutor\external\delete_my_data;
 use block_elediaaitutor\external\get_conversations;
 use block_elediaaitutor\external\send_message;
+use block_elediaaitutor\external\set_ltm;
 use block_elediaaitutor\local\conversation_repository;
+use block_elediaaitutor\local\ltm;
 use context_system;
 
 /**
@@ -32,6 +35,8 @@ use context_system;
  * @covers      \block_elediaaitutor\external\send_message
  * @covers      \block_elediaaitutor\external\get_conversations
  * @covers      \block_elediaaitutor\external\clear_conversation
+ * @covers      \block_elediaaitutor\external\set_ltm
+ * @covers      \block_elediaaitutor\external\delete_my_data
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -102,5 +107,52 @@ final class external_test extends \advanced_testcase {
         // Nothing deleted: Bob does not own it.
         $this->assertFalse($result['deleted']);
         $this->assertCount(1, conversation_repository::list_for_user((int) $alice->id));
+    }
+
+    /**
+     * set_ltm stores the calling user's preference and fires the audit event.
+     */
+    public function test_set_ltm_roundtrip(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $contextid = context_system::instance()->id;
+
+        $sink = $this->redirectEvents();
+        $result = set_ltm::execute($contextid, true);
+        $result = \core_external\external_api::clean_returnvalue(set_ltm::execute_returns(), $result);
+        $this->assertTrue($result['enabled']);
+        $this->assertTrue(ltm::is_enabled((int) $user->id));
+
+        $events = array_filter($sink->get_events(),
+            static fn($e) => $e instanceof \block_elediaaitutor\event\ltm_preference_changed);
+        $this->assertCount(1, $events);
+
+        $result = set_ltm::execute($contextid, false);
+        $result = \core_external\external_api::clean_returnvalue(set_ltm::execute_returns(), $result);
+        $this->assertFalse($result['enabled']);
+        $this->assertFalse(ltm::is_enabled((int) $user->id));
+    }
+
+    /**
+     * delete_my_data erases only the calling user's conversations and reports
+     * external deletion honestly when no delete tool is configured.
+     */
+    public function test_delete_my_data_scoped_to_caller(): void {
+        $this->resetAfterTest();
+        $alice = $this->getDataGenerator()->create_user();
+        $bob = $this->getDataGenerator()->create_user();
+        conversation_repository::upsert((int) $alice->id, 'a-1', null, 'one');
+        conversation_repository::upsert((int) $alice->id, 'a-2', null, 'two');
+        conversation_repository::upsert((int) $bob->id, 'b-1', null, 'bob');
+
+        $this->setUser($alice);
+        $result = delete_my_data::execute(context_system::instance()->id);
+        $result = \core_external\external_api::clean_returnvalue(delete_my_data::execute_returns(), $result);
+
+        $this->assertSame(2, $result['localdeleted']);
+        $this->assertFalse($result['externalsupported']);
+        $this->assertCount(0, conversation_repository::list_for_user((int) $alice->id));
+        $this->assertCount(1, conversation_repository::list_for_user((int) $bob->id));
     }
 }

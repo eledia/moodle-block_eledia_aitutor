@@ -98,6 +98,34 @@ class security {
     }
 
     /**
+     * The configured RAG user-level delete tool name (optional feature).
+     *
+     * When set, "delete all my data" requests are propagated as a single call
+     * that erases everything the RAG server holds for the user (transcripts and
+     * long-term memory) — complete even when Moodle no longer holds conversation
+     * pointers. Preferred over the per-conversation delete tool.
+     *
+     * @return string Empty string when not configured.
+     */
+    public static function delete_user_tool_name(): string {
+        return trim((string) self::get_config('deleteusertoolname', ''));
+    }
+
+    /**
+     * The configured RAG memory opt-in tool name (optional feature).
+     *
+     * A non-empty value declares that the RAG server supports long-term memory:
+     * opt-in changes are synced through this tool, and every chat call carries
+     * the user's current consent as the ltm_enabled argument. Empty means the
+     * server has no memory support and no consent data is ever transmitted.
+     *
+     * @return string Empty string when not configured.
+     */
+    public static function memory_optin_tool_name(): string {
+        return trim((string) self::get_config('memoryoptintoolname', ''));
+    }
+
+    /**
      * The configured MCP external service id used to mint user tokens.
      *
      * @return int Zero when unconfigured.

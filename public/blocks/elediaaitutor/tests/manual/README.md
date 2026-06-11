@@ -26,9 +26,11 @@ Useful flags:
 
 | Tool | Block setting | Purpose |
 |---|---|---|
-| `tutor_chat` | Chat tool name | Answers a message; tracks turns per conversation. |
+| `tutor_chat` | Chat tool name | Answers a message; tracks turns per conversation; echoes the `ltm_enabled` consent flag. |
 | `tutor_get_history` | History tool name | Returns the stored messages of a conversation. |
 | `tutor_delete_conversation` | Delete tool name | Deletes a conversation and its messages. |
+| `tutor_delete_user_data` | Delete user data tool name | Erases everything (all conversations + demo memory) in one call. |
+| `tutor_set_memory_optin` | Memory opt-in tool name | Records long-term memory consent; opting out erases the demo memory items. |
 
 ## Point the block at it
 
@@ -42,6 +44,8 @@ Useful flags:
 | Chat tool name | `tutor_chat` |
 | History tool name | `tutor_get_history` (optional) |
 | Delete tool name | `tutor_delete_conversation` (optional) |
+| Delete user data tool name | `tutor_delete_user_data` (optional) |
+| Memory opt-in tool name | `tutor_set_memory_optin` (optional) |
 | MCP external service | one of the services configured in `webservice_elediamcp` |
 
 If you set `--auth-token`, also set **RAG authorization method = Bearer token**

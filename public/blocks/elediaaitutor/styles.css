@@ -521,6 +521,73 @@
     transform: scale(0.92);
 }
 
+/* --- Grounding badge (in the message meta row). ------------------------ */
+.elediaaitutor-grounding {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    margin-left: 0.25rem;
+}
+
+.elediaaitutor-grounded {
+    background: #eaf1f3;
+    color: var(--eat-accent);
+    border: 1px solid #c9d8dd;
+}
+
+.elediaaitutor-ungrounded {
+    background: transparent;
+    color: var(--eat-muted);
+    border: 1px solid var(--eat-line);
+}
+
+/* --- Answer-style chips. ------------------------------------------------ */
+.elediaaitutor-styles {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem 0;
+    background: var(--eat-surface);
+    border-top: 1px solid rgba(16, 24, 40, 0.06);
+    flex: 0 0 auto;
+}
+
+.elediaaitutor-stylechip {
+    border: 1px solid var(--eat-line);
+    background: var(--eat-surface);
+    color: var(--eat-ink);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.25rem 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.elediaaitutor-stylechip:hover,
+.elediaaitutor-stylechip:focus-visible {
+    border-color: var(--eat-accent);
+}
+
+.elediaaitutor-stylechip-active {
+    background: var(--eat-accent);
+    border-color: var(--eat-accent);
+    color: #fff;
+}
+
+.elediaaitutor-stylechip-locked {
+    cursor: default;
+    color: var(--eat-muted);
+}
+
+/* The chips sit visually with the composer: remove its doubled top border. */
+.elediaaitutor-styles + .elediaaitutor-composer {
+    border-top: 0;
+}
+
 /* --- Footer. ----------------------------------------------------------- */
 .elediaaitutor-footer {
     flex: 0 0 auto;

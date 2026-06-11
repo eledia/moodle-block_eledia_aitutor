@@ -58,6 +58,10 @@ PROTOCOL_VERSION = "2025-06-18"
 # In-memory conversation store: {conversation_id: [{"role": ..., "content": ...}, ...]}.
 CONVERSATIONS = {}
 
+# Demo long-term memory state (single-user dev assumption): consent flag plus a
+# fake memory count so opt-out/delete visibly "erases" something.
+MEMORY = {"enabled": False, "items": 0}
+
 # Populated from CLI args in main().
 CONFIG = {
     "auth_token": None,       # If set, require "Authorization: Bearer <token>".
@@ -110,6 +114,25 @@ def extract_moodle_text(rpc_response):
         if isinstance(item, dict) and item.get("type") == "text" and item.get("text"):
             parts.append(str(item["text"]))
     return "\n\n".join(parts).strip()
+
+
+def derive_topic(message):
+    """Derive a stable, canonical topic label from the question (demo heuristic).
+
+    A real RAG server should derive this from retrieval (the dominant chunk's
+    section/concept) so that rephrasings of the same question always map to the
+    same label — that is what makes the teacher analytics hotspots useful.
+    """
+    lowered = message.lower()
+    if any(w in lowered for w in ("photosynthes",)):
+        return "Photosynthesis"
+    if any(w in lowered for w in ("course", "enrol", "enroll", "kurs")):
+        return "Courses & enrolment"
+    if any(w in lowered for w in ("assignment", "essay", "due", "deadline", "abgabe", "aufgabe", "week")):
+        return "Assignments & deadlines"
+    if any(w in lowered for w in ("grade", "mark", "score", "note")):
+        return "Grades & progress"
+    return "General study help"
 
 
 def choose_moodle_tool(message):
@@ -273,6 +296,34 @@ def handle_tools_list(_params):
                     "required": ["conversation_id"],
                 },
             },
+            {
+                "name": "tutor_delete_user_data",
+                "description": "Delete ALL data held for the authenticated user "
+                               "(every conversation and any long-term memory). "
+                               "Demo server: wipes the whole store.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "system_url": {"type": "string"},
+                        "moodle_token": {"type": "string"},
+                    },
+                    "required": ["moodle_token"],
+                },
+            },
+            {
+                "name": "tutor_set_memory_optin",
+                "description": "Record the user's long-term memory consent. "
+                               "enabled=false also erases stored memories.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "system_url": {"type": "string"},
+                        "moodle_token": {"type": "string"},
+                        "enabled": {"type": "boolean"},
+                    },
+                    "required": ["moodle_token", "enabled"],
+                },
+            },
         ]
     }
 
@@ -288,12 +339,33 @@ def tool_tutor_chat(arguments):
     token_preview = (moodle_token[:6] + "…") if moodle_token else "(none)"
     history = CONVERSATIONS.setdefault(conversation_id, [])
     turn = len([m for m in history if m.get("role") == "user"]) + 1
+    ltm = arguments.get("ltm_enabled", None)
+    style = arguments.get("answer_style", "explain") or "explain"
+    lang = arguments.get("user_lang", "")
     log(f"tutor_chat conv={conversation_id} turn={turn} course={course_id or '-'} "
+        f"style={style} lang={lang or '-'} ltm={ltm if ltm is not None else 'absent'} "
         f"token={token_preview} msg={user_message!r}")
 
     # Build the answer from the history *before* this turn is recorded.
     answer, sources = build_answer(user_message, course_id, system_url, moodle_token,
                                    conversation_id, history)
+
+    # Echo the pedagogical style so style switching is visible in manual tests.
+    if style == "hint":
+        answer += "\n\n\U0001F9ED _Hint mode: I guide you step by step and never hand over the final solution._"
+    elif style == "quiz":
+        answer += "\n\n❓ _Quiz mode: I respond with practice questions and check your answers._"
+    if lang:
+        answer += f"\n\n\U0001F310 _Requested answer language: `{lang}`._"
+
+    # Demonstrate the per-request consent gate: only when this request carries
+    # ltm_enabled=true would a real server read/write memory.
+    if ltm is True:
+        MEMORY["items"] += 1
+        answer += ("\n\n\U0001F9E0 _Long-term memory is **active** for this request "
+                   f"(demo store now holds {MEMORY['items']} item(s))._")
+    elif ltm is False:
+        answer += "\n\n\U0001F512 _Long-term memory is **off** for this request; nothing is remembered._"
 
     history.append({"role": "user", "content": user_message})
     history.append({"role": "assistant", "content": answer})
@@ -306,6 +378,7 @@ def tool_tutor_chat(arguments):
             "answer": answer,
             "conversation_id": conversation_id,
             "sources": sources,
+            "topic": derive_topic(user_message),
         },
         "isError": False,
     }
@@ -341,6 +414,43 @@ def tool_tutor_delete_conversation(arguments):
     }
 
 
+def tool_tutor_delete_user_data(arguments):
+    """Implement the tutor_delete_user_data tool (demo: wipes everything)."""
+    conv_count = len(CONVERSATIONS)
+    mem_count = MEMORY["items"]
+    CONVERSATIONS.clear()
+    MEMORY["items"] = 0
+    log(f"tutor_delete_user_data -> wiped {conv_count} conversation(s), {mem_count} memory item(s)")
+    return {
+        "content": [{"type": "text", "text":
+            f"All user data deleted ({conv_count} conversation(s), {mem_count} memory item(s))."}],
+        "structuredContent": {
+            "deleted": True,
+            "conversations_deleted": conv_count,
+            "memories_deleted": mem_count,
+        },
+        "isError": False,
+    }
+
+
+def tool_tutor_set_memory_optin(arguments):
+    """Implement the tutor_set_memory_optin tool."""
+    enabled = bool(arguments.get("enabled", False))
+    erased = 0
+    MEMORY["enabled"] = enabled
+    if not enabled:
+        erased = MEMORY["items"]
+        MEMORY["items"] = 0
+    log(f"tutor_set_memory_optin enabled={enabled}"
+        + (f" -> erased {erased} memory item(s)" if not enabled else ""))
+    return {
+        "content": [{"type": "text", "text":
+            f"Memory opt-in set to {enabled}" + (f"; {erased} memory item(s) erased." if not enabled else ".")}],
+        "structuredContent": {"accepted": True, "enabled": enabled, "memories_deleted": erased},
+        "isError": False,
+    }
+
+
 def handle_tools_call(params):
     """Dispatch a tools/call to the implemented tools."""
     name = params.get("name")
@@ -351,6 +461,10 @@ def handle_tools_call(params):
         return tool_tutor_get_history(arguments)
     if name == "tutor_delete_conversation":
         return tool_tutor_delete_conversation(arguments)
+    if name == "tutor_delete_user_data":
+        return tool_tutor_delete_user_data(arguments)
+    if name == "tutor_set_memory_optin":
+        return tool_tutor_set_memory_optin(arguments)
     raise ValueError(f"Unknown tool: {name}")
 
 

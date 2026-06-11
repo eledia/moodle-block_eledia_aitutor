@@ -116,6 +116,57 @@ final class chat_service_test extends \advanced_testcase {
     }
 
     /**
+     * With analytics enabled, a chat turn logs the question (grounded + style),
+     * and the chat payload carries the style and the user language.
+     */
+    public function test_send_logs_question_analytics(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->configure_mcp_service();
+        set_config('enableanalytics', 1, 'block_elediaaitutor');
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        global $CFG;
+        $transport = fake_transport::json_result([
+            'structuredContent' => [
+                'answer' => 'cited answer',
+                'topic' => 'Assignments & deadlines',
+                'sources' => [[
+                    'title' => 'Essay 2',
+                    'url' => $CFG->wwwroot . '/mod/assign/view.php?id=99',
+                    'snippet' => 'Due Friday',
+                ]],
+            ],
+        ]);
+        $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
+
+        chat_service::send((int) $user->id, 'What is due?', 42, null, context_system::instance(),
+            $client, 'hint');
+
+        $args = $transport->last_payload()['params']['arguments'];
+        $this->assertSame('hint', $args['answer_style']);
+        $this->assertNotEmpty($args['user_lang']);
+
+        $rows = array_values($DB->get_records('block_elediaaitutor_qlog'));
+        $this->assertCount(1, $rows);
+        $this->assertSame('What is due?', $rows[0]->question);
+        $this->assertEquals(42, $rows[0]->courseid);
+        $this->assertEquals(1, $rows[0]->grounded);
+        $this->assertSame('hint', $rows[0]->answerstyle);
+        // The clustering anchors are persisted: topic, primary source, cmid.
+        $this->assertSame('Assignments & deadlines', $rows[0]->topic);
+        $this->assertSame('Essay 2', $rows[0]->sourcetitle);
+        $this->assertEquals(99, $rows[0]->cmid);
+
+        // Disabled analytics logs nothing.
+        set_config('enableanalytics', 0, 'block_elediaaitutor');
+        chat_service::send((int) $user->id, 'Another?', 42, null, context_system::instance(), $client);
+        $this->assertSame(1, $DB->count_records('block_elediaaitutor_qlog'));
+    }
+
+    /**
      * Message-sent and response-received events are fired.
      */
     public function test_send_fires_events(): void {

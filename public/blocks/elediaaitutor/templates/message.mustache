@@ -47,6 +47,22 @@
             <img class="elediaaitutor-msg-avatar-img" src="{{avatarurl}}" alt="" width="20" height="20">
         </span>{{/isassistant}}
         <span class="elediaaitutor-sender">{{sendername}}</span>
+        {{#showgrounding}}
+            {{#grounded}}
+                <span class="elediaaitutor-grounding elediaaitutor-grounded"
+                      title="{{#str}}groundedbadge_title, block_elediaaitutor{{/str}}">
+                    <i class="fa fa-book" aria-hidden="true"></i>
+                    {{#str}}groundedbadge, block_elediaaitutor{{/str}}
+                </span>
+            {{/grounded}}
+            {{^grounded}}
+                <span class="elediaaitutor-grounding elediaaitutor-ungrounded"
+                      title="{{#str}}ungroundedbadge_title, block_elediaaitutor{{/str}}">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                    {{#str}}ungroundedbadge, block_elediaaitutor{{/str}}
+                </span>
+            {{/grounded}}
+        {{/showgrounding}}
     </div>
     <div class="elediaaitutor-bubble">
         {{#isuser}}{{text}}{{/isuser}}

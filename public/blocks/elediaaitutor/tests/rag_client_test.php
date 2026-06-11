@@ -121,6 +121,86 @@ final class rag_client_test extends \advanced_testcase {
     }
 
     /**
+     * The consent flag is included only when explicitly provided.
+     */
+    public function test_chat_ltm_flag(): void {
+        $this->resetAfterTest();
+
+        // Omitted (server without memory support): key absent.
+        $transport = fake_transport::json_result(['structuredContent' => ['answer' => 'ok']]);
+        $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat');
+        $this->assertArrayNotHasKey('ltm_enabled', $transport->last_payload()['params']['arguments']);
+
+        // Provided: transmitted verbatim, including false.
+        $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat', true);
+        $this->assertTrue($transport->last_payload()['params']['arguments']['ltm_enabled']);
+        $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat', false);
+        $this->assertFalse($transport->last_payload()['params']['arguments']['ltm_enabled']);
+    }
+
+    /**
+     * The canonical topic label is extracted (and capped) from the response.
+     */
+    public function test_chat_extracts_topic(): void {
+        $this->resetAfterTest();
+        $transport = fake_transport::json_result([
+            'structuredContent' => ['answer' => 'ok', 'topic' => '  Photosynthesis  '],
+        ]);
+        $result = $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat');
+        $this->assertSame('Photosynthesis', $result['topic']);
+
+        $transport = fake_transport::json_result(['structuredContent' => ['answer' => 'ok']]);
+        $result = $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat');
+        $this->assertNull($result['topic']);
+    }
+
+    /**
+     * Answer style and user language are transmitted when provided, omitted otherwise.
+     */
+    public function test_chat_style_and_lang_args(): void {
+        $this->resetAfterTest();
+        $transport = fake_transport::json_result(['structuredContent' => ['answer' => 'ok']]);
+
+        $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat', null, 'hint', 'de');
+        $args = $transport->last_payload()['params']['arguments'];
+        $this->assertSame('hint', $args['answer_style']);
+        $this->assertSame('de', $args['user_lang']);
+
+        $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat');
+        $args = $transport->last_payload()['params']['arguments'];
+        $this->assertArrayNotHasKey('answer_style', $args);
+        $this->assertArrayNotHasKey('user_lang', $args);
+    }
+
+    /**
+     * The memory opt-in tool receives the consent boolean.
+     */
+    public function test_set_memory_optin_payload(): void {
+        $this->resetAfterTest();
+        $transport = fake_transport::json_result(['structuredContent' => ['accepted' => true]]);
+        $this->client($transport)->set_memory_optin('https://m', 'SECRET', false, 'tutor_set_memory_optin');
+
+        $payload = $transport->last_payload();
+        $this->assertSame('tutor_set_memory_optin', $payload['params']['name']);
+        $this->assertFalse($payload['params']['arguments']['enabled']);
+        $this->assertSame('SECRET', $payload['params']['arguments']['moodle_token']);
+    }
+
+    /**
+     * The user-level delete tool is called with token only (no conversation id).
+     */
+    public function test_delete_user_data_payload(): void {
+        $this->resetAfterTest();
+        $transport = fake_transport::json_result(['structuredContent' => ['deleted' => true]]);
+        $this->client($transport)->delete_user_data('https://m', 'SECRET', 'tutor_delete_user_data');
+
+        $payload = $transport->last_payload();
+        $this->assertSame('tutor_delete_user_data', $payload['params']['name']);
+        $this->assertArrayNotHasKey('conversation_id', $payload['params']['arguments']);
+        $this->assertSame('SECRET', $payload['params']['arguments']['moodle_token']);
+    }
+
+    /**
      * Conversation id is forwarded on follow-up turns.
      */
     public function test_chat_forwards_conversation_id(): void {

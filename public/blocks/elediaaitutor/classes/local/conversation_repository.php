@@ -74,6 +74,8 @@ class conversation_repository {
                 $existing->title = \core_text::substr($title, 0, 255);
             }
             $DB->update_record(self::TABLE, $existing);
+            // Normalise: drivers return the id as a string, inserts as an int.
+            $existing->id = (int) $existing->id;
             return $existing;
         }
 
@@ -139,6 +141,24 @@ class conversation_repository {
         global $DB;
         $record = $DB->get_record(self::TABLE, ['conversationid' => $conversationid, 'userid' => $userid]);
         return $record ?: null;
+    }
+
+    /**
+     * Delete every conversation pointer a user owns.
+     *
+     * Fires no per-row events; callers performing a bulk erase (the deletion
+     * service) record a single summarising data_deletion_requested event instead.
+     *
+     * @param int $userid Owner.
+     * @return int Number of conversations deleted.
+     */
+    public static function delete_all_for_user(int $userid): int {
+        global $DB;
+        $count = $DB->count_records(self::TABLE, ['userid' => $userid]);
+        if ($count > 0) {
+            $DB->delete_records(self::TABLE, ['userid' => $userid]);
+        }
+        return $count;
     }
 
     /**

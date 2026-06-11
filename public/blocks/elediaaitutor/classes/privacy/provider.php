@@ -46,6 +46,7 @@ use core_privacy\local\request\writer;
 class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\user_preference_provider,
     \core_privacy\local\request\plugin\provider {
 
     /**
@@ -73,7 +74,45 @@ class provider implements
             'conversationid' => 'privacy:metadata:rag_server:conversationid',
         ], 'privacy:metadata:rag_server');
 
+        // Opt-in question analytics (questions only, never answers).
+        $collection->add_database_table('block_elediaaitutor_qlog', [
+            'userid' => 'privacy:metadata:block_elediaaitutor_qlog:userid',
+            'courseid' => 'privacy:metadata:block_elediaaitutor_qlog:courseid',
+            'question' => 'privacy:metadata:block_elediaaitutor_qlog:question',
+            'grounded' => 'privacy:metadata:block_elediaaitutor_qlog:grounded',
+            'answerstyle' => 'privacy:metadata:block_elediaaitutor_qlog:answerstyle',
+            'topic' => 'privacy:metadata:block_elediaaitutor_qlog:topic',
+            'sourcetitle' => 'privacy:metadata:block_elediaaitutor_qlog:sourcetitle',
+            'cmid' => 'privacy:metadata:block_elediaaitutor_qlog:cmid',
+            'timecreated' => 'privacy:metadata:block_elediaaitutor_qlog:timecreated',
+        ], 'privacy:metadata:block_elediaaitutor_qlog');
+
+        // The long-term memory opt-in (a user preference; off by default).
+        $collection->add_user_preference(
+            \block_elediaaitutor\local\ltm::PREF,
+            'privacy:metadata:preference:ltm'
+        );
+
         return $collection;
+    }
+
+    /**
+     * Export the user's preferences for this plugin.
+     *
+     * @param int $userid The user id.
+     * @return void
+     */
+    public static function export_user_preferences(int $userid): void {
+        $value = get_user_preferences(\block_elediaaitutor\local\ltm::PREF, null, $userid);
+        if ($value === null) {
+            return;
+        }
+        writer::export_user_preference(
+            'block_elediaaitutor',
+            \block_elediaaitutor\local\ltm::PREF,
+            transform::yesno($value),
+            get_string('privacy:metadata:preference:ltm', 'block_elediaaitutor')
+        );
     }
 
     /**
@@ -101,6 +140,7 @@ class provider implements
             return;
         }
         $userlist->add_from_sql('userid', 'SELECT userid FROM {block_elediaaitutor_conv}', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {block_elediaaitutor_qlog}', []);
     }
 
     /**
@@ -118,26 +158,43 @@ class provider implements
 
         $userid = $contextlist->get_user()->id;
         $records = $DB->get_records('block_elediaaitutor_conv', ['userid' => $userid], 'timecreated ASC');
-        if (empty($records)) {
-            return;
+        if (!empty($records)) {
+            $data = [];
+            foreach ($records as $record) {
+                $data[] = (object) [
+                    'conversationid' => $record->conversationid,
+                    'courseid' => (int) ($record->courseid ?? 0),
+                    'title' => $record->title,
+                    'lastpreview' => $record->lastpreview,
+                    'timecreated' => transform::datetime($record->timecreated),
+                    'timemodified' => transform::datetime($record->timemodified),
+                ];
+            }
+            writer::with_context(context_system::instance())->export_data(
+                [get_string('privacy:conversations', 'block_elediaaitutor')],
+                (object) ['conversations' => $data]
+            );
         }
 
-        $data = [];
-        foreach ($records as $record) {
-            $data[] = (object) [
-                'conversationid' => $record->conversationid,
-                'courseid' => (int) ($record->courseid ?? 0),
-                'title' => $record->title,
-                'lastpreview' => $record->lastpreview,
-                'timecreated' => transform::datetime($record->timecreated),
-                'timemodified' => transform::datetime($record->timemodified),
-            ];
+        $questions = $DB->get_records('block_elediaaitutor_qlog', ['userid' => $userid], 'timecreated ASC');
+        if (!empty($questions)) {
+            $data = [];
+            foreach ($questions as $record) {
+                $data[] = (object) [
+                    'courseid' => (int) $record->courseid,
+                    'question' => $record->question,
+                    'grounded' => transform::yesno($record->grounded),
+                    'answerstyle' => $record->answerstyle,
+                    'topic' => $record->topic,
+                    'sourcetitle' => $record->sourcetitle,
+                    'timecreated' => transform::datetime($record->timecreated),
+                ];
+            }
+            writer::with_context(context_system::instance())->export_data(
+                [get_string('privacy:questions', 'block_elediaaitutor')],
+                (object) ['questions' => $data]
+            );
         }
-
-        writer::with_context(context_system::instance())->export_data(
-            [get_string('privacy:conversations', 'block_elediaaitutor')],
-            (object) ['conversations' => $data]
-        );
     }
 
     /**
@@ -152,6 +209,7 @@ class provider implements
             return;
         }
         $DB->delete_records('block_elediaaitutor_conv');
+        $DB->delete_records('block_elediaaitutor_qlog');
     }
 
     /**
@@ -166,6 +224,7 @@ class provider implements
             return;
         }
         $DB->delete_records('block_elediaaitutor_conv', ['userid' => (int) $contextlist->get_user()->id]);
+        $DB->delete_records('block_elediaaitutor_qlog', ['userid' => (int) $contextlist->get_user()->id]);
     }
 
     /**
@@ -185,6 +244,7 @@ class provider implements
         }
         [$insql, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
         $DB->delete_records_select('block_elediaaitutor_conv', "userid $insql", $params);
+        $DB->delete_records_select('block_elediaaitutor_qlog', "userid $insql", $params);
     }
 
     /**
@@ -195,7 +255,8 @@ class provider implements
      */
     protected static function user_has_data(int $userid): bool {
         global $DB;
-        return $DB->record_exists('block_elediaaitutor_conv', ['userid' => $userid]);
+        return $DB->record_exists('block_elediaaitutor_conv', ['userid' => $userid])
+            || $DB->record_exists('block_elediaaitutor_qlog', ['userid' => $userid]);
     }
 
     /**

@@ -86,6 +86,22 @@ if ($hassiteconfig) {
         PARAM_ALPHANUMEXT
     ));
 
+    $settings->add(new admin_setting_configtext(
+        'block_elediaaitutor/deleteusertoolname',
+        get_string('setting_deleteusertoolname', 'block_elediaaitutor'),
+        get_string('setting_deleteusertoolname_desc', 'block_elediaaitutor'),
+        '',
+        PARAM_ALPHANUMEXT
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'block_elediaaitutor/memoryoptintoolname',
+        get_string('setting_memoryoptintoolname', 'block_elediaaitutor'),
+        get_string('setting_memoryoptintoolname_desc', 'block_elediaaitutor'),
+        '',
+        PARAM_ALPHANUMEXT
+    ));
+
     $settings->add(new admin_setting_configcheckbox(
         'block_elediaaitutor/allowinsecuretransport',
         get_string('setting_allowinsecuretransport', 'block_elediaaitutor'),
@@ -202,6 +218,21 @@ if ($hassiteconfig) {
         get_string('setting_ratelimitperminute', 'block_elediaaitutor'),
         get_string('setting_ratelimitperminute_desc', 'block_elediaaitutor'),
         20,
+        PARAM_INT
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'block_elediaaitutor/enableanalytics',
+        get_string('setting_enableanalytics', 'block_elediaaitutor'),
+        get_string('setting_enableanalytics_desc', 'block_elediaaitutor'),
+        0
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'block_elediaaitutor/analyticsretentiondays',
+        get_string('setting_analyticsretention', 'block_elediaaitutor'),
+        get_string('setting_analyticsretention_desc', 'block_elediaaitutor'),
+        180,
         PARAM_INT
     ));
 

@@ -79,6 +79,21 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         $mform->setType('config_persona', PARAM_TEXT);
         $mform->setDefault('config_persona', get_string('default_persona', 'block_elediaaitutor'));
 
+        // Pedagogical answer style.
+        $styles = [
+            'explain' => get_string('answerstyle_explain', 'block_elediaaitutor'),
+            'hint' => get_string('answerstyle_hint', 'block_elediaaitutor'),
+            'quiz' => get_string('answerstyle_quiz', 'block_elediaaitutor'),
+        ];
+        $mform->addElement('select', 'config_answerstyle', get_string('config_answerstyle', 'block_elediaaitutor'),
+            $styles);
+        $mform->setDefault('config_answerstyle', 'explain');
+        $mform->addHelpButton('config_answerstyle', 'config_answerstyle', 'block_elediaaitutor');
+
+        $mform->addElement('selectyesno', 'config_allowstylechange',
+            get_string('config_allowstylechange', 'block_elediaaitutor'));
+        $mform->setDefault('config_allowstylechange', 1);
+
         // History enabled.
         $mform->addElement('selectyesno', 'config_historyenabled',
             get_string('config_historyenabled', 'block_elediaaitutor'));
