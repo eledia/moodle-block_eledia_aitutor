@@ -264,11 +264,25 @@ Contract notes, fixed now so you can design toward them:
 - **Authentication — maintenance account token.** The `moodle_token` belongs to
   a dedicated, auto-provisioned **maintenance account**
   (username `elediaaitutor_service`) — never to a learner or an administrator.
-  Validate it exactly like every other tool's token (a cheap callback into
-  Moodle, see C.1); no shared transport secret is required for this call.
-  The account is deliberately powerless inside Moodle (no roles, no
-  enrolments, no interactive login), so do **not** treat it as a person:
-  never create conversations, memories or any per-user state for it.
+  No shared transport secret is required for this call. Your server **MUST**:
+  1. **Validate the token by callback** like every other tool's token: call
+     `moodle_verify_user_context` against
+     `{system_url}/webservice/elediamcp/server.php` (C.1) with the token as
+     bearer. Moodle only answers for genuine, unexpired, unrevoked tokens of
+     active accounts.
+  2. **Pin on the username**: accept `tutor_recluster_questions` only when the
+     validated identity is `user.username === "elediaaitutor_service"`. A valid
+     *learner* token MUST be rejected for this tool. (Corroborating signal: the
+     account has no enrolments, so its `courses` list is empty.)
+  3. **Validate against known tenants only**: perform the callback only for
+     `system_url` values in your configured tenant list, over HTTPS — a
+     callback to an attacker-supplied URL proves nothing.
+
+  One successful validation may be cached for the duration of a nightly run
+  (the token lives ~1 hour; a run takes seconds). The account is deliberately
+  powerless inside Moodle (no roles, no enrolments, no interactive login), so
+  do **not** treat it as a person: never create conversations, memories or any
+  per-user state for it.
   (Plugins ≤ 0.6.0 sent no `moodle_token`; if you must support those, fall
   back to requiring the transport-level authorization of B.4.)
 - Batches are bounded (≤ 200 questions per call); the plugin may call
@@ -557,7 +571,9 @@ Tools advertise MCP annotations (`readOnlyHint`, `destructiveHint`) via
 - [ ] Optional `tutor_recluster_questions`: classify each batch into the
       supplied label registry (mint sparingly), idempotent, ≤ 200/batch; its
       `moodle_token` belongs to the `elediaaitutor_service` maintenance
-      account — validate it, but never create per-user state for it.
+      account — validate it by callback, **pin on that username** (reject
+      learner tokens for this tool), only against known tenant `system_url`s,
+      and never create per-user state for it.
 - [ ] For direct MCP hosts (Claude Desktop etc.): accept a Moodle token as
       transport bearer and map it to `moodle_token` when the argument is absent.
 
@@ -571,6 +587,7 @@ unless marked otherwise).
 
 | Plugin version | Change |
 |---|---|
+| 0.7.0 (doc update) | A.6 recluster validation spelled out as MUSTs: callback-validate via `moodle_verify_user_context`, **pin on username `elediaaitutor_service`** (reject learner tokens for this tool), callback only to known tenant `system_url`s over HTTPS; one validation may be cached per nightly run. |
 | 0.7.0 | **Reclustering now authenticates with a `moodle_token`** (A.6): the nightly task auto-provisions a powerless maintenance account (`elediaaitutor_service`) and sends its token, so the call is verifiable like every other tool and **no shared transport secret is needed**; B.4 transport auth is now optional defence in depth. New B.4 note: servers SHOULD accept a Moodle token as transport bearer for direct MCP hosts (Claude Desktop etc.) and map it to `moodle_token`. |
 | 0.6.0 | **`tutor_recluster_questions` is now LIVE** (A.6): when configured, a nightly Moodle task sends the last 30 days of questions per course (≤200/batch, service-level auth — no `moodle_token`) and applies the returned labels. The per-course label registry remains the primary mechanism. |
 | 0.5.0 (doc update) | **`tutor_recluster_questions`** reserved (A.6): per-course label registry declared the primary topic-quality mechanism; batch-reclustering contract fixed (service-level auth, ≤200/batch, idempotent). |
