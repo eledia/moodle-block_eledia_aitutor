@@ -79,3 +79,63 @@ Users without `block/elediaaitutor:use` see no chat.
 Map the `usertoken` and `ratelimit` application caches to a shared store
 (Redis/Memcached) under **Site administration ▸ Plugins ▸ Caching** so the
 token cache and rate limiter work correctly across a cluster.
+
+## 6. Moodle App
+
+Third-party blocks are not rendered by the Moodle App, so the tutor ships a
+standalone page hosting the identical chat widget:
+
+```
+https://YOURSITE/blocks/elediaaitutor/view.php            (global chat)
+https://YOURSITE/blocks/elediaaitutor/view.php?courseid=N (course chat)
+```
+
+`?embedded=1` switches to Moodle's chrome-less page layout (no navigation).
+Login, enrolment (for course chat), the `use` capability, the consent gate and
+all rate limits apply exactly as in the block — it is the same widget against
+the same endpoints.
+
+**In-app entry points (automatic).** The plugin registers Moodle App remote
+add-on handlers (`db/mobile.php`) that open this page in-app via `core-iframe`
+(which auto-logins same-site URLs):
+
+- a **Tutor** entry in the course options menu (course-scoped chat), and
+- an **eLeDia.ai Tutor** item in the app's main menu (global chat).
+
+**Who decides where the tutor appears:**
+
+- The site toggles **Enable course chat** / **Enable global chat** control
+  whether the corresponding app handler is registered at all (purge caches
+  after changing them).
+- Per course, **the teacher decides by adding the eLeDia.ai Tutor block to the
+  course** — the same opt-in as on the web. In courses without the block, the
+  app entry and `view.php?courseid=N` show a friendly "not enabled in this
+  course" notice instead of the chat. (The app cannot hide a remote handler
+  per course, so the entry is visible everywhere but only functional where
+  opted in.)
+
+They appear after the app refreshes its remote add-ons (pull-to-refresh on the
+app home, or log out/in). Requirements: HTTPS site, web services for mobile
+enabled.
+
+**Alternative: custom menu item.** A site-level entry can also be added under
+**Site administration ▸ Plugins ▸ Admin tools ▸ Moodle app tools ▸ Mobile
+features ▸ Custom menu items** (`tool_mobile/custommenuitems`):
+
+```
+eLeDia.ai Tutor|https://YOURSITE/blocks/elediaaitutor/view.php?embedded=1|embedded
+```
+
+**Pitfalls worth knowing:**
+
+- **Do not link the page from a URL activity** — the app hands URL activities
+  to the device browser, which has no Moodle session. The browser auto-login
+  the app attempts is throttled (~one key per 6 minutes) and **always refused
+  for site administrators**, so an admin testing this sees a login wall.
+  Use the built-in handlers above instead.
+- Test app behaviour with a **non-admin** account for the same reason.
+
+This remains the pragmatic integration — the full web UI inside the app. A
+fully native chat UI (CoreBlockDelegate templates) is a possible future step;
+the entire server side (tokens, RAG calls, consent, analytics) would be reused
+unchanged.

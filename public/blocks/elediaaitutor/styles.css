@@ -187,6 +187,19 @@
     box-shadow: 0 4px 12px rgba(16, 24, 40, 0.12);
 }
 
+/* The header avatar links to eledia.ai; keep the badge look, signal the link. */
+a.elediaaitutor-avatar,
+a.elediaaitutor-avatar:hover,
+a.elediaaitutor-avatar:focus {
+    text-decoration: none;
+}
+
+a.elediaaitutor-avatar:hover,
+a.elediaaitutor-avatar:focus-visible {
+    border-color: var(--eat-accent);
+    box-shadow: 0 4px 12px rgba(30, 63, 89, 0.28);
+}
+
 .elediaaitutor-avatar-img {
     width: 100%;
     height: 100%;
@@ -543,6 +556,21 @@
     background: transparent;
     color: var(--eat-muted);
     border: 1px solid var(--eat-line);
+}
+
+/* --- Standalone page (view.php; Moodle App embedding). ------------------ */
+.elediaaitutor-page {
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.elediaaitutor-page .elediaaitutor-embedded .elediaaitutor-window {
+    height: clamp(420px, 72vh, 860px);
+}
+
+/* Inside the app/iframe (chrome-less embedded layout) fill the viewport. */
+.elediaaitutor-pagebody.pagelayout-embedded .elediaaitutor-page .elediaaitutor-embedded .elediaaitutor-window {
+    height: calc(100vh - 2rem);
 }
 
 /* --- First-use privacy consent gate. ------------------------------------ */

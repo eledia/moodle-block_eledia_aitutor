@@ -92,6 +92,40 @@ final class external_test extends \advanced_testcase {
     }
 
     /**
+     * Course contexts are accepted (the standalone view.php page chats at the
+     * course context); unrelated context levels stay rejected.
+     */
+    public function test_course_context_accepted_user_context_rejected(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
+        conversation_repository::upsert((int) $student->id, 'c-1', (int) $course->id, 'hi');
+
+        $this->setUser($student);
+        $coursecontext = \context_course::instance($course->id);
+        $result = get_conversations::execute($coursecontext->id, (int) $course->id);
+        $result = \core_external\external_api::clean_returnvalue(get_conversations::execute_returns(), $result);
+        $this->assertCount(1, $result['conversations']);
+
+        $usercontext = \context_user::instance((int) $student->id);
+        $this->expectException(\moodle_exception::class);
+        get_conversations::execute($usercontext->id, 0);
+    }
+
+    /**
+     * A user who cannot access the course cannot use its context either.
+     */
+    public function test_course_context_requires_course_access(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['visible' => 1]);
+        $stranger = $this->getDataGenerator()->create_user();
+
+        $this->setUser($stranger);
+        $this->expectException(\moodle_exception::class);
+        get_conversations::execute(\context_course::instance($course->id)->id, (int) $course->id);
+    }
+
+    /**
      * A user cannot delete another user's conversation.
      */
     public function test_clear_conversation_enforces_ownership(): void {

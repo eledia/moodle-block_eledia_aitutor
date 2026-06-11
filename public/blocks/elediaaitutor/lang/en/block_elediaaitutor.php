@@ -160,6 +160,7 @@ $string['error_token_provision_failed'] = 'A Moodle MCP token could not be provi
 $string['error_invalid_context'] = 'Invalid context.';
 $string['error_conversation_not_found'] = 'Conversation not found.';
 $string['error_course_chat_disabled'] = 'Course chat is disabled on this site.';
+$string['notenabledincourse'] = 'The tutor is not enabled in this course. Teachers enable it by adding the eLeDia.ai Tutor block to the course.';
 $string['error_global_chat_disabled'] = 'Global chat is disabled on this site.';
 
 // Events.
@@ -212,6 +213,8 @@ $string['deleteall_external_unsupported'] = 'The external tutor service does not
 $string['event_data_deletion_requested'] = 'Tutor data deletion requested';
 $string['event_ltm_preference_changed'] = 'Tutor long-term memory preference changed';
 $string['privacy:metadata:preference:ltm'] = 'Whether the user has opted in to the tutor\'s long-term memory.';
+
+$string['eledialink'] = 'Visit eledia.ai (opens in a new tab)';
 
 // Institution-specific privacy guidelines.
 $string['setting_header_privacy'] = 'Privacy';

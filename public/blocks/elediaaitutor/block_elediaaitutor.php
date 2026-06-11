@@ -14,10 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use block_elediaaitutor\local\consent;
-use block_elediaaitutor\local\ltm;
 use block_elediaaitutor\local\security;
-use block_elediaaitutor\local\token_provider;
+use block_elediaaitutor\local\widget;
 
 /**
  * eLeDia.ai Tutor block.
@@ -100,7 +98,7 @@ class block_elediaaitutor extends block_base {
      * @return stdClass|null
      */
     public function get_content(): ?stdClass {
-        global $OUTPUT, $USER, $PAGE;
+        global $OUTPUT;
 
         if ($this->content !== null) {
             return $this->content;
@@ -118,7 +116,7 @@ class block_elediaaitutor extends block_base {
         // Surface configuration problems to those who can fix them; everyone else
         // gets a friendly unavailable notice instead of a broken widget.
         $canmanage = has_capability('block/elediaaitutor:manage', $context);
-        $configerror = $this->detect_config_error();
+        $configerror = widget::config_error();
         if ($configerror !== null) {
             $this->content->text = $OUTPUT->render_from_template('block_elediaaitutor/unavailable', [
                 'isadmin' => $canmanage,
@@ -132,78 +130,21 @@ class block_elediaaitutor extends block_base {
             return $this->content;
         }
 
-        $courseid = $this->resolve_course_id();
-        $displaymode = $this->get_instance_config('displaymode', get_config('block_elediaaitutor', 'defaultdisplaymode') ?: 'embedded');
-        $historyenabled = (int) $this->get_instance_config('historyenabled', 1) === 1
-            && has_capability('block/elediaaitutor:viewhistory', $context);
-
-        $uniqid = 'elediaaitutor_' . uniqid();
-        $welcome = (string) $this->get_instance_config('welcomemessage', get_string('default_welcome', 'block_elediaaitutor'));
-        $persona = (string) $this->get_instance_config('persona', get_string('default_persona', 'block_elediaaitutor'));
-
-        $avatarurl = $OUTPUT->image_url('logo', 'block_elediaaitutor')->out(false);
-
-        // Pedagogical answer style: instance default plus whether learners may switch.
-        $answerstyle = (string) $this->get_instance_config('answerstyle', 'explain');
-        if (!in_array($answerstyle, ['explain', 'hint', 'quiz'], true)) {
-            $answerstyle = 'explain';
-        }
-        $allowstylechange = (int) $this->get_instance_config('allowstylechange', 1) === 1;
-        $consented = consent::has_consented((int) $USER->id);
-
-        // Institution-specific privacy guidelines (admin setting). When set, the
-        // formatted text replaces the built-in informational sections of the
-        // privacy dialogue; filters (e.g. multilang) apply at render time.
-        $privacytext = (string) get_config('block_elediaaitutor', 'privacyguidelinestext');
-        $privacyhtml = trim(strip_tags($privacytext)) !== ''
-            ? format_text($privacytext, FORMAT_HTML, ['context' => $context])
-            : '';
-        $styles = [];
-        foreach (['explain', 'hint', 'quiz'] as $style) {
-            $styles[] = [
-                'key' => $style,
-                'label' => get_string('answerstyle_' . $style, 'block_elediaaitutor'),
-                'active' => $style === $answerstyle,
-            ];
-        }
-
-        $templatecontext = [
-            'uniqid' => $uniqid,
+        // The shared widget builder assembles the shell + AMD init; the block
+        // contributes its per-instance configuration. The standalone page
+        // (view.php, used for Moodle App embedding) renders the same widget.
+        $this->content->text = widget::render($context, $this->resolve_course_id(), [
             'instanceid' => (int) $this->instance->id,
-            'displaymode' => $displaymode,
-            'embedded' => $displaymode === 'embedded',
-            'persona' => format_string($persona),
-            'avatarurl' => $avatarurl,
-            'welcome' => format_text($welcome, FORMAT_MOODLE, ['context' => $context, 'filter' => false]),
-            'historyenabled' => $historyenabled,
-            'launchlabel' => get_string('launch', 'block_elediaaitutor'),
-            'stylechoice' => $allowstylechange,
-            'styles' => $styles,
-            'stylelocked' => !$allowstylechange && $answerstyle !== 'explain',
-            'lockedlabel' => get_string('answerstyle_' . $answerstyle, 'block_elediaaitutor'),
-            'consented' => $consented,
-        ];
-
-        $this->content->text = $OUTPUT->render_from_template('block_elediaaitutor/launcher', $templatecontext);
-
-        // The JS module owns all behaviour; it only receives non-secret config.
-        $PAGE->requires->js_call_amd('block_elediaaitutor/chat', 'init', [[
-            'uniqid' => $uniqid,
-            'contextid' => $context->id,
-            'courseid' => $courseid,
-            'displaymode' => $displaymode,
-            'historyenabled' => $historyenabled,
-            'streaming' => security::streaming_enabled(),
-            'maxlength' => security::max_message_length(),
-            'persona' => format_string($persona),
-            'avatarurl' => $avatarurl,
-            'ltmenabled' => ltm::is_enabled((int) $USER->id),
-            'candelete' => has_capability('block/elediaaitutor:deleteownhistory', $context),
-            'answerstyle' => $answerstyle,
-            'allowstylechange' => $allowstylechange,
-            'consented' => $consented,
-            'privacyhtml' => $privacyhtml,
-        ]]);
+            'displaymode' => $this->get_instance_config('displaymode',
+                get_config('block_elediaaitutor', 'defaultdisplaymode') ?: 'embedded'),
+            'historyenabled' => (int) $this->get_instance_config('historyenabled', 1) === 1,
+            'welcomemessage' => (string) $this->get_instance_config('welcomemessage',
+                get_string('default_welcome', 'block_elediaaitutor')),
+            'persona' => (string) $this->get_instance_config('persona',
+                get_string('default_persona', 'block_elediaaitutor')),
+            'answerstyle' => (string) $this->get_instance_config('answerstyle', 'explain'),
+            'allowstylechange' => (int) $this->get_instance_config('allowstylechange', 1) === 1,
+        ]);
 
         // Teachers reach the question-analytics report via the course
         // navigation; see block_elediaaitutor_extend_navigation_course().
@@ -232,24 +173,6 @@ class block_elediaaitutor extends block_base {
             return (int) $this->page->course->id;
         }
         return 0;
-    }
-
-    /**
-     * Detect a fatal configuration problem, returning an admin-facing message.
-     *
-     * @return string|null Null when configuration is healthy.
-     */
-    private function detect_config_error(): ?string {
-        if (!token_provider::is_connector_available()) {
-            return get_string('error_connector_missing', 'block_elediaaitutor');
-        }
-        if (security::mcp_service_id() <= 0) {
-            return get_string('error_service_not_configured', 'block_elediaaitutor');
-        }
-        if (security::rag_server_url() === '') {
-            return get_string('error_rag_url_missing', 'block_elediaaitutor');
-        }
-        return null;
     }
 
     /**

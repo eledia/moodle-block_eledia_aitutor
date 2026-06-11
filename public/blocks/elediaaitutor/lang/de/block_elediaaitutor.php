@@ -160,6 +160,7 @@ $string['error_token_provision_failed'] = 'Für Ihr Konto konnte kein Moodle-MCP
 $string['error_invalid_context'] = 'Ungültiger Kontext.';
 $string['error_conversation_not_found'] = 'Gespräch nicht gefunden.';
 $string['error_course_chat_disabled'] = 'Der Kurs-Chat ist auf dieser Website deaktiviert.';
+$string['notenabledincourse'] = 'Der Tutor ist in diesem Kurs nicht aktiviert. Lehrende aktivieren ihn, indem sie den eLeDia.ai-Tutor-Block zum Kurs hinzufügen.';
 $string['error_global_chat_disabled'] = 'Der globale Chat ist auf dieser Website deaktiviert.';
 
 // Events.
@@ -212,6 +213,8 @@ $string['deleteall_external_unsupported'] = 'Der externe Tutor-Dienst unterstüt
 $string['event_data_deletion_requested'] = 'Löschung der Tutor-Daten angefordert';
 $string['event_ltm_preference_changed'] = 'Einstellung zum Langzeitgedächtnis des Tutors geändert';
 $string['privacy:metadata:preference:ltm'] = 'Ob die Person dem Langzeitgedächtnis des Tutors zugestimmt hat.';
+
+$string['eledialink'] = 'eledia.ai besuchen (öffnet in neuem Tab)';
 
 // Institution-specific privacy guidelines.
 $string['setting_header_privacy'] = 'Datenschutz';

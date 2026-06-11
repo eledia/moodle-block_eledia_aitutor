@@ -34,8 +34,12 @@ class helper {
     /**
      * Resolve a context id passed from the client into a context object.
      *
-     * Only block and system contexts are accepted; anything else is rejected so
-     * a caller cannot point the capability check at an unrelated context.
+     * Only block, course and system contexts are accepted — the three places
+     * the widget renders (block instance, the standalone view.php page in a
+     * course, and global chat); anything else is rejected so a caller cannot
+     * point the capability check at an unrelated context. For course contexts
+     * the external functions' validate_context() additionally enforces course
+     * access for the calling user.
      *
      * @param int $contextid The context id.
      * @return context
@@ -46,7 +50,8 @@ class helper {
         if ($context === false) {
             throw new moodle_exception('error_invalid_context', 'block_elediaaitutor');
         }
-        if ($context->contextlevel !== CONTEXT_BLOCK && $context->contextlevel !== CONTEXT_SYSTEM) {
+        $allowed = [CONTEXT_BLOCK, CONTEXT_COURSE, CONTEXT_SYSTEM];
+        if (!in_array($context->contextlevel, $allowed, true)) {
             throw new moodle_exception('error_invalid_context', 'block_elediaaitutor');
         }
         return $context;
