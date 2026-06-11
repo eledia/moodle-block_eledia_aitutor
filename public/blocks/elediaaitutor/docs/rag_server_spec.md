@@ -213,6 +213,61 @@ consent signal.
 > store as memory, you own; include it in A.4 deletion and document its
 > retention.
 
+### A.6 `tutor_recluster_questions` (RESERVED — design now, not yet called)
+
+Topic quality is the foundation of the teacher analytics. Two mechanisms keep
+it high; design for both even though only the first is live:
+
+**Primary — per-course label registry (required for good analytics now).**
+Maintain a registry of topic labels per course and always classify a question
+*into the existing set*, only minting a new label when nothing fits. Free-form
+label generation per answer WILL fragment ("Essay deadline", "Essay 2 due
+date", "Assignment deadlines" for the same concept) and makes the hotspot
+report useless.
+
+**Repair — batch reclustering (this reserved tool).** Even with a registry,
+labels drift over time (model/prompt updates, course restructuring, early
+questions asked before the registry stabilised). When fragmentation shows up in
+practice, the plugin will call this tool from a scheduled task to converge the
+*historical* labels:
+
+```json
+{ "name": "tutor_recluster_questions",
+  "arguments": {
+    "system_url": "https://moodle.example.com",
+    "course_id": "42",
+    "existing_labels": ["Photosynthesis", "Assignment 2", "Enrolment & access"],
+    "questions": [
+      { "id": 17, "text": "When is the essay due?" },
+      { "id": 18, "text": "essay deadline?" }
+    ]
+  } }
+```
+
+Expected response — one label per question id, drawn from (or extending) the
+supplied label set:
+
+```json
+{ "structuredContent": {
+    "topics": [
+      { "id": 17, "topic": "Assignment 2" },
+      { "id": 18, "topic": "Assignment 2" }
+    ] } }
+```
+
+Contract notes, fixed now so you can design toward them:
+
+- **Authentication differs from every other tool**: this is a site-level
+  service operation (the batch spans many users), so there is **no
+  `moodle_token`** — the request is authenticated solely by the transport-level
+  RAG authorization (B.4). Reject it when that is not configured.
+- Batches are bounded (≤ 200 questions per call); the plugin may call
+  repeatedly.
+- Idempotent: reclustering the same batch must yield the same labels.
+- Privacy: the question texts already transited your server at chat time; this
+  re-sends the same data to the same processor for the same purpose. Do not
+  retain the batch beyond processing.
+
 ---
 
 ## Part B — Transport, framing & authentication
@@ -490,6 +545,7 @@ unless marked otherwise).
 
 | Plugin version | Change |
 |---|---|
+| 0.5.0 (doc update) | **`tutor_recluster_questions`** reserved (A.6): per-course label registry declared the primary topic-quality mechanism; batch-reclustering contract fixed (service-level auth, ≤200/batch, idempotent) for when historical labels need converging. Not yet called by the plugin. |
 | 0.5.0 | **`topic`** response field (canonical label for analytics clustering); `sources[0]` defined as the primary source and stored (title + cmid) for hotspot aggregation. |
 | 0.4.0 | **`answer_style`** chat argument (`explain`/`hint`/`quiz`, server-side lock-enforced — the UI's pedagogy chips) and **`user_lang`** chat argument (answer in the learner's language). |
 | 0.3.0 | Long-term memory consent: **`ltm_enabled`** chat argument (per-request gate) and **`tutor_set_memory_optin`** tool (erase-on-revoke); **`tutor_delete_user_data`** tool (complete user-level erasure, preferred for "delete all my data"). |
