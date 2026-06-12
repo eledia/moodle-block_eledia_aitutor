@@ -376,6 +376,18 @@ site/connector, not the end user. Since every tool call (including the nightly
 reclustering, as of 0.7.0) carries a verifiable `moodle_token`, transport-level
 authorization is **optional defence in depth**, not a requirement.
 
+**Tenant resolution at query time (multi-customer deployments).** The corpus
+ingested by `local_ragingest` is namespaced by a tenant id **derived from the
+Moodle site's `wwwroot`** (canonicalisation defined in that plugin's
+`API_SPECIFICATION.md` v1.2: lowercased host plus subdirectory path, reduced to
+`[a-z0-9._-]`). At query time, resolve the tenant from the **verified**
+`site.url` returned by the `moodle_verify_user_context` callback — i.e. only
+after the `moodle_token` validated against that `system_url` — and apply the
+same canonicalisation. Filter every retrieval by that tenant. Never trust a
+client-claimed tenant value: the verified site URL is the only tenant anchor.
+Maintain a small tenant registry (`tenant → ingestion API key, [site_urls]`)
+when one customer operates several Moodle sites against one corpus.
+
 **Direct MCP hosts (e.g. Claude Desktop).** Users may connect generic MCP
 clients straight to your server, and such hosts cannot inject per-call tool
 arguments. Support this by also accepting a Moodle MCP token as the transport
@@ -592,6 +604,7 @@ unless marked otherwise).
 
 | Plugin version | Change |
 |---|---|
+| 0.8.2 (doc update) | **Tenant resolution defined** (B.4): the retrieval corpus is namespaced by a tenant id derived from the Moodle `wwwroot` (see local_ragingest API spec v1.2); resolve it at query time from the **verified** `site.url` of the token callback with the same canonicalisation, and filter all retrieval by it. Never trust a claimed tenant value. |
 | 0.8.1 (doc update) | Moodle tool catalogue (C.4) at `webservice_elediamcp` 1.0: added **`moodle_search_content`** (full-text/content discovery — pairs with `moodle_get_resource`) and **`moodle_my_submission_files`** (the user's own submission files + online text). No change to the Moodle→RAG chat contract. Security note for self-hosters: elediamcp 1.0 closes a `moodle_get_resource` cross-course content-access leak — run ≥ 1.0 in production. |
 | 0.8.0 | Moodle tool catalogue (C.4) grew to 15 with `webservice_elediamcp` 0.9: **`moodle_my_progress`** (completion coaching), **`moodle_quiz_info`** (own attempts only) and **`moodle_forum_discussions`** (visibility-safe forum reading) — use them to ground tutoring in the learner's actual progress. Also new chat-side capabilities since 0.7.0: tutor UI sends `answer_style`/`user_lang` unchanged; nothing else in the Moodle→RAG contract changed. |
 | 0.7.0 (doc update) | A.6 recluster validation spelled out as MUSTs: callback-validate via `moodle_verify_user_context`, **pin on username `elediaaitutor_service`** (reject learner tokens for this tool), callback only to known tenant `system_url`s over HTTPS; one validation may be cached per nightly run. |
