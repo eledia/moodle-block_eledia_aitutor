@@ -116,6 +116,13 @@ class chat_service {
             }
         }
 
+        // In LLM-only mode no retrieval happened (or must be treated as if it
+        // hadn't): drop any sources a non-compliant server returned, so the UI
+        // never shows a "grounded" badge and analytics record grounded=false.
+        if ($ragenabled === false) {
+            $result['sources'] = [];
+        }
+
         $answerhtml = markdown_renderer::render($result['answer'], $context);
 
         $newconversationid = $result['conversation_id'] ?? $conversationid;

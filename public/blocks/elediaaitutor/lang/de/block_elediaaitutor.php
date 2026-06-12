@@ -165,6 +165,7 @@ $string['error_invalid_context'] = 'Ungültiger Kontext.';
 $string['error_conversation_not_found'] = 'Gespräch nicht gefunden.';
 $string['error_course_chat_disabled'] = 'Der Kurs-Chat ist auf dieser Website deaktiviert.';
 $string['llmonly_unavailable'] = 'Der eLeDia.ai Tutor ist in diesem Kurs noch nicht verfügbar: Es gibt keine Wissensbasis, und Antworten aus dem Allgemeinwissen sind auf dieser Website deaktiviert.';
+$string['llmonly_banner'] = 'Allgemeinwissen-Modus — Antworten basieren nicht auf Ihren Kursmaterialien.';
 $string['notenabledincourse'] = 'Der Tutor ist in diesem Kurs nicht aktiviert. Lehrende aktivieren ihn, indem sie den eLeDia.ai-Tutor-Block zum Kurs hinzufügen.';
 $string['error_global_chat_disabled'] = 'Der globale Chat ist auf dieser Website deaktiviert.';
 

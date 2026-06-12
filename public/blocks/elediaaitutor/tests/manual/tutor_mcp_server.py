@@ -357,13 +357,21 @@ def tool_tutor_chat(arguments):
     ltm = arguments.get("ltm_enabled", None)
     style = arguments.get("answer_style", "explain") or "explain"
     lang = arguments.get("user_lang", "")
+    rag = arguments.get("rag_enabled", None)
     log(f"tutor_chat conv={conversation_id} turn={turn} course={course_id or '-'} "
         f"style={style} lang={lang or '-'} ltm={ltm if ltm is not None else 'absent'} "
+        f"rag={rag if rag is not None else 'absent'} "
         f"token={token_preview} msg={user_message!r}")
 
     # Build the answer from the history *before* this turn is recorded.
     answer, sources = build_answer(user_message, course_id, system_url, moodle_token,
                                    conversation_id, history)
+
+    # Honour LLM-only mode: no retrieval, hence no sources.
+    if rag is False:
+        sources = []
+        answer += ("\n\n\U0001F4A1 _LLM-only mode (`rag_enabled: false`): answered from the "
+                   "model's general knowledge — no course retrieval performed._")
 
     # Echo the pedagogical style so style switching is visible in manual tests.
     if style == "hint":

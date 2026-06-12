@@ -617,6 +617,21 @@ a.elediaaitutor-avatar:focus-visible {
     height: calc(100vh - 2rem);
 }
 
+/* --- LLM-only mode banner. ---------------------------------------------- */
+.elediaaitutor-modenote {
+    flex: 0 0 auto;
+    padding: 0.4rem 1rem;
+    font-size: 0.78rem;
+    color: var(--eat-muted);
+    background: #f4f7fa;
+    border-bottom: 1px solid var(--eat-line);
+}
+
+.elediaaitutor-modenote .fa {
+    color: var(--eat-accent);
+    margin-right: 0.35rem;
+}
+
 /* --- First-use privacy consent gate. ------------------------------------ */
 .elediaaitutor-consent {
     flex: 0 0 auto;

@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2026061300;
+$plugin->version = 2026061301;
 $plugin->requires = 2023041800;
 $plugin->component = 'block_elediaaitutor';
 $plugin->maturity = MATURITY_BETA;

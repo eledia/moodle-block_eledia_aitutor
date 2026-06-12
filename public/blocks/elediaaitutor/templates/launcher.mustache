@@ -104,6 +104,13 @@
                 </div>
             </header>
 
+            {{#llmonly}}
+                <div class="elediaaitutor-modenote" role="note">
+                    <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
+                    {{#str}}llmonly_banner, block_elediaaitutor{{/str}}
+                </div>
+            {{/llmonly}}
+
             {{#historyenabled}}
                 <div class="elediaaitutor-history" data-region="history" hidden
                      role="region" aria-label="{{#str}}history, block_elediaaitutor{{/str}}">

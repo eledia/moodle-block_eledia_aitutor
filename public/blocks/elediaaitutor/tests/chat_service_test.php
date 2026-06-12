@@ -113,6 +113,39 @@ final class chat_service_test extends \advanced_testcase {
     }
 
     /**
+     * In LLM-only mode, sources returned by a non-compliant server are
+     * stripped: no grounded badge, analytics record grounded=false.
+     */
+    public function test_send_llmonly_strips_sources(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->configure_mcp_service();
+        set_config('enableanalytics', 1, 'block_elediaaitutor');
+        $user = $this->create_consented_user();
+
+        // A server that (wrongly) returns sources despite rag_enabled=false.
+        $transport = fake_transport::json_result([
+            'structuredContent' => [
+                'answer' => 'general answer',
+                'sources' => [['title' => 'Should not appear', 'url' => '', 'snippet' => '']],
+            ],
+        ]);
+        $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
+
+        $result = chat_service::send((int) $user->id, 'Q?', 5, null, context_system::instance(),
+            $client, null, null, false);
+
+        // The flag was sent, and the sources were dropped.
+        $this->assertFalse($transport->last_payload()['params']['arguments']['rag_enabled']);
+        $this->assertSame([], $result['sources']);
+
+        // Analytics records the turn as ungrounded.
+        $rows = array_values($DB->get_records('block_elediaaitutor_qlog'));
+        $this->assertCount(1, $rows);
+        $this->assertEquals(0, $rows[0]->grounded);
+    }
+
+    /**
      * The daily quota blocks the turn at the limit; only successful turns
      * consume quota.
      */

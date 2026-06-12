@@ -165,6 +165,7 @@ $string['error_invalid_context'] = 'Invalid context.';
 $string['error_conversation_not_found'] = 'Conversation not found.';
 $string['error_course_chat_disabled'] = 'Course chat is disabled on this site.';
 $string['llmonly_unavailable'] = 'The eLeDia.ai Tutor is not available in this course yet: it has no knowledge base, and general-knowledge answers are disabled on this site.';
+$string['llmonly_banner'] = 'General knowledge mode — answers are not based on your course materials.';
 $string['notenabledincourse'] = 'The tutor is not enabled in this course. Teachers enable it by adding the eLeDia.ai Tutor block to the course.';
 $string['error_global_chat_disabled'] = 'Global chat is disabled on this site.';
 

@@ -173,6 +173,7 @@ class widget {
             'consented' => $consented,
             'starters' => $starters,
             'hasstarters' => !empty($starters),
+            'llmonly' => $mode === chat_mode::MODE_LLMONLY,
         ];
 
         $html = $OUTPUT->render_from_template('block_elediaaitutor/launcher', $templatecontext);
