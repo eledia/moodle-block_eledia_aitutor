@@ -82,6 +82,7 @@ $string['config_ragmode'] = 'Answer source';
 $string['config_ragmode_help'] = 'Grounded: the tutor answers from this course\'s ingested materials (with citations). LLM-only: the tutor answers from the language model\'s general knowledge without searching the course knowledge base. If the course has no ingested content, the tutor uses LLM-only automatically.';
 $string['ragmode_grounded'] = 'Grounded in course materials';
 $string['ragmode_llmonly'] = 'General knowledge (LLM only)';
+$string['config_ragmode_nokb'] = 'General knowledge (LLM only) — this course has no ingested knowledge base, so grounded answers are not available. Mark the course for ingestion to enable them.';
 
 // Display modes.
 $string['displaymode_embedded'] = 'Embedded in block';

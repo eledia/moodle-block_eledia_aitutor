@@ -82,6 +82,7 @@ $string['config_ragmode'] = 'Antwortquelle';
 $string['config_ragmode_help'] = 'Verankert: Der Tutor antwortet aus den eingelesenen Materialien dieses Kurses (mit Quellenangaben). Nur LLM: Der Tutor antwortet aus dem Allgemeinwissen des Sprachmodells, ohne die Wissensbasis des Kurses zu durchsuchen. Hat der Kurs keine eingelesenen Inhalte, verwendet der Tutor automatisch den Nur-LLM-Modus.';
 $string['ragmode_grounded'] = 'In Kursmaterialien verankert';
 $string['ragmode_llmonly'] = 'Allgemeinwissen (nur LLM)';
+$string['config_ragmode_nokb'] = 'Allgemeinwissen (nur LLM) — dieser Kurs hat keine eingelesene Wissensbasis, daher sind verankerte Antworten nicht verfügbar. Markieren Sie den Kurs für die Ingestion, um sie zu aktivieren.';
 
 // Display modes.
 $string['displaymode_embedded'] = 'Im Block eingebettet';

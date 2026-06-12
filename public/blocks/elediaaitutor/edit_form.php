@@ -106,10 +106,14 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         $mform->setDefault('config_dailylimit', -1);
         $mform->addHelpButton('config_dailylimit', 'config_dailylimit', 'block_elediaaitutor');
 
-        // Answer source (grounded vs LLM-only) — only when LLM-only is allowed
-        // site-wide. When grounding is unavailable for the course, the server
-        // forces LLM-only regardless of this choice.
-        if (\block_elediaaitutor\local\chat_mode::is_llm_allowed()) {
+        // Answer source (grounded vs LLM-only). The choice is only offered when
+        // it is real: LLM-only must be allowed site-wide, and grounded answers
+        // require the course to have an ingested knowledge base. When grounding
+        // is unavailable the form states the effective mode instead of offering
+        // an inert option (the server forces it either way).
+        $grounding = \block_elediaaitutor\local\chat_mode::ingestion_available($this->effective_courseid());
+        $llmallowed = \block_elediaaitutor\local\chat_mode::is_llm_allowed();
+        if ($llmallowed && $grounding) {
             $mform->addElement('select', 'config_ragmode',
                 get_string('config_ragmode', 'block_elediaaitutor'), [
                     \block_elediaaitutor\local\chat_mode::MODE_GROUNDED =>
@@ -119,11 +123,43 @@ class block_elediaaitutor_edit_form extends block_edit_form {
                 ]);
             $mform->setDefault('config_ragmode', \block_elediaaitutor\local\chat_mode::MODE_GROUNDED);
             $mform->addHelpButton('config_ragmode', 'config_ragmode', 'block_elediaaitutor');
+        } else if (!$grounding) {
+            // No knowledge base: state the effective mode (LLM-only, or
+            // unavailable when LLM-only is disallowed) instead of a dead select.
+            $mform->addElement('static', 'ragmode_note',
+                get_string('config_ragmode', 'block_elediaaitutor'),
+                $llmallowed
+                    ? get_string('config_ragmode_nokb', 'block_elediaaitutor')
+                    : get_string('llmonly_unavailable', 'block_elediaaitutor'));
         }
 
         // History enabled.
         $mform->addElement('selectyesno', 'config_historyenabled',
             get_string('config_historyenabled', 'block_elediaaitutor'));
         $mform->setDefault('config_historyenabled', 1);
+    }
+
+    /**
+     * The course this instance will chat in, mirroring the block's own
+     * resolution: a configured fixed course id wins, otherwise the page course
+     * when course context is passed, else 0 (global chat).
+     *
+     * @return int Course id, or 0 for global chat.
+     */
+    private function effective_courseid(): int {
+        $config = $this->block->config ?? new \stdClass();
+
+        $fixed = (int) ($config->fixedcourseid ?? 0);
+        if ($fixed > 0) {
+            return \block_elediaaitutor\local\security::course_chat_enabled() ? $fixed : 0;
+        }
+
+        $passcontext = !isset($config->passcoursecontext) || (int) $config->passcoursecontext === 1;
+        $pagecourseid = (int) ($this->block->page->course->id ?? 0);
+        if ($passcontext && \block_elediaaitutor\local\security::course_chat_enabled()
+                && $pagecourseid > 0 && $pagecourseid !== SITEID) {
+            return $pagecourseid;
+        }
+        return 0;
     }
 }
