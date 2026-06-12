@@ -59,5 +59,21 @@
         <KEY NAME="userid" TYPE="foreign-unique" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="At most one consent record per user."/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="block_elediaaitutor_usage" COMMENT="Per-user daily message counters for quota/cost governance: one row per user per day, incremented on each successful chat turn. Pruned after a short retention; covered by the privacy provider and erased on user deletion.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The chatting user."/>
+        <FIELD NAME="daykey" TYPE="int" LENGTH="8" NOTNULL="true" SEQUENCE="false" COMMENT="Day as YYYYMMDD (server timezone)."/>
+        <FIELD NAME="messagecount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Messages sent that day."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid-daykey" UNIQUE="true" FIELDS="userid,daykey" COMMENT="One counter per user per day."/>
+        <INDEX NAME="daykey" UNIQUE="false" FIELDS="daykey" COMMENT="Retention pruning."/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

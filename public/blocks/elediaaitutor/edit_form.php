@@ -94,6 +94,18 @@ class block_elediaaitutor_edit_form extends block_edit_form {
             get_string('config_allowstylechange', 'block_elediaaitutor'));
         $mform->setDefault('config_allowstylechange', 1);
 
+        // Prompt starters (one per line; empty falls back to the site default).
+        $mform->addElement('textarea', 'config_promptstarters',
+            get_string('config_promptstarters', 'block_elediaaitutor'), ['rows' => 4, 'cols' => 50]);
+        $mform->setType('config_promptstarters', PARAM_TEXT);
+        $mform->addHelpButton('config_promptstarters', 'config_promptstarters', 'block_elediaaitutor');
+
+        // Daily message limit override (-1 = site default, 0 = unlimited).
+        $mform->addElement('text', 'config_dailylimit', get_string('config_dailylimit', 'block_elediaaitutor'));
+        $mform->setType('config_dailylimit', PARAM_INT);
+        $mform->setDefault('config_dailylimit', -1);
+        $mform->addHelpButton('config_dailylimit', 'config_dailylimit', 'block_elediaaitutor');
+
         // History enabled.
         $mform->addElement('selectyesno', 'config_historyenabled',
             get_string('config_historyenabled', 'block_elediaaitutor'));

@@ -216,6 +216,24 @@ $string['privacy:metadata:preference:ltm'] = 'Ob die Person dem Langzeitgedächt
 
 $string['eledialink'] = 'eledia.ai besuchen (öffnet in neuem Tab)';
 
+// Prompt starters, conversation resume and daily quota (0.8.0).
+$string['setting_promptstarters'] = 'Vorgeschlagene Fragen';
+$string['setting_promptstarters_desc'] = 'Vorgeschlagene Fragen, die als antippbare Chips unter der Begrüßung angezeigt werden, eine pro Zeile (höchstens 6 werden angezeigt). Block-Instanzen können diese Liste überschreiben; leer lassen, um keine anzuzeigen.';
+$string['setting_dailymessagelimit'] = 'Tägliches Nachrichtenlimit';
+$string['setting_dailymessagelimit_desc'] = 'Maximale Anzahl an Nachrichten, die eine Person pro Tag an den Tutor senden darf (0 = unbegrenzt). Wird serverseitig vor jedem KI-Aufruf durchgesetzt; Block-Instanzen können das Limit überschreiben, der Zähler gilt jedoch immer pro Person für die gesamte Website.';
+$string['config_promptstarters'] = 'Vorgeschlagene Fragen';
+$string['config_promptstarters_help'] = 'Vorgeschlagene Fragen, die als antippbare Chips unter der Begrüßung angezeigt werden, eine pro Zeile (höchstens 6 werden angezeigt). Leer lassen, um die Website-Voreinstellung zu verwenden.';
+$string['config_dailylimit'] = 'Tägliches Nachrichtenlimit';
+$string['config_dailylimit_help'] = '-1 = Website-Voreinstellung verwenden, 0 = unbegrenzt, jede andere Zahl = maximale Nachrichten pro Person und Tag für Chats über diesen Block. Der Zähler gilt für die gesamte Website.';
+$string['starters_label'] = 'Vorgeschlagene Fragen';
+$string['conversation_resumed'] = 'Gespräch fortgesetzt.';
+$string['error_quota_exceeded'] = 'Sie haben Ihr Tageslimit von {$a} Tutor-Nachrichten erreicht. Bitte versuchen Sie es morgen erneut.';
+$string['privacy:usage'] = 'eLeDia.ai Tutor Nutzungszähler';
+$string['privacy:metadata:block_elediaaitutor_usage'] = 'Tageszähler, wie viele Nachrichten Sie an den Tutor gesendet haben; dient der Durchsetzung des täglichen Nachrichtenlimits. Wird beim Löschen Ihres Kontos automatisch entfernt.';
+$string['privacy:metadata:block_elediaaitutor_usage:userid'] = 'Die Person, zu der der Zähler gehört.';
+$string['privacy:metadata:block_elediaaitutor_usage:daykey'] = 'Der Tag, an dem die Nachrichten gesendet wurden.';
+$string['privacy:metadata:block_elediaaitutor_usage:messagecount'] = 'Wie viele Nachrichten an diesem Tag gesendet wurden.';
+
 // Institution-specific privacy guidelines.
 $string['setting_header_privacy'] = 'Datenschutz';
 $string['setting_privacyguidelinestext'] = 'Text der Datenschutzhinweise';

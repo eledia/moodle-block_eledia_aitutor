@@ -221,6 +221,21 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
+    $settings->add(new admin_setting_configtext(
+        'block_elediaaitutor/dailymessagelimit',
+        get_string('setting_dailymessagelimit', 'block_elediaaitutor'),
+        get_string('setting_dailymessagelimit_desc', 'block_elediaaitutor'),
+        0,
+        PARAM_INT
+    ));
+
+    $settings->add(new admin_setting_configtextarea(
+        'block_elediaaitutor/promptstarters',
+        get_string('setting_promptstarters', 'block_elediaaitutor'),
+        get_string('setting_promptstarters_desc', 'block_elediaaitutor'),
+        ''
+    ));
+
     $settings->add(new admin_setting_configcheckbox(
         'block_elediaaitutor/enableanalytics',
         get_string('setting_enableanalytics', 'block_elediaaitutor'),

@@ -87,6 +87,13 @@ class provider implements
             'timecreated' => 'privacy:metadata:block_elediaaitutor_qlog:timecreated',
         ], 'privacy:metadata:block_elediaaitutor_qlog');
 
+        // Daily message counters for quota enforcement.
+        $collection->add_database_table('block_elediaaitutor_usage', [
+            'userid' => 'privacy:metadata:block_elediaaitutor_usage:userid',
+            'daykey' => 'privacy:metadata:block_elediaaitutor_usage:daykey',
+            'messagecount' => 'privacy:metadata:block_elediaaitutor_usage:messagecount',
+        ], 'privacy:metadata:block_elediaaitutor_usage');
+
         // Documented first-use acknowledgement of the privacy guidelines.
         $collection->add_database_table('block_elediaaitutor_consent', [
             'userid' => 'privacy:metadata:block_elediaaitutor_consent:userid',
@@ -148,6 +155,7 @@ class provider implements
         $userlist->add_from_sql('userid', 'SELECT userid FROM {block_elediaaitutor_conv}', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {block_elediaaitutor_qlog}', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {block_elediaaitutor_consent}', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {block_elediaaitutor_usage}', []);
     }
 
     /**
@@ -203,6 +211,21 @@ class provider implements
             );
         }
 
+        $counters = $DB->get_records('block_elediaaitutor_usage', ['userid' => $userid], 'daykey ASC');
+        if (!empty($counters)) {
+            $data = [];
+            foreach ($counters as $record) {
+                $data[] = (object) [
+                    'day' => (string) $record->daykey,
+                    'messages' => (int) $record->messagecount,
+                ];
+            }
+            writer::with_context(context_system::instance())->export_data(
+                [get_string('privacy:usage', 'block_elediaaitutor')],
+                (object) ['days' => $data]
+            );
+        }
+
         $consenttime = \block_elediaaitutor\local\consent::time_consented((int) $userid);
         if ($consenttime !== null) {
             writer::with_context(context_system::instance())->export_data(
@@ -226,6 +249,7 @@ class provider implements
         $DB->delete_records('block_elediaaitutor_conv');
         $DB->delete_records('block_elediaaitutor_qlog');
         $DB->delete_records('block_elediaaitutor_consent');
+        $DB->delete_records('block_elediaaitutor_usage');
     }
 
     /**
@@ -242,6 +266,7 @@ class provider implements
         $DB->delete_records('block_elediaaitutor_conv', ['userid' => (int) $contextlist->get_user()->id]);
         $DB->delete_records('block_elediaaitutor_qlog', ['userid' => (int) $contextlist->get_user()->id]);
         $DB->delete_records('block_elediaaitutor_consent', ['userid' => (int) $contextlist->get_user()->id]);
+        $DB->delete_records('block_elediaaitutor_usage', ['userid' => (int) $contextlist->get_user()->id]);
     }
 
     /**
@@ -263,6 +288,7 @@ class provider implements
         $DB->delete_records_select('block_elediaaitutor_conv', "userid $insql", $params);
         $DB->delete_records_select('block_elediaaitutor_qlog', "userid $insql", $params);
         $DB->delete_records_select('block_elediaaitutor_consent', "userid $insql", $params);
+        $DB->delete_records_select('block_elediaaitutor_usage', "userid $insql", $params);
     }
 
     /**
@@ -275,7 +301,8 @@ class provider implements
         global $DB;
         return $DB->record_exists('block_elediaaitutor_conv', ['userid' => $userid])
             || $DB->record_exists('block_elediaaitutor_qlog', ['userid' => $userid])
-            || $DB->record_exists('block_elediaaitutor_consent', ['userid' => $userid]);
+            || $DB->record_exists('block_elediaaitutor_consent', ['userid' => $userid])
+            || $DB->record_exists('block_elediaaitutor_usage', ['userid' => $userid]);
     }
 
     /**

@@ -126,6 +126,15 @@
                     </div>
                     <div class="elediaaitutor-bubble">{{{welcome}}}</div>
                 </div>
+                {{#hasstarters}}
+                    <div class="elediaaitutor-starters" data-region="starters" role="group"
+                         aria-label="{{#str}}starters_label, block_elediaaitutor{{/str}}">
+                        {{#starters}}
+                            <button type="button" class="elediaaitutor-starter"
+                                    data-action="starter">{{.}}</button>
+                        {{/starters}}
+                    </div>
+                {{/hasstarters}}
             </div>
 
             <div class="elediaaitutor-status" data-region="status" role="status" aria-live="polite"></div>

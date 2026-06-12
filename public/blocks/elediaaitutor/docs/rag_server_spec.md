@@ -435,7 +435,7 @@ usually `structuredContent`. Read `structuredContent` when present.
 ### C.4 Moodle MCP tool catalogue
 
 All read-only unless noted. Names/▾schemas are authoritative via `tools/list`; this
-is the summary as of `webservice_elediamcp` 0.8.
+is the summary as of `webservice_elediamcp` 0.9.
 
 | Tool | Purpose |
 |---|---|
@@ -446,9 +446,12 @@ is the summary as of `webservice_elediamcp` 0.8.
 | `moodle_course_contents` | Sections and activity modules visible to the user in a course. |
 | `moodle_get_resource` | Readable content of one course module by `cmid`. |
 | `moodle_get_announcements` | Most recent posts in each course's Announcements forum. |
+| `moodle_forum_discussions` | Course forum discussions and the posts of one discussion (groups, Q&A gating, timed posts and private replies enforced). |
 | `moodle_calendar_upcoming` | Upcoming calendar events visible to the user. |
 | `moodle_my_assignments` | Assignments across the user's courses (status, due dates). |
 | `moodle_my_grades` | The user's course-final grade per enrolled course. |
+| `moodle_my_progress` | Completion progress per course (percentage, completed/total), optional per-activity states — the backbone for progress coaching. |
+| `moodle_quiz_info` | Quizzes with timing/attempt limits plus the user's **own** attempt history and best grade. |
 | `moodle_find_user` | Find messageable users by fuzzy name (precursor to messaging). |
 | `moodle_send_message` ⚠️ | **Write.** Send a 1:1 personal message *as the user*. |
 
@@ -587,6 +590,7 @@ unless marked otherwise).
 
 | Plugin version | Change |
 |---|---|
+| 0.8.0 | Moodle tool catalogue (C.4) grew to 15 with `webservice_elediamcp` 0.9: **`moodle_my_progress`** (completion coaching), **`moodle_quiz_info`** (own attempts only) and **`moodle_forum_discussions`** (visibility-safe forum reading) — use them to ground tutoring in the learner's actual progress. Also new chat-side capabilities since 0.7.0: tutor UI sends `answer_style`/`user_lang` unchanged; nothing else in the Moodle→RAG contract changed. |
 | 0.7.0 (doc update) | A.6 recluster validation spelled out as MUSTs: callback-validate via `moodle_verify_user_context`, **pin on username `elediaaitutor_service`** (reject learner tokens for this tool), callback only to known tenant `system_url`s over HTTPS; one validation may be cached per nightly run. |
 | 0.7.0 | **Reclustering now authenticates with a `moodle_token`** (A.6): the nightly task auto-provisions a powerless maintenance account (`elediaaitutor_service`) and sends its token, so the call is verifiable like every other tool and **no shared transport secret is needed**; B.4 transport auth is now optional defence in depth. New B.4 note: servers SHOULD accept a Moodle token as transport bearer for direct MCP hosts (Claude Desktop etc.) and map it to `moodle_token`. |
 | 0.6.0 | **`tutor_recluster_questions` is now LIVE** (A.6): when configured, a nightly Moodle task sends the last 30 days of questions per course (≤200/batch, service-level auth — no `moodle_token`) and applies the returned labels. The per-course label registry remains the primary mechanism. |

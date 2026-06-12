@@ -46,8 +46,10 @@ class chat_service {
      * @param rag_client|null $client Optional injected client (tests).
      * @param string|null $answerstyle Effective answer style (explain|hint|quiz), already
      *                                 validated and lock-enforced by the caller.
+     * @param int|null $dailylimit Effective daily message limit (0 = unlimited);
+     *                             null falls back to the site setting.
      * @return array{answerhtml: string, answermarkdown: string, conversationid: ?string, sources: array, iserror: bool}
-     * @throws \moodle_exception On validation, configuration or RAG failure.
+     * @throws \moodle_exception On validation, configuration, quota or RAG failure.
      */
     public static function send(
         int $userid,
@@ -56,7 +58,8 @@ class chat_service {
         ?string $conversationid,
         context $context,
         ?rag_client $client = null,
-        ?string $answerstyle = null
+        ?string $answerstyle = null,
+        ?int $dailylimit = null
     ): array {
         global $CFG;
 
@@ -66,6 +69,13 @@ class chat_service {
 
         $message = security::validate_message($message);
         security::enforce_rate_limit($userid);
+
+        // Daily quota (cost governance): enforced before any RAG call.
+        $dailylimit ??= security::daily_message_limit();
+        if ($dailylimit > 0) {
+            usage::assert_within_limit($userid, $dailylimit);
+        }
+
         token_provider::require_available();
 
         \block_elediaaitutor\event\message_sent::create([
@@ -120,6 +130,10 @@ class chat_service {
             'userid' => $userid,
             'other' => ['sources' => count($result['sources']), 'iserror' => (int) $result['iserror']],
         ])->trigger();
+
+        // Count the successful turn against the daily quota (failed RAG calls
+        // never reach this point and therefore never consume quota).
+        usage::increment($userid);
 
         // Opt-in question analytics (question text only — never the answer).
         // The server-supplied topic and the primary cited source anchor the

@@ -410,6 +410,34 @@ a.elediaaitutor-avatar:focus-visible {
     max-width: 100%;
 }
 
+/* --- Prompt starters (suggested questions under the welcome message). --- */
+.elediaaitutor-starters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    max-width: 90%;
+    align-self: flex-start;
+}
+
+.elediaaitutor-starter {
+    border: 1px solid var(--eat-line);
+    background: var(--eat-surface);
+    color: var(--eat-accent);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.35rem 0.85rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.elediaaitutor-starter:hover,
+.elediaaitutor-starter:focus-visible {
+    border-color: var(--eat-accent);
+    background: #f4f7fa;
+}
+
 /* --- Sources / citations. --------------------------------------------- */
 .elediaaitutor-sources {
     margin-top: 0.5rem;

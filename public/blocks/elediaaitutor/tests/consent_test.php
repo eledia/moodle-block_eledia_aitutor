@@ -87,7 +87,8 @@ final class consent_test extends \advanced_testcase {
     }
 
     /**
-     * Deleting the user account erases the consent record via the observer.
+     * Deleting the user account erases the consent record and the usage
+     * counters via the observer.
      */
     public function test_user_deleted_observer(): void {
         global $DB;
@@ -96,12 +97,17 @@ final class consent_test extends \advanced_testcase {
         $other = $this->getDataGenerator()->create_user();
         consent::give((int) $user->id, context_system::instance());
         consent::give((int) $other->id, context_system::instance());
+        \block_elediaaitutor\local\usage::increment((int) $user->id);
+        \block_elediaaitutor\local\usage::increment((int) $other->id);
 
         delete_user($user);
 
         $this->assertFalse($DB->record_exists(consent::TABLE, ['userid' => $user->id]));
-        // Other users' consent records are untouched.
+        $this->assertSame(0, $DB->count_records(\block_elediaaitutor\local\usage::TABLE,
+            ['userid' => $user->id]));
+        // Other users' records are untouched.
         $this->assertTrue(consent::has_consented((int) $other->id));
+        $this->assertSame(1, \block_elediaaitutor\local\usage::count_today((int) $other->id));
     }
 
     /**

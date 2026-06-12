@@ -26,3 +26,12 @@ Feature: Standalone tutor chat page
     And I log in as "student1"
     When I visit "/blocks/elediaaitutor/view.php"
     Then I should see "Global chat is disabled on this site."
+
+  @javascript
+  Scenario: Prompt starters from the site setting appear under the welcome message
+    Given the following config values are set as admin:
+      | promptstarters | What's due this week? | block_elediaaitutor |
+    And I log in as "student1"
+    When I visit "/blocks/elediaaitutor/view.php"
+    Then "What's due this week?" "button" should exist
+

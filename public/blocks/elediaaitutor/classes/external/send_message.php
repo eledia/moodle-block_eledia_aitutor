@@ -116,8 +116,15 @@ class send_message extends external_api {
         $allowchange = !isset($blockconfig->allowstylechange) || (int) $blockconfig->allowstylechange === 1;
         $effectivestyle = ($allowchange && $params['answerstyle'] !== '') ? $params['answerstyle'] : $default;
 
+        // Daily message limit: the instance may override the site default
+        // (-1 / unset = site default, 0 = unlimited, >0 = messages per day).
+        $dailylimit = null;
+        if (isset($blockconfig->dailylimit) && (int) $blockconfig->dailylimit >= 0) {
+            $dailylimit = (int) $blockconfig->dailylimit;
+        }
+
         $result = chat_service::send((int) $USER->id, $params['message'], $courseid, $conv, $context, null,
-            $effectivestyle);
+            $effectivestyle, $dailylimit);
 
         return [
             'answerhtml' => $result['answerhtml'],

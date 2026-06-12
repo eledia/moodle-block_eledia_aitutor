@@ -144,6 +144,7 @@ class block_elediaaitutor extends block_base {
                 get_string('default_persona', 'block_elediaaitutor')),
             'answerstyle' => (string) $this->get_instance_config('answerstyle', 'explain'),
             'allowstylechange' => (int) $this->get_instance_config('allowstylechange', 1) === 1,
+            'promptstarters' => (string) $this->get_instance_config('promptstarters', ''),
         ]);
 
         // Teachers reach the question-analytics report via the course

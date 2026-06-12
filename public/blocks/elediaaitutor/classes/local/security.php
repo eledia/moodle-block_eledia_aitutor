@@ -194,6 +194,18 @@ class security {
     }
 
     /**
+     * Site-wide daily message limit per user (0 = unlimited).
+     *
+     * Block instances may override this (see send_message); the counter itself
+     * is always global per user, since cost accrues per user, not per course.
+     *
+     * @return int
+     */
+    public static function daily_message_limit(): int {
+        return max(0, (int) self::get_config('dailymessagelimit', 0));
+    }
+
+    /**
      * Whether streaming responses are enabled (when supported by the server).
      *
      * @return bool

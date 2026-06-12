@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace block_elediaaitutor;
 
 use block_elediaaitutor\local\consent;
+use block_elediaaitutor\local\usage;
 
 /**
  * Core event observers.
@@ -31,17 +32,19 @@ use block_elediaaitutor\local\consent;
  */
 class observer {
     /**
-     * When a user account is deleted, erase their consent record immediately.
+     * When a user account is deleted, erase their consent record and usage
+     * counters immediately.
      *
-     * The consent row exists solely to document the (now deleted) user's
-     * acknowledgement, so it must not outlive the account. Conversation
-     * pointers and analytics rows are handled by the Privacy API on data
-     * deletion requests.
+     * Both rows exist solely for the (now deleted) account — documented
+     * acknowledgement and quota counting — so they must not outlive it.
+     * Conversation pointers and analytics rows are handled by the Privacy API
+     * on data deletion requests.
      *
      * @param \core\event\user_deleted $event The deletion event.
      * @return void
      */
     public static function user_deleted(\core\event\user_deleted $event): void {
         consent::delete_for_user((int) $event->objectid);
+        usage::delete_for_user((int) $event->objectid);
     }
 }

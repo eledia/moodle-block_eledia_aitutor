@@ -113,6 +113,36 @@ final class chat_service_test extends \advanced_testcase {
     }
 
     /**
+     * The daily quota blocks the turn at the limit; only successful turns
+     * consume quota.
+     */
+    public function test_send_enforces_daily_quota(): void {
+        $this->resetAfterTest();
+        $this->configure_mcp_service();
+        $user = $this->create_consented_user();
+        $uid = (int) $user->id;
+
+        $transport = fake_transport::json_result(['structuredContent' => ['answer' => 'ok']]);
+        $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
+
+        // Limit 2: two turns pass and are counted, the third is refused.
+        chat_service::send($uid, 'one', null, null, context_system::instance(), $client, null, 2);
+        chat_service::send($uid, 'two', null, null, context_system::instance(), $client, null, 2);
+        $this->assertSame(2, \block_elediaaitutor\local\usage::count_today($uid));
+
+        try {
+            chat_service::send($uid, 'three', null, null, context_system::instance(), $client, null, 2);
+            $this->fail('Expected the quota gate to throw.');
+        } catch (\moodle_exception $e) {
+            $this->assertSame('error_quota_exceeded', $e->errorcode);
+        }
+
+        // Limit 0 = unlimited.
+        chat_service::send($uid, 'four', null, null, context_system::instance(), $client, null, 0);
+        $this->assertSame(3, \block_elediaaitutor\local\usage::count_today($uid));
+    }
+
+    /**
      * A full chat turn provisions a token, calls the RAG server and persists
      * the conversation pointer.
      */

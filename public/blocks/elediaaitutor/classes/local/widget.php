@@ -118,6 +118,23 @@ class widget {
             ? format_text($privacytext, FORMAT_HTML, ['context' => $context])
             : '';
 
+        // Prompt starters: instance value, falling back to the site default.
+        // One per line, capped so the welcome area stays tidy.
+        $startersraw = (string) ($options['promptstarters'] ?? '');
+        if (trim($startersraw) === '') {
+            $startersraw = (string) get_config('block_elediaaitutor', 'promptstarters');
+        }
+        $starters = [];
+        foreach (preg_split('/\R/', $startersraw) ?: [] as $line) {
+            $line = trim($line);
+            if ($line !== '') {
+                $starters[] = format_string($line);
+            }
+            if (count($starters) >= 6) {
+                break;
+            }
+        }
+
         $styles = [];
         foreach (['explain', 'hint', 'quiz'] as $style) {
             $styles[] = [
@@ -142,6 +159,8 @@ class widget {
             'stylelocked' => !$allowstylechange && $answerstyle !== 'explain',
             'lockedlabel' => get_string('answerstyle_' . $answerstyle, 'block_elediaaitutor'),
             'consented' => $consented,
+            'starters' => $starters,
+            'hasstarters' => !empty($starters),
         ];
 
         $html = $OUTPUT->render_from_template('block_elediaaitutor/launcher', $templatecontext);

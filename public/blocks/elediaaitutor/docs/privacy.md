@@ -70,6 +70,16 @@ the same question texts already transited the same processor at chat time —
 and the server must not retain the batches beyond processing (see the RAG
 server specification, section A.6).
 
+## Usage counters (daily quota)
+
+Table `block_elediaaitutor_usage` — one row per user per day (`userid`,
+`daykey`, `messagecount`), incremented on each successful chat turn and used
+only to enforce the admin-configured daily message limit. Exported and deleted
+by the privacy provider, erased immediately when the account is deleted
+(observer), and pruned after 60 days by the daily task. Deliberately **not**
+removed by the self-service "delete all my tutor data" control — that would
+let users reset their own quota.
+
 ## User preferences
 
 One user preference is stored: `block_elediaaitutor_ltm_enabled` — the explicit

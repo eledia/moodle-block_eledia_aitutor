@@ -216,6 +216,24 @@ $string['privacy:metadata:preference:ltm'] = 'Whether the user has opted in to t
 
 $string['eledialink'] = 'Visit eledia.ai (opens in a new tab)';
 
+// Prompt starters, conversation resume and daily quota (0.8.0).
+$string['setting_promptstarters'] = 'Prompt starters';
+$string['setting_promptstarters_desc'] = 'Suggested questions shown as tappable chips under the welcome message, one per line (at most 6 are shown). Block instances can override this list; leave empty to show none.';
+$string['setting_dailymessagelimit'] = 'Daily message limit';
+$string['setting_dailymessagelimit_desc'] = 'Maximum number of messages each user may send to the tutor per day (0 = unlimited). Enforced server-side before any AI call; block instances can override the limit, while the counter is always per user across the site.';
+$string['config_promptstarters'] = 'Prompt starters';
+$string['config_promptstarters_help'] = 'Suggested questions shown as tappable chips under the welcome message, one per line (at most 6 are shown). Leave empty to use the site default.';
+$string['config_dailylimit'] = 'Daily message limit';
+$string['config_dailylimit_help'] = '-1 = use the site default, 0 = unlimited, any other number = maximum messages per user per day for chats through this block. The counter is shared across the whole site.';
+$string['starters_label'] = 'Suggested questions';
+$string['conversation_resumed'] = 'Conversation resumed.';
+$string['error_quota_exceeded'] = 'You have reached your daily limit of {$a} tutor messages. Please try again tomorrow.';
+$string['privacy:usage'] = 'eLeDia.ai Tutor usage counters';
+$string['privacy:metadata:block_elediaaitutor_usage'] = 'Per-day counters of how many messages you sent to the tutor, used to enforce the daily message limit. Removed automatically when your account is deleted.';
+$string['privacy:metadata:block_elediaaitutor_usage:userid'] = 'The user the counter belongs to.';
+$string['privacy:metadata:block_elediaaitutor_usage:daykey'] = 'The day the messages were sent.';
+$string['privacy:metadata:block_elediaaitutor_usage:messagecount'] = 'How many messages were sent that day.';
+
 // Institution-specific privacy guidelines.
 $string['setting_header_privacy'] = 'Privacy';
 $string['setting_privacyguidelinestext'] = 'Privacy guidelines text';

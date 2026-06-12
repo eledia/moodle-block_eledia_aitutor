@@ -44,11 +44,16 @@ class prune_question_log extends scheduled_task {
     }
 
     /**
-     * Delete logged questions older than the configured retention.
+     * Delete logged questions and stale usage counters past their retention.
      *
      * @return void
      */
     public function execute(): void {
+        // Daily quota counters only matter for the current day; keep a short
+        // tail for support questions, then drop them.
+        $usagedeleted = \block_elediaaitutor\local\usage::prune();
+        mtrace("block_elediaaitutor: pruned {$usagedeleted} stale usage counter(s).");
+
         $configured = get_config('block_elediaaitutor', 'analyticsretentiondays');
         $days = ($configured === false || $configured === '') ? 180 : (int) $configured;
 

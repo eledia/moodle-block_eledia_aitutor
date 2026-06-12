@@ -39,6 +39,8 @@ short-lived application cache (never the database) and reused until it expires.
 | Enable course chat | Yes |
 | Maximum message length | 4000 |
 | Rate limit (messages/minute/user) | 20 (0 disables) |
+| Daily message limit | 0 = unlimited (per-user daily cap, enforced server-side before any AI call; block instances may override the limit — the counter is always per user site-wide; counters live in `block_elediaaitutor_usage`, pruned after 60 days) |
+| Prompt starters | Empty (suggested questions shown as chips under the welcome message, one per line, max 6; block instances may override) |
 | Question analytics | Off (opt-in; logs learner questions for the course report — see privacy.md) |
 | Question analytics retention (days) | 180 (daily prune task) |
 | Recluster tool name | Empty (optional; e.g. `tutor_recluster_questions` — a nightly task converges hotspot topic labels via the RAG server). The task auto-provisions a powerless maintenance account (`elediaaitutor_service`, webservice-only auth, no roles/enrolments) and authenticates with its MCP token, so no shared transport secret is required for this call. |
