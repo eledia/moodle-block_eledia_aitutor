@@ -48,6 +48,8 @@ class chat_service {
      *                                 validated and lock-enforced by the caller.
      * @param int|null $dailylimit Effective daily message limit (0 = unlimited);
      *                             null falls back to the site setting.
+     * @param bool|null $ragenabled Whether the RAG agent may use its knowledge-base
+     *                              tool (false = LLM-only); null omits the flag.
      * @return array{answerhtml: string, answermarkdown: string, conversationid: ?string, sources: array, iserror: bool}
      * @throws \moodle_exception On validation, configuration, quota or RAG failure.
      */
@@ -59,7 +61,8 @@ class chat_service {
         context $context,
         ?rag_client $client = null,
         ?string $answerstyle = null,
-        ?int $dailylimit = null
+        ?int $dailylimit = null,
+        ?bool $ragenabled = null
     ): array {
         global $CFG;
 
@@ -98,7 +101,7 @@ class chat_service {
         try {
             $token = token_provider::get_token($userid);
             $result = $client->chat($systemurl, $token, $message, $courseparam, $conversationid, $toolname,
-                $ltmflag, $answerstyle, $userlang);
+                $ltmflag, $answerstyle, $userlang, $ragenabled);
         } catch (rag_exception $e) {
             // The cached token may have been revoked/expired server-side: drop it,
             // mint a fresh one and retry exactly once before giving up.
@@ -106,7 +109,7 @@ class chat_service {
             try {
                 $token = token_provider::get_token($userid);
                 $result = $client->chat($systemurl, $token, $message, $courseparam, $conversationid, $toolname,
-                    $ltmflag, $answerstyle, $userlang);
+                    $ltmflag, $answerstyle, $userlang, $ragenabled);
             } catch (rag_exception $retry) {
                 self::log_failure($userid, $context, 'rag_error');
                 throw $retry;

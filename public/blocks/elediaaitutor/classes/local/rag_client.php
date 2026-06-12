@@ -121,6 +121,10 @@ class rag_client {
      *                                 or null/empty to omit (server default: explain).
      * @param string|null $userlang The user's Moodle language code (e.g. "de"),
      *                              or null/empty to omit.
+     * @param bool|null $ragenabled Whether the agent may use its retrieval/
+     *                              knowledge-base tool. When false the agent
+     *                              answers from the model alone (LLM-only). Null
+     *                              omits the flag (server default: enabled).
      * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, iserror: bool}
      * @throws rag_exception On transport or protocol failure.
      */
@@ -133,7 +137,8 @@ class rag_client {
         string $toolname,
         ?bool $ltmenabled = null,
         ?string $answerstyle = null,
-        ?string $userlang = null
+        ?string $userlang = null,
+        ?bool $ragenabled = null
     ): array {
         $arguments = [
             'system_url' => $systemurl,
@@ -154,6 +159,9 @@ class rag_client {
         }
         if ($userlang !== null && $userlang !== '') {
             $arguments['user_lang'] = $userlang;
+        }
+        if ($ragenabled !== null) {
+            $arguments['rag_enabled'] = $ragenabled;
         }
 
         $result = $this->call_tool($toolname, $arguments);

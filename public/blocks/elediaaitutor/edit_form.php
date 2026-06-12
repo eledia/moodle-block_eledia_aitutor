@@ -106,6 +106,21 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         $mform->setDefault('config_dailylimit', -1);
         $mform->addHelpButton('config_dailylimit', 'config_dailylimit', 'block_elediaaitutor');
 
+        // Answer source (grounded vs LLM-only) — only when LLM-only is allowed
+        // site-wide. When grounding is unavailable for the course, the server
+        // forces LLM-only regardless of this choice.
+        if (\block_elediaaitutor\local\chat_mode::is_llm_allowed()) {
+            $mform->addElement('select', 'config_ragmode',
+                get_string('config_ragmode', 'block_elediaaitutor'), [
+                    \block_elediaaitutor\local\chat_mode::MODE_GROUNDED =>
+                        get_string('ragmode_grounded', 'block_elediaaitutor'),
+                    \block_elediaaitutor\local\chat_mode::MODE_LLMONLY =>
+                        get_string('ragmode_llmonly', 'block_elediaaitutor'),
+                ]);
+            $mform->setDefault('config_ragmode', \block_elediaaitutor\local\chat_mode::MODE_GROUNDED);
+            $mform->addHelpButton('config_ragmode', 'config_ragmode', 'block_elediaaitutor');
+        }
+
         // History enabled.
         $mform->addElement('selectyesno', 'config_historyenabled',
             get_string('config_historyenabled', 'block_elediaaitutor'));

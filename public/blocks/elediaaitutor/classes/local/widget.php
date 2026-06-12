@@ -90,6 +90,18 @@ class widget {
     public static function render(\context $context, int $courseid, array $options = []): string {
         global $OUTPUT, $PAGE, $USER;
 
+        // Resolve the answer mode (grounded / LLM-only / unavailable). When the
+        // tutor cannot answer here (no knowledge base and LLM-only disallowed),
+        // show a friendly notice and skip the chat UI entirely.
+        $blockconfig = (object) ['ragmode' => (string) ($options['ragmode'] ?? chat_mode::MODE_GROUNDED)];
+        $mode = chat_mode::resolve($courseid, $blockconfig);
+        if ($mode === chat_mode::MODE_UNAVAILABLE) {
+            return $OUTPUT->render_from_template('block_elediaaitutor/unavailable', [
+                'isadmin' => false,
+                'message' => get_string('llmonly_unavailable', 'block_elediaaitutor'),
+            ]);
+        }
+
         $displaymode = (string) ($options['displaymode']
             ?? (get_config('block_elediaaitutor', 'defaultdisplaymode') ?: 'embedded'));
         $historyenabled = (bool) ($options['historyenabled'] ?? true)
@@ -182,6 +194,7 @@ class widget {
             'allowstylechange' => $allowstylechange,
             'consented' => $consented,
             'privacyhtml' => $privacyhtml,
+            'ragmode' => $mode,
         ]]);
 
         return $html;

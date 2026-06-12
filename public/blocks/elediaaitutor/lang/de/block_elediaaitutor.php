@@ -78,6 +78,10 @@ $string['config_fixedcourseid_help'] = 'Erzwingt, dass unabhängig von der Seite
 $string['config_welcomemessage'] = 'Begrüßungsnachricht';
 $string['config_persona'] = 'Bezeichnung der Assistenten-Persona';
 $string['config_historyenabled'] = 'Gesprächsverlauf aktivieren';
+$string['config_ragmode'] = 'Antwortquelle';
+$string['config_ragmode_help'] = 'Verankert: Der Tutor antwortet aus den eingelesenen Materialien dieses Kurses (mit Quellenangaben). Nur LLM: Der Tutor antwortet aus dem Allgemeinwissen des Sprachmodells, ohne die Wissensbasis des Kurses zu durchsuchen. Hat der Kurs keine eingelesenen Inhalte, verwendet der Tutor automatisch den Nur-LLM-Modus.';
+$string['ragmode_grounded'] = 'In Kursmaterialien verankert';
+$string['ragmode_llmonly'] = 'Allgemeinwissen (nur LLM)';
 
 // Display modes.
 $string['displaymode_embedded'] = 'Im Block eingebettet';
@@ -160,6 +164,7 @@ $string['error_token_provision_failed'] = 'Für Ihr Konto konnte kein Moodle-MCP
 $string['error_invalid_context'] = 'Ungültiger Kontext.';
 $string['error_conversation_not_found'] = 'Gespräch nicht gefunden.';
 $string['error_course_chat_disabled'] = 'Der Kurs-Chat ist auf dieser Website deaktiviert.';
+$string['llmonly_unavailable'] = 'Der eLeDia.ai Tutor ist in diesem Kurs noch nicht verfügbar: Es gibt keine Wissensbasis, und Antworten aus dem Allgemeinwissen sind auf dieser Website deaktiviert.';
 $string['notenabledincourse'] = 'Der Tutor ist in diesem Kurs nicht aktiviert. Lehrende aktivieren ihn, indem sie den eLeDia.ai-Tutor-Block zum Kurs hinzufügen.';
 $string['error_global_chat_disabled'] = 'Der globale Chat ist auf dieser Website deaktiviert.';
 
@@ -266,6 +271,8 @@ $string['config_answerstyle_help'] = 'Wie der Tutor standardmäßig antwortet: v
 $string['config_allowstylechange'] = 'Lernende dürfen den Antwortstil ändern';
 
 // Question analytics.
+$string['setting_allowllmonly'] = 'Nur-LLM-Modus erlauben';
+$string['setting_allowllmonly_desc'] = 'Wenn aktiviert, kann ein Tutor-Block so eingestellt werden, dass er aus dem Allgemeinwissen des Sprachmodells antwortet, ohne die Wissensbasis des Kurses zu durchsuchen; Kurse ohne eingelesene Inhalte greifen automatisch darauf zurück. Wenn deaktiviert, antwortet der Tutor ausschließlich aus eingelesenen Kursmaterialien; in einem Kurs ohne Wissensbasis zeigt er stattdessen einen Hinweis "nicht verfügbar".';
 $string['setting_enableanalytics'] = 'Fragen-Analyse';
 $string['setting_enableanalytics_desc'] = 'Protokolliert die Fragen der Lernenden an den Tutor (mit Kurs und fragender Person), damit Lehrkräfte Verständnisprobleme im Kursbericht erkennen können. Antworten werden nie gespeichert. Standardmäßig deaktiviert: Die Aktivierung ist eine datenschutzrelevante Entscheidung — protokollierte Fragen sind über die Privacy-API abgedeckt, hinter einer Lehrkraft-Berechtigung verborgen, werden ohne Namen angezeigt und nach Ablauf der Aufbewahrungsfrist gelöscht.';
 $string['setting_analyticsretention'] = 'Aufbewahrung der Fragen-Analyse (Tage)';

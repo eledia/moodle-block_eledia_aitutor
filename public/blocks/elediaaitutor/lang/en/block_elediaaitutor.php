@@ -78,6 +78,10 @@ $string['config_fixedcourseid_help'] = 'Force a specific course id to be sent as
 $string['config_welcomemessage'] = 'Welcome message';
 $string['config_persona'] = 'Assistant persona label';
 $string['config_historyenabled'] = 'Enable conversation history';
+$string['config_ragmode'] = 'Answer source';
+$string['config_ragmode_help'] = 'Grounded: the tutor answers from this course\'s ingested materials (with citations). LLM-only: the tutor answers from the language model\'s general knowledge without searching the course knowledge base. If the course has no ingested content, the tutor uses LLM-only automatically.';
+$string['ragmode_grounded'] = 'Grounded in course materials';
+$string['ragmode_llmonly'] = 'General knowledge (LLM only)';
 
 // Display modes.
 $string['displaymode_embedded'] = 'Embedded in block';
@@ -160,6 +164,7 @@ $string['error_token_provision_failed'] = 'A Moodle MCP token could not be provi
 $string['error_invalid_context'] = 'Invalid context.';
 $string['error_conversation_not_found'] = 'Conversation not found.';
 $string['error_course_chat_disabled'] = 'Course chat is disabled on this site.';
+$string['llmonly_unavailable'] = 'The eLeDia.ai Tutor is not available in this course yet: it has no knowledge base, and general-knowledge answers are disabled on this site.';
 $string['notenabledincourse'] = 'The tutor is not enabled in this course. Teachers enable it by adding the eLeDia.ai Tutor block to the course.';
 $string['error_global_chat_disabled'] = 'Global chat is disabled on this site.';
 
@@ -266,6 +271,8 @@ $string['config_answerstyle_help'] = 'How the tutor responds by default: full ex
 $string['config_allowstylechange'] = 'Learners may change the answer style';
 
 // Question analytics.
+$string['setting_allowllmonly'] = 'Allow LLM-only mode';
+$string['setting_allowllmonly_desc'] = 'When enabled, a tutor block can be set to answer from the language model\'s general knowledge without searching the course knowledge base, and courses with no ingested content fall back to this automatically. When disabled, the tutor only ever answers from ingested course materials; in a course with no knowledge base it shows an "unavailable" notice instead.';
 $string['setting_enableanalytics'] = 'Question analytics';
 $string['setting_enableanalytics_desc'] = 'Log the questions learners ask the tutor (with course and asker) so teachers can spot confusion hotspots in the course report. Answers are never stored. Disabled by default: enabling this is a privacy-relevant decision — logged questions are covered by the privacy API, hidden behind a teacher capability, displayed without names, and pruned after the retention period.';
 $string['setting_analyticsretention'] = 'Question analytics retention (days)';

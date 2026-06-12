@@ -26,11 +26,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2026061114;
+$plugin->version = 2026061300;
 $plugin->requires = 2023041800;
 $plugin->component = 'block_elediaaitutor';
 $plugin->maturity = MATURITY_BETA;
-$plugin->release = '0.8.0';
+$plugin->release = '0.9.0';
 // Soft dependency on the MCP web service plugin is enforced at runtime so the
 // block degrades gracefully (admin error + user-facing unavailable message)
 // rather than refusing to install. See token_provider::is_connector_available().

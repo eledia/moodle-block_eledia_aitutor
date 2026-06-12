@@ -139,6 +139,28 @@ final class rag_client_test extends \advanced_testcase {
     }
 
     /**
+     * The rag_enabled flag is sent only when provided (LLM-only = false).
+     */
+    public function test_chat_rag_enabled_flag(): void {
+        $this->resetAfterTest();
+        $transport = fake_transport::json_result(['structuredContent' => ['answer' => 'ok']]);
+
+        // Omitted by default.
+        $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat');
+        $this->assertArrayNotHasKey('rag_enabled', $transport->last_payload()['params']['arguments']);
+
+        // LLM-only: false transmitted verbatim.
+        $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat',
+            null, null, null, false);
+        $this->assertFalse($transport->last_payload()['params']['arguments']['rag_enabled']);
+
+        // Grounded: true.
+        $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat',
+            null, null, null, true);
+        $this->assertTrue($transport->last_payload()['params']['arguments']['rag_enabled']);
+    }
+
+    /**
      * The canonical topic label is extracted (and capped) from the response.
      */
     public function test_chat_extracts_topic(): void {

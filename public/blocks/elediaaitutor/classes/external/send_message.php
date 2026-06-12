@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_elediaaitutor\external;
 
+use block_elediaaitutor\local\chat_mode;
 use block_elediaaitutor\local\chat_service;
 use block_elediaaitutor\local\security;
 use core_external\external_api;
@@ -123,8 +124,17 @@ class send_message extends external_api {
             $dailylimit = (int) $blockconfig->dailylimit;
         }
 
+        // Resolve the answer mode authoritatively (the client cannot widen it):
+        // grounded vs LLM-only, honouring the site gate and the course's
+        // ingestion state. Refuse the turn when the tutor is unavailable here.
+        $mode = chat_mode::resolve((int) ($courseid ?? 0), $blockconfig);
+        if ($mode === chat_mode::MODE_UNAVAILABLE) {
+            throw new moodle_exception('llmonly_unavailable', 'block_elediaaitutor');
+        }
+        $ragenabled = chat_mode::rag_enabled_for($mode);
+
         $result = chat_service::send((int) $USER->id, $params['message'], $courseid, $conv, $context, null,
-            $effectivestyle, $dailylimit);
+            $effectivestyle, $dailylimit, $ragenabled);
 
         return [
             'answerhtml' => $result['answerhtml'],

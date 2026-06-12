@@ -237,6 +237,13 @@ if ($hassiteconfig) {
     ));
 
     $settings->add(new admin_setting_configcheckbox(
+        'block_elediaaitutor/allowllmonly',
+        get_string('setting_allowllmonly', 'block_elediaaitutor'),
+        get_string('setting_allowllmonly_desc', 'block_elediaaitutor'),
+        1
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
         'block_elediaaitutor/enableanalytics',
         get_string('setting_enableanalytics', 'block_elediaaitutor'),
         get_string('setting_enableanalytics_desc', 'block_elediaaitutor'),
