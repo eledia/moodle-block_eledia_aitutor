@@ -164,8 +164,9 @@
 .elediaaitutor-window {
     display: flex;
     flex-direction: column;
-    background: var(--eat-bg, #fff);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--eat-surface);
+    color: var(--eat-ink);
+    border: 1px solid var(--eat-line);
     border-radius: var(--eat-radius);
     overflow: hidden;
     box-shadow: var(--eat-shadow-lg);
@@ -612,7 +613,7 @@ a.elediaaitutor-avatar:focus-visible {
     flex: 0 0 auto;
     border: 0;
     background: var(--eat-accent);
-    color: #fff;
+    color: var(--eat-accent-contrast);
     border-radius: 50%;
     width: 2.5rem;
     height: 2.5rem;
@@ -722,7 +723,7 @@ a.elediaaitutor-avatar:focus-visible {
 .elediaaitutor-panel .elediaaitutor-consent-accept {
     background: var(--eat-accent);
     border-color: var(--eat-accent);
-    color: #fff;
+    color: var(--eat-accent-contrast);
     font-size: 0.85rem;
     font-weight: 600;
     border-radius: 999px;
@@ -770,7 +771,7 @@ a.elediaaitutor-avatar:focus-visible {
 .elediaaitutor-stylechip-active {
     background: var(--eat-accent);
     border-color: var(--eat-accent);
-    color: #fff;
+    color: var(--eat-accent-contrast);
 }
 
 .elediaaitutor-stylechip-locked {
