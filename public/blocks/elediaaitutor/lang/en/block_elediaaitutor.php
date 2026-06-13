@@ -42,6 +42,39 @@ $string['close'] = 'Close';
 $string['online'] = 'Online';
 $string['senderyou'] = 'You';
 $string['poweredby'] = 'Powered by eLeDia.ai';
+
+// Branding (admin settings).
+$string['setting_header_branding'] = 'Branding';
+$string['setting_header_branding_desc'] = 'Adapt the tutor\'s appearance to your institution. All fields are optional; leave them empty to use the built-in eLeDia.ai design. Colours and the launcher label can also be overridden per block instance.';
+$string['setting_brandlogo'] = 'Logo';
+$string['setting_brandlogo_desc'] = 'The logo/avatar shown in the launcher and the chat header. A square image works best. Replaces the built-in eLeDia.ai mark.';
+$string['setting_brandaccent'] = 'Accent colour';
+$string['setting_brandaccent_desc'] = 'The primary colour for buttons, links, the header and the send button. Leave empty for the default navy.';
+$string['setting_brandbubble'] = 'User bubble colour';
+$string['setting_brandbubble_desc'] = 'Background colour of the learner\'s own message bubbles. Leave empty for the default peach.';
+$string['setting_brandsurface'] = 'Conversation background';
+$string['setting_brandsurface_desc'] = 'Background tint behind the conversation. Leave empty for the default light grey.';
+$string['setting_brandfont'] = 'Font family';
+$string['setting_brandfont_desc'] = 'Optional CSS font-family stack for the widget, e.g. "Inter, sans-serif". Leave empty to inherit your Moodle theme font.';
+$string['setting_brandlaunchlabel'] = 'Launcher label';
+$string['setting_brandlaunchlabel_desc'] = 'Text on the button that opens the tutor (docked/modal/fullscreen modes). Leave empty for the default.';
+$string['setting_footermode'] = 'Footer';
+$string['setting_footermode_desc'] = 'What to show in the small footer beneath the composer.';
+$string['footermode_default'] = 'Show "Powered by eLeDia.ai"';
+$string['footermode_custom'] = 'Show custom text';
+$string['footermode_none'] = 'Hide the footer (white-label)';
+$string['setting_footertext'] = 'Custom footer text';
+$string['setting_footertext_desc'] = 'Shown when the footer is set to "custom text".';
+$string['setting_customcss'] = 'Custom CSS';
+$string['setting_customcss_desc'] = 'Advanced. CSS added to every tutor widget on the site. Target the widget\'s own classes (all prefixed <code>.elediaaitutor-</code>), e.g. <code>.elediaaitutor-bubble { border-radius: 4px; }</code>. Applied site-wide.';
+
+// Per-instance branding overrides (block settings).
+$string['config_launchlabel'] = 'Launcher label';
+$string['config_launchlabel_help'] = 'Overrides the launcher button text for this block only. Leave empty to use the site default.';
+$string['config_brandaccent'] = 'Accent colour';
+$string['config_brandaccent_help'] = 'A hex colour (e.g. #1e3f59) overriding the accent for this block only. Leave empty to use the site branding.';
+$string['config_brandbubble'] = 'User bubble colour';
+$string['config_brandbubble_help'] = 'A hex colour (e.g. #fce9db) for the learner\'s message bubbles in this block only. Leave empty to use the site branding.';
 $string['send'] = 'Send message';
 $string['messagelabel'] = 'Your message to the tutor';
 $string['inputplaceholder'] = 'Ask the tutor anything…';

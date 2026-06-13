@@ -60,6 +60,36 @@
     --eat-bubble-radius: 16px;
     --eat-gap: 0.8rem;
     --eat-z: 1080;
+    /* Typography — inherits the Moodle theme font unless an institution sets one. */
+    --eat-font: inherit;
+    /* State + accent surfaces (tokenised so branding overrides reach them). */
+    --eat-status-online: #22c55e;
+    --eat-overlay: rgba(16, 24, 40, 0.06);
+    --eat-overlay-strong: rgba(0, 0, 0, 0.04);
+    --eat-code-bg: rgba(0, 0, 0, 0.06);
+    --eat-backdrop: rgba(16, 24, 40, 0.45);
+    --eat-error-bg: #fdecec;
+    --eat-error-fg: #842029;
+    --eat-error-line: #f5c2c7;
+    --eat-grounded-bg: #eaf1f3;
+    --eat-grounded-line: #c9d8dd;
+    --eat-muted-soft: #5b6677;
+    --eat-tint: #f4f7fa;
+    /* Cohesive shadow scale — all elevation flows from these three. */
+    --eat-shadow-sm: 0 1px 2px rgba(30, 63, 89, 0.06);
+    --eat-shadow-md: 0 2px 8px rgba(30, 63, 89, 0.10), 0 1px 2px rgba(30, 63, 89, 0.06);
+    --eat-shadow-lg: 0 10px 40px rgba(16, 24, 40, 0.16);
+}
+
+.elediaaitutor-root,
+.elediaaitutor-panel {
+    font-family: var(--eat-font);
+}
+/* Children inherit the widget font, but icon fonts (Font Awesome) must not be
+   overridden, so we never set font-family on [class*="fa-"]. */
+.elediaaitutor-root :not([class*="fa-"]):not(.fa),
+.elediaaitutor-panel :not([class*="fa-"]):not(.fa) {
+    font-family: inherit;
 }
 
 /* --- Launch button (overlay modes). ----------------------------------- */
@@ -136,7 +166,7 @@
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: var(--eat-radius);
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(16, 24, 40, 0.16);
+    box-shadow: var(--eat-shadow-lg);
     min-height: 0;
 }
 
@@ -159,7 +189,7 @@
     padding: 0.85rem 1rem;
     background: var(--eat-surface);
     color: var(--eat-header-fg);
-    border-bottom: 1px solid rgba(16, 24, 40, 0.06);
+    border-bottom: 1px solid var(--eat-overlay);
     flex: 0 0 auto;
 }
 
@@ -215,7 +245,7 @@ a.elediaaitutor-avatar:focus-visible {
     width: 0.7rem;
     height: 0.7rem;
     border-radius: 50%;
-    background: #22c55e;
+    background: var(--eat-status-online);
     border: 2px solid var(--eat-surface);
 }
 
@@ -259,7 +289,7 @@ a.elediaaitutor-avatar:focus-visible {
 
 .elediaaitutor-iconbtn:hover,
 .elediaaitutor-iconbtn:focus-visible {
-    background: rgba(16, 24, 40, 0.06);
+    background: var(--eat-overlay);
     color: var(--eat-header-fg);
 }
 
@@ -268,7 +298,7 @@ a.elediaaitutor-avatar:focus-visible {
 }
 
 .elediaaitutor-message-actions .elediaaitutor-iconbtn:hover {
-    background: rgba(16, 24, 40, 0.06);
+    background: var(--eat-overlay);
 }
 
 /* --- Message log. ------------------------------------------------------ */
@@ -290,6 +320,18 @@ a.elediaaitutor-avatar:focus-visible {
     flex-direction: column;
     max-width: 90%;
     min-width: 0;
+    animation: elediaaitutor-msg-in 0.22s ease-out both;
+}
+
+@keyframes elediaaitutor-msg-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .elediaaitutor-user {
@@ -370,9 +412,9 @@ a.elediaaitutor-avatar:focus-visible {
 }
 
 .elediaaitutor-failed .elediaaitutor-bubble {
-    background: #fdecec;
-    color: #842029;
-    border: 1px solid #f5c2c7;
+    background: var(--eat-error-bg);
+    color: var(--eat-error-fg);
+    border: 1px solid var(--eat-error-line);
 }
 
 .elediaaitutor-markdown > *:first-child {
@@ -384,7 +426,7 @@ a.elediaaitutor-avatar:focus-visible {
 }
 
 .elediaaitutor-markdown pre {
-    background: rgba(0, 0, 0, 0.06);
+    background: var(--eat-code-bg);
     padding: 0.6rem;
     border-radius: 8px;
     overflow-x: auto;
@@ -435,7 +477,7 @@ a.elediaaitutor-avatar:focus-visible {
 .elediaaitutor-starter:hover,
 .elediaaitutor-starter:focus-visible {
     border-color: var(--eat-accent);
-    background: #f4f7fa;
+    background: var(--eat-tint);
 }
 
 /* --- Sources / citations. --------------------------------------------- */
@@ -505,7 +547,7 @@ a.elediaaitutor-avatar:focus-visible {
     min-height: 1.1rem;
     padding: 0 0.85rem;
     font-size: 0.78rem;
-    color: #5b6677;
+    color: var(--eat-muted-soft);
 }
 
 .elediaaitutor-status:empty {
@@ -518,7 +560,7 @@ a.elediaaitutor-avatar:focus-visible {
     align-items: flex-end;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    border-top: 1px solid rgba(16, 24, 40, 0.06);
+    border-top: 1px solid var(--eat-overlay);
     background: var(--eat-surface);
     flex: 0 0 auto;
 }
@@ -591,9 +633,9 @@ a.elediaaitutor-avatar:focus-visible {
 }
 
 .elediaaitutor-grounded {
-    background: #eaf1f3;
+    background: var(--eat-grounded-bg);
     color: var(--eat-accent);
-    border: 1px solid #c9d8dd;
+    border: 1px solid var(--eat-grounded-line);
 }
 
 .elediaaitutor-ungrounded {
@@ -623,7 +665,7 @@ a.elediaaitutor-avatar:focus-visible {
     padding: 0.4rem 1rem;
     font-size: 0.78rem;
     color: var(--eat-muted);
-    background: #f4f7fa;
+    background: var(--eat-tint);
     border-bottom: 1px solid var(--eat-line);
 }
 
@@ -637,7 +679,7 @@ a.elediaaitutor-avatar:focus-visible {
     flex: 0 0 auto;
     padding: 0.85rem 1rem;
     background: var(--eat-surface);
-    border-top: 1px solid rgba(16, 24, 40, 0.06);
+    border-top: 1px solid var(--eat-overlay);
     color: var(--eat-ink);
     font-size: 0.85rem;
 }
@@ -688,7 +730,7 @@ a.elediaaitutor-avatar:focus-visible {
     gap: 0.4rem;
     padding: 0.45rem 1rem 0;
     background: var(--eat-surface);
-    border-top: 1px solid rgba(16, 24, 40, 0.06);
+    border-top: 1px solid var(--eat-overlay);
     flex: 0 0 auto;
 }
 
@@ -748,7 +790,7 @@ a.elediaaitutor-avatar:focus-visible {
 
 .elediaaitutor-history-empty {
     padding: 0.6rem;
-    color: #5b6677;
+    color: var(--eat-muted-soft);
     font-size: 0.85rem;
 }
 
@@ -767,7 +809,7 @@ a.elediaaitutor-avatar:focus-visible {
 }
 
 .elediaaitutor-history-item:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--eat-overlay-strong);
 }
 
 .elediaaitutor-history-open {
@@ -792,7 +834,7 @@ a.elediaaitutor-avatar:focus-visible {
 .elediaaitutor-history-preview {
     display: block;
     font-size: 0.78rem;
-    color: #5b6677;
+    color: var(--eat-muted-soft);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -833,7 +875,7 @@ a.elediaaitutor-avatar:focus-visible {
 .elediaaitutor-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(16, 24, 40, 0.45);
+    background: var(--eat-backdrop);
     z-index: 0;
 }
 
@@ -901,7 +943,8 @@ body.elediaaitutor-noscroll {
 
 /* --- Reduced motion. --------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-    .elediaaitutor-dot {
+    .elediaaitutor-dot,
+    .elediaaitutor-message {
         animation: none;
     }
 

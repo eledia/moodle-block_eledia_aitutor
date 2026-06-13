@@ -39,6 +39,12 @@
         "consented": true
     }
 }}
+{{#hasbrandstyle}}
+    <style>{{{brandstyle}}}</style>
+{{/hasbrandstyle}}
+{{#customcss}}
+    <style>{{{customcss}}}</style>
+{{/customcss}}
 <div class="elediaaitutor-root" data-region="elediaaitutor" id="{{uniqid}}"
      data-mode="{{displaymode}}">
 
@@ -202,7 +208,9 @@
                 </button>
             </form>
 
-            <div class="elediaaitutor-footer">{{#str}}poweredby, block_elediaaitutor{{/str}}</div>
+            {{#showfooter}}
+                <div class="elediaaitutor-footer">{{footertext}}</div>
+            {{/showfooter}}
         </div>
     </div>
 </div>

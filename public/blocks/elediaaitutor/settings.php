@@ -266,6 +266,90 @@ if ($hassiteconfig) {
         PARAM_ALPHANUMEXT
     ));
 
+    // --- Branding. ----------------------------------------------------------.
+    $settings->add(new admin_setting_heading(
+        'block_elediaaitutor/headerbranding',
+        get_string('setting_header_branding', 'block_elediaaitutor'),
+        get_string('setting_header_branding_desc', 'block_elediaaitutor')
+    ));
+
+    $settings->add(new admin_setting_configstoredfile(
+        'block_elediaaitutor/brandlogo',
+        get_string('setting_brandlogo', 'block_elediaaitutor'),
+        get_string('setting_brandlogo_desc', 'block_elediaaitutor'),
+        \block_elediaaitutor\local\branding::LOGO_FILEAREA,
+        0,
+        ['maxfiles' => 1, 'accepted_types' => ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif']]
+    ));
+
+    $settings->add(new admin_setting_configcolourpicker(
+        'block_elediaaitutor/brandaccent',
+        get_string('setting_brandaccent', 'block_elediaaitutor'),
+        get_string('setting_brandaccent_desc', 'block_elediaaitutor'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_configcolourpicker(
+        'block_elediaaitutor/brandbubble',
+        get_string('setting_brandbubble', 'block_elediaaitutor'),
+        get_string('setting_brandbubble_desc', 'block_elediaaitutor'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_configcolourpicker(
+        'block_elediaaitutor/brandsurface',
+        get_string('setting_brandsurface', 'block_elediaaitutor'),
+        get_string('setting_brandsurface_desc', 'block_elediaaitutor'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'block_elediaaitutor/brandfont',
+        get_string('setting_brandfont', 'block_elediaaitutor'),
+        get_string('setting_brandfont_desc', 'block_elediaaitutor'),
+        '',
+        PARAM_TEXT
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'block_elediaaitutor/brandlaunchlabel',
+        get_string('setting_brandlaunchlabel', 'block_elediaaitutor'),
+        get_string('setting_brandlaunchlabel_desc', 'block_elediaaitutor'),
+        '',
+        PARAM_TEXT
+    ));
+
+    $settings->add(new admin_setting_configselect(
+        'block_elediaaitutor/footermode',
+        get_string('setting_footermode', 'block_elediaaitutor'),
+        get_string('setting_footermode_desc', 'block_elediaaitutor'),
+        \block_elediaaitutor\local\branding::FOOTER_DEFAULT,
+        [
+            \block_elediaaitutor\local\branding::FOOTER_DEFAULT =>
+                get_string('footermode_default', 'block_elediaaitutor'),
+            \block_elediaaitutor\local\branding::FOOTER_CUSTOM =>
+                get_string('footermode_custom', 'block_elediaaitutor'),
+            \block_elediaaitutor\local\branding::FOOTER_NONE =>
+                get_string('footermode_none', 'block_elediaaitutor'),
+        ]
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'block_elediaaitutor/footertext',
+        get_string('setting_footertext', 'block_elediaaitutor'),
+        get_string('setting_footertext_desc', 'block_elediaaitutor'),
+        '',
+        PARAM_TEXT
+    ));
+
+    $settings->add(new admin_setting_configtextarea(
+        'block_elediaaitutor/customcss',
+        get_string('setting_customcss', 'block_elediaaitutor'),
+        get_string('setting_customcss_desc', 'block_elediaaitutor'),
+        '',
+        PARAM_RAW
+    ));
+
     // --- Privacy. -----------------------------------------------------------.
     $settings->add(new admin_setting_heading(
         'block_elediaaitutor/headerprivacy',

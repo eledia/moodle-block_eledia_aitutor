@@ -42,6 +42,39 @@ $string['close'] = 'Schließen';
 $string['online'] = 'Online';
 $string['senderyou'] = 'Sie';
 $string['poweredby'] = 'Bereitgestellt von eLeDia.ai';
+
+// Branding (Administrationseinstellungen).
+$string['setting_header_branding'] = 'Branding';
+$string['setting_header_branding_desc'] = 'Passen Sie das Erscheinungsbild des Tutors an Ihre Einrichtung an. Alle Felder sind optional; leer lassen, um das eingebaute eLeDia.ai-Design zu verwenden. Farben und die Beschriftung der Schaltfläche lassen sich auch pro Block-Instanz überschreiben.';
+$string['setting_brandlogo'] = 'Logo';
+$string['setting_brandlogo_desc'] = 'Das Logo/Avatar in der Startschaltfläche und der Chat-Kopfzeile. Ein quadratisches Bild eignet sich am besten. Ersetzt die eingebaute eLeDia.ai-Marke.';
+$string['setting_brandaccent'] = 'Akzentfarbe';
+$string['setting_brandaccent_desc'] = 'Die Hauptfarbe für Schaltflächen, Links, die Kopfzeile und die Senden-Schaltfläche. Leer lassen für das standardmäßige Marineblau.';
+$string['setting_brandbubble'] = 'Farbe der Nutzer-Sprechblase';
+$string['setting_brandbubble_desc'] = 'Hintergrundfarbe der eigenen Nachrichten-Sprechblasen der lernenden Person. Leer lassen für das standardmäßige Pfirsich.';
+$string['setting_brandsurface'] = 'Gesprächshintergrund';
+$string['setting_brandsurface_desc'] = 'Hintergrundton hinter dem Gespräch. Leer lassen für das standardmäßige Hellgrau.';
+$string['setting_brandfont'] = 'Schriftart';
+$string['setting_brandfont_desc'] = 'Optionaler CSS-font-family-Stack für das Widget, z. B. "Inter, sans-serif". Leer lassen, um die Schriftart Ihres Moodle-Themes zu übernehmen.';
+$string['setting_brandlaunchlabel'] = 'Beschriftung der Startschaltfläche';
+$string['setting_brandlaunchlabel_desc'] = 'Text auf der Schaltfläche, die den Tutor öffnet (Modi angedockt/modal/Vollbild). Leer lassen für den Standard.';
+$string['setting_footermode'] = 'Fußzeile';
+$string['setting_footermode_desc'] = 'Was in der kleinen Fußzeile unter dem Eingabefeld angezeigt wird.';
+$string['footermode_default'] = '„Bereitgestellt von eLeDia.ai“ anzeigen';
+$string['footermode_custom'] = 'Eigenen Text anzeigen';
+$string['footermode_none'] = 'Fußzeile ausblenden (White-Label)';
+$string['setting_footertext'] = 'Eigener Fußzeilentext';
+$string['setting_footertext_desc'] = 'Wird angezeigt, wenn die Fußzeile auf „Eigener Text“ gesetzt ist.';
+$string['setting_customcss'] = 'Eigenes CSS';
+$string['setting_customcss_desc'] = 'Erweitert. CSS, das jedem Tutor-Widget auf der Website hinzugefügt wird. Sprechen Sie die eigenen Klassen des Widgets an (alle mit <code>.elediaaitutor-</code> beginnend), z. B. <code>.elediaaitutor-bubble { border-radius: 4px; }</code>. Gilt website-weit.';
+
+// Per-Instanz-Branding-Überschreibungen (Blockeinstellungen).
+$string['config_launchlabel'] = 'Beschriftung der Startschaltfläche';
+$string['config_launchlabel_help'] = 'Überschreibt den Text der Startschaltfläche nur für diesen Block. Leer lassen, um die Website-Voreinstellung zu verwenden.';
+$string['config_brandaccent'] = 'Akzentfarbe';
+$string['config_brandaccent_help'] = 'Eine Hex-Farbe (z. B. #1e3f59), die die Akzentfarbe nur für diesen Block überschreibt. Leer lassen, um das Website-Branding zu verwenden.';
+$string['config_brandbubble'] = 'Farbe der Nutzer-Sprechblase';
+$string['config_brandbubble_help'] = 'Eine Hex-Farbe (z. B. #fce9db) für die Nachrichten-Sprechblasen der lernenden Person nur in diesem Block. Leer lassen, um das Website-Branding zu verwenden.';
 $string['send'] = 'Nachricht senden';
 $string['messagelabel'] = 'Ihre Nachricht an den Tutor';
 $string['inputplaceholder'] = 'Fragen Sie den Tutor etwas …';

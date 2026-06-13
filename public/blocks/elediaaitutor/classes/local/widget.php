@@ -87,6 +87,26 @@ class widget {
      *                       answerstyle, allowstylechange, historyenabled, instanceid.
      * @return string The widget HTML.
      */
+    /**
+     * The admin custom CSS, scoped to the widget classes and returned at most
+     * once per request (it is global, so emitting it per instance would
+     * duplicate identical rules on pages with several blocks).
+     *
+     * @return string The custom CSS, or '' (also '' on subsequent calls).
+     */
+    private static function custom_css_once(): string {
+        static $emitted = false;
+        if ($emitted) {
+            return '';
+        }
+        $css = security::custom_css();
+        if ($css === '') {
+            return '';
+        }
+        $emitted = true;
+        return $css;
+    }
+
     public static function render(\context $context, int $courseid, array $options = []): string {
         global $OUTPUT, $PAGE, $USER;
 
@@ -119,8 +139,14 @@ class widget {
         $allowstylechange = (bool) ($options['allowstylechange'] ?? true);
 
         $uniqid = 'elediaaitutor_' . uniqid();
-        $avatarurl = $OUTPUT->image_url('logo', 'block_elediaaitutor')->out(false);
         $consented = consent::has_consented((int) $USER->id);
+
+        // Resolve institutional branding (per-instance overrides over the site
+        // defaults). The logo is the site brand logo when uploaded, otherwise
+        // the built-in eLeDia mark.
+        $brand = branding::resolve($options);
+        $avatarurl = branding::site_logo_url() ?: $OUTPUT->image_url('logo', 'block_elediaaitutor')->out(false);
+        $brandstyle = branding::css_variables($brand);
 
         // Institution-specific privacy guidelines (admin setting). When set, the
         // formatted text replaces the built-in informational sections of the
@@ -165,7 +191,7 @@ class widget {
             'avatarurl' => $avatarurl,
             'welcome' => format_text($welcome, FORMAT_MOODLE, ['context' => $context, 'filter' => false]),
             'historyenabled' => $historyenabled,
-            'launchlabel' => get_string('launch', 'block_elediaaitutor'),
+            'launchlabel' => $brand['launchlabel'],
             'stylechoice' => $allowstylechange,
             'styles' => $styles,
             'stylelocked' => !$allowstylechange && $answerstyle !== 'explain',
@@ -174,6 +200,12 @@ class widget {
             'starters' => $starters,
             'hasstarters' => !empty($starters),
             'llmonly' => $mode === chat_mode::MODE_LLMONLY,
+            // Branding: scoped CSS-variable overrides + footer/white-label.
+            'brandstyle' => $brandstyle !== '' ? '#' . $uniqid . '{' . $brandstyle . '}' : '',
+            'hasbrandstyle' => $brandstyle !== '',
+            'showfooter' => $brand['footertext'] !== '',
+            'footertext' => $brand['footertext'],
+            'customcss' => self::custom_css_once(),
         ];
 
         $html = $OUTPUT->render_from_template('block_elediaaitutor/launcher', $templatecontext);

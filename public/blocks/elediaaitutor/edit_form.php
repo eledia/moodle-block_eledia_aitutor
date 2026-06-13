@@ -79,6 +79,24 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         $mform->setType('config_persona', PARAM_TEXT);
         $mform->setDefault('config_persona', get_string('default_persona', 'block_elediaaitutor'));
 
+        // Per-instance branding overrides (empty = use the site branding). The
+        // logo, footer/white-label, font and custom CSS are institution-level
+        // (site admin) only.
+        $mform->addElement('text', 'config_launchlabel',
+            get_string('config_launchlabel', 'block_elediaaitutor'));
+        $mform->setType('config_launchlabel', PARAM_TEXT);
+        $mform->addHelpButton('config_launchlabel', 'config_launchlabel', 'block_elediaaitutor');
+
+        $mform->addElement('text', 'config_brandaccent',
+            get_string('config_brandaccent', 'block_elediaaitutor'), ['placeholder' => '#1e3f59']);
+        $mform->setType('config_brandaccent', PARAM_TEXT);
+        $mform->addHelpButton('config_brandaccent', 'config_brandaccent', 'block_elediaaitutor');
+
+        $mform->addElement('text', 'config_brandbubble',
+            get_string('config_brandbubble', 'block_elediaaitutor'), ['placeholder' => '#fce9db']);
+        $mform->setType('config_brandbubble', PARAM_TEXT);
+        $mform->addHelpButton('config_brandbubble', 'config_brandbubble', 'block_elediaaitutor');
+
         // Pedagogical answer style.
         $styles = [
             'explain' => get_string('answerstyle_explain', 'block_elediaaitutor'),

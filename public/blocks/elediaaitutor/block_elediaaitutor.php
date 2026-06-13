@@ -146,6 +146,9 @@ class block_elediaaitutor extends block_base {
             'allowstylechange' => (int) $this->get_instance_config('allowstylechange', 1) === 1,
             'promptstarters' => (string) $this->get_instance_config('promptstarters', ''),
             'ragmode' => (string) $this->get_instance_config('ragmode', 'grounded'),
+            'launchlabel' => (string) $this->get_instance_config('launchlabel', ''),
+            'brandaccent' => (string) $this->get_instance_config('brandaccent', ''),
+            'brandbubble' => (string) $this->get_instance_config('brandbubble', ''),
         ]);
 
         // Teachers reach the question-analytics report via the course

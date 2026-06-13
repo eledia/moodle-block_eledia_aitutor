@@ -224,6 +224,61 @@ class security {
     }
 
     /**
+     * Institution accent colour (hex), or '' when unset.
+     *
+     * @return string
+     */
+    public static function brand_accent(): string {
+        return trim((string) self::get_config('brandaccent', ''));
+    }
+
+    /**
+     * Institution user-bubble colour (hex), or '' when unset.
+     *
+     * @return string
+     */
+    public static function brand_bubble(): string {
+        return trim((string) self::get_config('brandbubble', ''));
+    }
+
+    /**
+     * Institution surface/background tint (hex), or '' when unset.
+     *
+     * @return string
+     */
+    public static function brand_surface(): string {
+        return trim((string) self::get_config('brandsurface', ''));
+    }
+
+    /**
+     * Institution font stack, or '' when unset.
+     *
+     * @return string
+     */
+    public static function brand_font(): string {
+        return trim((string) self::get_config('brandfont', ''));
+    }
+
+    /**
+     * Institution launcher-button label override, or '' when unset.
+     *
+     * @return string
+     */
+    public static function brand_launch_label(): string {
+        return trim((string) self::get_config('brandlaunchlabel', ''));
+    }
+
+    /**
+     * Admin custom CSS (trusted; targets the widget's .elediaaitutor-* classes),
+     * or '' when unset.
+     *
+     * @return string
+     */
+    public static function custom_css(): string {
+        return trim((string) self::get_config('customcss', ''));
+    }
+
+    /**
      * Whether to bypass Moodle's cURL security helper for the RAG host.
      *
      * Off by default. Intended only for RAG servers on an internal network or a
