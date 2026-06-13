@@ -115,7 +115,6 @@ class block_elediaaitutor_edit_form extends block_edit_form {
                 '' => get_string('config_launcherstyle_site', 'block_elediaaitutor'),
                 'pill' => get_string('launcherstyle_pill', 'block_elediaaitutor'),
                 'solid' => get_string('launcherstyle_solid', 'block_elediaaitutor'),
-                'fab' => get_string('launcherstyle_fab', 'block_elediaaitutor'),
             ]);
         $mform->setDefault('config_launcherstyle', '');
         $mform->addHelpButton('config_launcherstyle', 'config_launcherstyle', 'block_elediaaitutor');

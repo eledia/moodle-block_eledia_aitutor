@@ -128,7 +128,7 @@ class branding {
 
         // Launcher style: per-instance ('' = follow site) over the site default.
         $launcherstyle = trim((string) ($instance['launcherstyle'] ?? ''));
-        if (!in_array($launcherstyle, ['pill', 'solid', 'fab'], true)) {
+        if (!in_array($launcherstyle, ['pill', 'solid'], true)) {
             $launcherstyle = security::launcher_style();
         }
 

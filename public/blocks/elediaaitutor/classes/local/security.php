@@ -260,13 +260,22 @@ class security {
     }
 
     /**
-     * The configured launcher button style (pill|solid|fab).
+     * The configured launcher button style (pill|solid).
      *
      * @return string
      */
     public static function launcher_style(): string {
         $style = trim((string) self::get_config('launcherstyle', 'pill'));
-        return in_array($style, ['pill', 'solid', 'fab'], true) ? $style : 'pill';
+        return in_array($style, ['pill', 'solid'], true) ? $style : 'pill';
+    }
+
+    /**
+     * Whether the site-wide navbar launcher is enabled.
+     *
+     * @return bool
+     */
+    public static function navbar_launcher_enabled(): bool {
+        return (int) self::get_config('navbarlauncher', 0) === 1;
     }
 
     /**

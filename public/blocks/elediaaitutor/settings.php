@@ -330,8 +330,14 @@ if ($hassiteconfig) {
         [
             'pill' => get_string('launcherstyle_pill', 'block_elediaaitutor'),
             'solid' => get_string('launcherstyle_solid', 'block_elediaaitutor'),
-            'fab' => get_string('launcherstyle_fab', 'block_elediaaitutor'),
         ]
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'block_elediaaitutor/navbarlauncher',
+        get_string('setting_navbarlauncher', 'block_elediaaitutor'),
+        get_string('setting_navbarlauncher_desc', 'block_elediaaitutor'),
+        0
     ));
 
     $settings->add(new admin_setting_configcolourpicker(

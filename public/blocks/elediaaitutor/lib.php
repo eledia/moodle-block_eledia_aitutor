@@ -56,6 +56,52 @@ function block_elediaaitutor_extend_navigation_course(navigation_node $navigatio
 }
 
 /**
+ * Inject a site-wide tutor launcher into the navigation bar.
+ *
+ * When the admin enables it, every logged-in page gets a small tutor icon next
+ * to the notifications bell that opens the chat as an overlay (display mode
+ * follows the site default). The whole widget — trigger, hidden panel, config
+ * island and JS init — is returned; the panel portals to <body> on open.
+ *
+ * @param renderer_base $renderer The page renderer.
+ * @return string Navbar HTML, or '' when not shown.
+ */
+function block_elediaaitutor_render_navbar_output(renderer_base $renderer): string {
+    global $PAGE;
+
+    if (!isloggedin() || isguestuser() || \core_user::awaiting_action()) {
+        return '';
+    }
+    if (!\block_elediaaitutor\local\security::navbar_launcher_enabled()) {
+        return '';
+    }
+    if (\block_elediaaitutor\local\widget::config_error() !== null) {
+        return '';
+    }
+
+    $context = $PAGE->context ?? context_system::instance();
+
+    // Pass the course when chatting inside a real course (and course chat is on);
+    // otherwise global chat, which must be enabled.
+    $courseid = 0;
+    if (\block_elediaaitutor\local\security::course_chat_enabled()
+            && !empty($PAGE->course) && (int) $PAGE->course->id !== SITEID) {
+        $courseid = (int) $PAGE->course->id;
+    }
+    if ($courseid === 0 && !\block_elediaaitutor\local\security::global_chat_enabled()) {
+        return '';
+    }
+
+    try {
+        require_capability('block/elediaaitutor:use', $context);
+    } catch (\moodle_exception $e) {
+        return '';
+    }
+
+    return \block_elediaaitutor\local\widget::render($context, $courseid, ['navbar' => true]);
+}
+
+/**
  * Serve per-instance branding files (logo / conversation avatar) stored in the
  * block context. The images are non-sensitive branding shown to every learner
  * who can see the block, so any logged-in user may fetch them.

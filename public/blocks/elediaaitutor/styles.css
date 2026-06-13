@@ -143,32 +143,33 @@
     color: var(--eat-accent-contrast);
 }
 
-/* FAB variant: fixed circular floating button, bottom-right of the viewport. */
-.elediaaitutor-root .elediaaitutor-launch--fab {
-    position: fixed;
-    right: 1.25rem;
-    bottom: 1.25rem;
-    z-index: var(--eat-z);
-    width: 3.5rem;
-    height: 3.5rem;
-    padding: 0;
+/* Navbar launcher trigger — sits among the site navbar icons (next to the
+   notifications bell). Deliberately neutral: it adopts the navbar's own
+   sizing/colour rather than the tutor accent, so it never restyles the navbar.
+   The chat panel it opens still uses the tutor theme. */
+.elediaaitutor-navbtn {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
+    background: transparent;
+    border: 0;
+    padding: 0 0.5rem;
+    cursor: pointer;
+    line-height: 1;
+    color: inherit;
+}
+
+.elediaaitutor-navbtn .elediaaitutor-navbtn-img {
+    width: 1.6rem;
+    height: 1.6rem;
+    object-fit: contain;
     border-radius: 50%;
-    background: var(--eat-accent);
-    border-color: var(--eat-accent);
-    color: var(--eat-accent-contrast);
-    box-shadow: var(--eat-shadow-lg);
+    display: block;
 }
 
-.elediaaitutor-root .elediaaitutor-launch--fab:hover,
-.elediaaitutor-root .elediaaitutor-launch--fab:focus-visible {
-    background: var(--eat-accent-dark);
-    border-color: var(--eat-accent-dark);
-}
-
-.elediaaitutor-launch--fab .elediaaitutor-launch-icon {
-    width: 2rem;
-    height: 2rem;
+.elediaaitutor-navbtn:hover,
+.elediaaitutor-navbtn:focus-visible {
+    opacity: 0.85;
 }
 
 .elediaaitutor-launch-icon,

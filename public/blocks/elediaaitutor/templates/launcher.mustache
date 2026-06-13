@@ -48,15 +48,24 @@
     <script type="application/json" data-region="elediaaitutor-config">{{{configjson}}}</script>
 
     {{^embedded}}
-        <button type="button"
-                class="btn btn-primary elediaaitutor-launch elediaaitutor-launch--{{launcherstyle}}"
-                data-action="launch" aria-haspopup="dialog" aria-expanded="false"
-                {{#launchfab}}aria-label="{{launchlabel}}" title="{{launchlabel}}"{{/launchfab}}>
-            <span class="elediaaitutor-launch-icon" aria-hidden="true">
-                <img class="elediaaitutor-launch-img" src="{{logourl}}" alt="" width="20" height="20">
-            </span>
-            {{^launchfab}}<span class="elediaaitutor-launch-text">{{launchlabel}}</span>{{/launchfab}}
-        </button>
+        {{#navbar}}
+            <button type="button" class="btn nav-link icon-no-margin elediaaitutor-navbtn"
+                    data-action="launch" aria-haspopup="dialog" aria-expanded="false"
+                    aria-label="{{launchlabel}}" title="{{launchlabel}}">
+                <img class="elediaaitutor-navbtn-img" src="{{logourl}}" alt="">
+                <span class="visually-hidden">{{launchlabel}}</span>
+            </button>
+        {{/navbar}}
+        {{^navbar}}
+            <button type="button"
+                    class="btn btn-primary elediaaitutor-launch elediaaitutor-launch--{{launcherstyle}}"
+                    data-action="launch" aria-haspopup="dialog" aria-expanded="false">
+                <span class="elediaaitutor-launch-icon" aria-hidden="true">
+                    <img class="elediaaitutor-launch-img" src="{{logourl}}" alt="" width="20" height="20">
+                </span>
+                <span class="elediaaitutor-launch-text">{{launchlabel}}</span>
+            </button>
+        {{/navbar}}
     {{/embedded}}
 
     <div class="elediaaitutor-panel {{#embedded}}elediaaitutor-embedded{{/embedded}}"
