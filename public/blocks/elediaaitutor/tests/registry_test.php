@@ -116,6 +116,33 @@ final class registry_test extends \advanced_testcase {
     }
 
     /**
+     * Every non-colour token offers friendly named options (so the forms render
+     * a dropdown rather than a raw-CSS text box), and each option value survives
+     * the token's own sanitiser. Colour tokens stay free pickers (no choices).
+     */
+    public function test_non_colour_tokens_have_choices(): void {
+        foreach (registry::all() as $key => $entry) {
+            if ($entry['token'] === null) {
+                continue; // Not a design token.
+            }
+            if ($entry['type'] === 'colour') {
+                $this->assertNull($entry['choices'], "Colour token {$key} should not have choices");
+                continue;
+            }
+            // cssvalue / font tokens must have choices keyed by valid CSS values.
+            $this->assertNotEmpty($entry['choices'], "Token {$key} is missing friendly choices");
+            $this->assertArrayHasKey('', $entry['choices'], "Token {$key} needs a default option");
+            foreach ($entry['choices'] as $value => $langkey) {
+                if ((string) $value === '') {
+                    continue;
+                }
+                $this->assertNotNull(registry::sanitise($key, $value),
+                    "Choice '{$value}' for {$key} is rejected by its sanitiser");
+            }
+        }
+    }
+
+    /**
      * sanitise() cleans by type and rejects the unsafe.
      */
     public function test_sanitise(): void {

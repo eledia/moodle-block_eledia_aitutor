@@ -93,7 +93,9 @@ if ($action === 'exportinstance') {
 // Mutating actions (POST forms or sesskey-guarded confirmations).
 // ---------------------------------------------------------------------------
 if ($action === 'save') {
-    $form = new tutor_edit_form($baseurl->out(false), ['id' => optional_param('id', 0, PARAM_INT)]);
+    $saveid = optional_param('id', 0, PARAM_INT);
+    $existing = ($saveid > 0 && ($p = tutor_profile::get($saveid))) ? tutor_profile::settings($p) : [];
+    $form = new tutor_edit_form($baseurl->out(false), ['id' => $saveid, 'settings' => $existing]);
     if ($form->is_cancelled()) {
         redirect($baseurl);
     }
@@ -252,13 +254,15 @@ echo $OUTPUT->heading(get_string('managetutors', 'block_elediaaitutor'));
 
 if ($action === 'new' || $action === 'edit') {
     $id = optional_param('id', 0, PARAM_INT);
-    $form = new tutor_edit_form($baseurl->out(false), ['id' => $id]);
+    $profile = $id > 0 ? tutor_profile::get($id) : null;
+    $existing = $profile ? tutor_profile::settings($profile) : [];
+    $form = new tutor_edit_form($baseurl->out(false), ['id' => $id, 'settings' => $existing]);
     $defaults = (object) ['id' => $id];
-    if ($id > 0 && ($profile = tutor_profile::get($id))) {
+    if ($profile) {
         $defaults->name = $profile->name;
         $defaults->shortname = $profile->shortname;
         $defaults->description = $profile->description;
-        foreach (tutor_profile::settings($profile) as $key => $value) {
+        foreach ($existing as $key => $value) {
             $defaults->{'cfg_' . $key} = $value;
         }
         $syscontext = context_system::instance();

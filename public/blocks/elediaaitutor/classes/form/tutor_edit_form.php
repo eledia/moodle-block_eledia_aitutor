@@ -48,6 +48,7 @@ class tutor_edit_form extends moodleform {
     protected function definition(): void {
         $mform = $this->_form;
         $isnew = empty($this->_customdata['id']);
+        \block_elediaaitutor\local\formhelper::register_colour_element();
 
         $mform->addElement('hidden', 'id', (int) ($this->_customdata['id'] ?? 0));
         $mform->setType('id', PARAM_INT);
@@ -110,9 +111,11 @@ class tutor_edit_form extends moodleform {
             ? get_string('reg_' . $key, 'block_elediaaitutor')
             : (string) ($entry['token'] ?? $key);
 
+        $settings = $this->_customdata['settings'] ?? [];
+
         switch ($entry['type']) {
             case 'colour':
-                $mform->addElement('text', $name, $label, ['placeholder' => '#rrggbb']);
+                $mform->addElement('eatcolour', $name, $label);
                 $mform->setType($name, PARAM_TEXT);
                 break;
             case 'textarea':
@@ -133,13 +136,18 @@ class tutor_edit_form extends moodleform {
                     '0' => get_string('no'),
                 ]);
                 break;
-            case 'cssvalue':
-                $mform->addElement('text', $name, $label, ['size' => 40]);
-                $mform->setType($name, PARAM_RAW_TRIMMED);
-                break;
-            default: // text / font.
-                $mform->addElement('text', $name, $label, ['size' => 40]);
-                $mform->setType($name, PARAM_TEXT);
+            default:
+                // cssvalue / font / text. Named-options tokens become a dropdown;
+                // plain text stays a text box.
+                if (!empty($entry['choices'])) {
+                    $current = isset($settings[$key]) ? (string) $settings[$key] : null;
+                    $options = registry::choice_select_options($key,
+                        get_string('tutor_notset', 'block_elediaaitutor'), $current);
+                    $mform->addElement('select', $name, $label, $options);
+                } else {
+                    $mform->addElement('text', $name, $label, ['size' => 40]);
+                    $mform->setType($name, PARAM_TEXT);
+                }
                 break;
         }
     }

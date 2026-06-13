@@ -56,28 +56,53 @@ if (!question_log::is_enabled()) {
     die;
 }
 
-echo html_writer::div(get_string('report_intro', 'block_elediaaitutor'), 'mb-3 text-muted');
+/**
+ * Render one labelled progress bar row for the report.
+ *
+ * @param string $labelhtml Already-escaped label HTML.
+ * @param int $count The value.
+ * @param int $max The maximum across the set (for scaling).
+ * @return string
+ */
+$barrow = function (string $labelhtml, int $count, int $max): string {
+    $pct = $max > 0 && $count > 0 ? max(6, (int) round($count * 100 / $max)) : 0;
+    $fill = html_writer::div((string) $count, 'eat-bar-fill' . ($count === 0 ? ' eat-bar-zero' : ''),
+        ['style' => 'width: ' . $pct . '%', 'role' => 'progressbar',
+            'aria-valuenow' => $count, 'aria-valuemin' => 0, 'aria-valuemax' => $max]);
+    return html_writer::div(
+        html_writer::div($labelhtml, 'eat-bar-label') . html_writer::div($fill, 'eat-bar-track'),
+        'eat-bar-row');
+};
+
+echo html_writer::start_div('eat-admin eat-report');
+echo html_writer::div(
+    html_writer::tag('i', '', ['class' => 'fa fa-chart-bar', 'aria-hidden' => 'true']) .
+    html_writer::span(get_string('report_intro', 'block_elediaaitutor')),
+    'eat-admin-intro');
 
 $summary = question_log::summary($course->id);
 
-// Summary cards.
+// Summary stat cards.
 $groundedpct = $summary->total > 0 ? round($summary->grounded * 100 / $summary->total) : 0;
-$cards = [
-    [get_string('report_total', 'block_elediaaitutor'), (string) $summary->total],
-    [get_string('report_last7', 'block_elediaaitutor'), (string) $summary->last7],
-    [get_string('report_grounded', 'block_elediaaitutor'), $groundedpct . '%'],
+$stats = [
+    ['fa-comments', (string) $summary->total, get_string('report_total', 'block_elediaaitutor')],
+    ['fa-calendar-week', (string) $summary->last7, get_string('report_last7', 'block_elediaaitutor')],
+    ['fa-book', $groundedpct . '%', get_string('report_grounded', 'block_elediaaitutor')],
 ];
-$cardshtml = '';
-foreach ($cards as [$label, $value]) {
-    $cardshtml .= html_writer::div(
-        html_writer::div($value, 'h2 mb-0') . html_writer::div($label, 'text-muted small'),
-        'card p-3 me-3 mb-3 d-inline-block text-center'
-    );
+echo html_writer::start_div('eat-stat-grid');
+foreach ($stats as [$icon, $value, $label]) {
+    echo html_writer::div(
+        html_writer::div(html_writer::tag('i', '', ['class' => 'fa ' . $icon, 'aria-hidden' => 'true']),
+            'eat-stat-icon') .
+        html_writer::div(
+            html_writer::div($value, 'eat-stat-num') . html_writer::div($label, 'eat-stat-label')),
+        'eat-stat');
 }
-echo html_writer::div($cardshtml, 'mb-2');
+echo html_writer::end_div();
 
 if ($summary->total === 0) {
     echo $OUTPUT->notification(get_string('report_none', 'block_elediaaitutor'), 'info');
+    echo html_writer::end_div();
     echo $OUTPUT->footer();
     die;
 }
@@ -85,9 +110,8 @@ if ($summary->total === 0) {
 // Hotspots: questions clustered by canonical topic / primary source.
 $hotspots = question_log::hotspots($course->id, 30, 10);
 if (!empty($hotspots)) {
-    echo $OUTPUT->heading(get_string('report_hotspots', 'block_elediaaitutor'), 3);
     $maxcount = max(array_map(static fn($h) => $h->count, $hotspots));
-    $rows = '';
+    $bars = '';
     foreach ($hotspots as $hotspot) {
         $label = s($hotspot->label);
         if (!empty($hotspot->cmid)) {
@@ -98,45 +122,33 @@ if (!empty($hotspots)) {
                     $label = html_writer::link($cm->url, s($hotspot->label));
                 }
             } catch (\moodle_exception $e) {
-                // Module gone: plain label.
                 $label = s($hotspot->label);
             }
         }
-        $pct = (int) round($hotspot->count * 100 / max(1, $maxcount));
-        $bar = html_writer::div(
-            html_writer::div(s((string) $hotspot->count), 'progress-bar', ['role' => 'progressbar',
-                'style' => 'width: ' . max($pct, 4) . '%',
-                'aria-valuenow' => $hotspot->count, 'aria-valuemin' => 0, 'aria-valuemax' => $maxcount]),
-            'progress', ['style' => 'height: 1.4rem; min-width: 200px;']
-        );
-        $rows .= html_writer::tag('tr',
-            html_writer::tag('td', $label, ['class' => 'text-nowrap'])
-            . html_writer::tag('td', $bar, ['class' => 'w-100']));
+        $bars .= $barrow($label, (int) $hotspot->count, (int) $maxcount);
     }
-    echo html_writer::tag('table', html_writer::tag('tbody', $rows), ['class' => 'table table-sm mb-4']);
+    echo html_writer::start_div('eat-report-card');
+    echo html_writer::tag('h3', get_string('report_hotspots', 'block_elediaaitutor'),
+        ['class' => 'eat-report-title']);
+    echo html_writer::div($bars, 'eat-bars');
+    echo html_writer::end_div();
 }
 
-// Questions per day (last 14 days, newest first) as a simple bar list.
-echo $OUTPUT->heading(get_string('report_byday', 'block_elediaaitutor'), 3);
+// Questions per day (last 14 days, newest first).
 $perday = array_reverse(question_log::per_day($course->id, 14), true);
 $max = max(1, max($perday));
-$rows = '';
+$bars = '';
 foreach ($perday as $day => $count) {
-    $pct = (int) round($count * 100 / $max);
-    $bar = html_writer::div(
-        html_writer::div(s((string) $count), 'progress-bar', ['role' => 'progressbar',
-            'style' => 'width: ' . max($pct, $count > 0 ? 4 : 0) . '%',
-            'aria-valuenow' => $count, 'aria-valuemin' => 0, 'aria-valuemax' => $max]),
-        'progress', ['style' => 'height: 1.4rem; min-width: 200px;']
-    );
-    $rows .= html_writer::tag('tr',
-        html_writer::tag('td', s($day), ['class' => 'text-nowrap'])
-        . html_writer::tag('td', $bar, ['class' => 'w-100']));
+    $bars .= $barrow(s($day), (int) $count, (int) $max);
 }
-echo html_writer::tag('table', html_writer::tag('tbody', $rows), ['class' => 'table table-sm mb-4']);
+echo html_writer::start_div('eat-report-card');
+echo html_writer::tag('h3', get_string('report_byday', 'block_elediaaitutor'), ['class' => 'eat-report-title']);
+echo html_writer::div($bars, 'eat-bars');
+echo html_writer::end_div();
 
 // Recent questions (no asker identities, by design), paginated.
-echo $OUTPUT->heading(get_string('report_recent', 'block_elediaaitutor'), 3);
+echo html_writer::start_div('eat-report-card');
+echo html_writer::tag('h3', get_string('report_recent', 'block_elediaaitutor'), ['class' => 'eat-report-title']);
 $perpage = 20;
 $lastpage = max(0, (int) ceil($summary->total / $perpage) - 1);
 $page = min($page, $lastpage);
@@ -165,5 +177,7 @@ foreach (question_log::recent($course->id, $perpage, $page * $perpage) as $row) 
 }
 echo html_writer::table($table);
 echo $OUTPUT->paging_bar($summary->total, $page, $perpage, $PAGE->url);
+echo html_writer::end_div(); // .eat-report-card
 
+echo html_writer::end_div(); // .eat-admin.eat-report
 echo $OUTPUT->footer();

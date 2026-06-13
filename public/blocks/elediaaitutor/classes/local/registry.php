@@ -64,7 +64,7 @@ class registry {
     /** @var string[] Group ids in display order. */
     private const GROUP_ORDER = [
         'persona', 'accent', 'surfaces', 'text', 'bubbles', 'states',
-        'shape', 'effects', 'behaviour', 'launcher', 'footer', 'files',
+        'shape', 'effects', 'conversation', 'launcher', 'footer', 'files',
     ];
 
     /**
@@ -145,23 +145,33 @@ class registry {
             ['tok_shadowlg', '--eat-shadow-lg', 'effects', 'cssvalue', false],
             ['tok_avatarglow', '--eat-avatar-glow', 'effects', 'cssvalue', false],
         ];
+        // Friendly named options for the non-colour tokens, so non-technical
+        // staff pick "Medium" rather than type raw CSS. Keyed registry key =>
+        // (CSS value => option lang-key); '' is always "use the built-in
+        // default". Values stay real CSS strings so presets/imports are
+        // unaffected (the field type remains cssvalue/font, which sanitises any
+        // safe value). The light()/dark() preset wash values are included so
+        // applying a preset keeps them.
+        $choices = self::token_choices();
+
         // The 5th tuple element is retained for documentation of the original
         // intent, but every token is now exposed per instance by default (the
         // admin removes exposure where they want a setting kept site-wide).
         foreach ($tokens as [$key, $token, $group, $type]) {
             $entries[$key] = self::entry($group, $type, [
                 'token' => $token,
+                'choices' => $choices[$key] ?? null,
             ]);
         }
 
-        // --- Behaviour / presentation (instanceable). ----------------------
-        $entries['welcomemessage'] = self::entry('behaviour', 'textarea', [
+        // --- Conversation & display (instanceable). ------------------------
+        $entries['welcomemessage'] = self::entry('conversation', 'textarea', [
             'exposedefault' => true,
         ]);
-        $entries['promptstarters'] = self::entry('behaviour', 'textarea', [
+        $entries['promptstarters'] = self::entry('conversation', 'textarea', [
             'exposedefault' => true,
         ]);
-        $entries['answerstyle'] = self::entry('behaviour', 'select', [
+        $entries['answerstyle'] = self::entry('conversation', 'select', [
             'default' => 'explain',
             'options' => [
                 'explain' => 'answerstyle_explain',
@@ -170,11 +180,12 @@ class registry {
             ],
             'exposedefault' => true,
         ]);
-        $entries['allowstylechange'] = self::entry('behaviour', 'checkbox', [
+        $entries['allowstylechange'] = self::entry('conversation', 'checkbox', [
             'default' => 1, 'exposedefault' => true,
         ]);
-        $entries['displaymode'] = self::entry('behaviour', 'select', [
-            'default' => 'embedded',
+        // The default presentation is the docked floating panel.
+        $entries['displaymode'] = self::entry('conversation', 'select', [
+            'default' => 'docked',
             'sitekey' => 'defaultdisplaymode',
             'options' => [
                 'embedded' => 'displaymode_embedded',
@@ -184,7 +195,7 @@ class registry {
             ],
             'exposedefault' => true,
         ]);
-        $entries['historyenabled'] = self::entry('behaviour', 'checkbox', [
+        $entries['historyenabled'] = self::entry('conversation', 'checkbox', [
             'default' => 1, 'exposedefault' => true,
         ]);
 
@@ -245,6 +256,7 @@ class registry {
             'token' => null,
             'default' => self::type_default($type),
             'options' => null,
+            'choices' => null,
             'instanceable' => true,
             'sendtorag' => false,
             'sitekey' => null,
@@ -263,6 +275,118 @@ class registry {
      */
     private static function type_default(string $type): mixed {
         return $type === 'checkbox' ? 0 : '';
+    }
+
+    /**
+     * Friendly named options for the non-colour tokens (registry key => (CSS
+     * value => option lang-key)). The empty value means "built-in default".
+     * Wash options include the light()/dark() preset values verbatim so applying
+     * a preset never loses them.
+     *
+     * @return array<string, array<string, string>>
+     */
+    private static function token_choices(): array {
+        return [
+            'tok_radius' => ['' => 'reg_opt_default', '0' => 'reg_opt_none', '8px' => 'reg_opt_small',
+                '14px' => 'reg_opt_medium', '22px' => 'reg_opt_large', '999px' => 'reg_opt_pill'],
+            'tok_bubbleradius' => ['' => 'reg_opt_default', '4px' => 'reg_opt_small',
+                '10px' => 'reg_opt_medium', '16px' => 'reg_opt_large', '24px' => 'reg_opt_round'],
+            'tok_gap' => ['' => 'reg_opt_default', '0.5rem' => 'reg_opt_compact', '0.65rem' => 'reg_opt_cosy',
+                '0.8rem' => 'reg_opt_comfortable', '1.1rem' => 'reg_opt_spacious'],
+            'tok_z' => ['' => 'reg_opt_default', '1080' => 'reg_opt_normal', '5000' => 'reg_opt_high',
+                '99999' => 'reg_opt_highest'],
+            'tok_fabbottom' => ['' => 'reg_opt_default', '1.25rem' => 'reg_opt_near',
+                '5.5rem' => 'reg_opt_far'],
+            'tok_fabright' => ['' => 'reg_opt_default', '1rem' => 'reg_opt_near', '2rem' => 'reg_opt_far'],
+            'tok_shadowsm' => ['' => 'reg_opt_default', 'none' => 'reg_opt_none',
+                '0 1px 2px rgba(16, 24, 40, 0.06)' => 'reg_opt_subtle',
+                '0 1px 3px rgba(16, 24, 40, 0.12)' => 'reg_opt_soft'],
+            'tok_shadowmd' => ['' => 'reg_opt_default', 'none' => 'reg_opt_none',
+                '0 2px 8px rgba(16, 24, 40, 0.10)' => 'reg_opt_soft',
+                '0 4px 14px rgba(16, 24, 40, 0.16)' => 'reg_opt_medium',
+                '0 8px 24px rgba(16, 24, 40, 0.22)' => 'reg_opt_strong'],
+            'tok_shadowlg' => ['' => 'reg_opt_default', 'none' => 'reg_opt_none',
+                '0 8px 24px rgba(16, 24, 40, 0.16)' => 'reg_opt_medium',
+                '0 16px 48px rgba(16, 24, 40, 0.24)' => 'reg_opt_strong'],
+            'tok_avatarglow' => ['' => 'reg_opt_default', 'none' => 'reg_opt_none',
+                '0 4px 12px rgba(16, 24, 40, 0.18)' => 'reg_opt_softglow',
+                '0 0 14px 2px rgba(255, 24, 24, 0.75)' => 'reg_opt_redglow',
+                '0 0 14px 2px rgba(92, 200, 255, 0.6)' => 'reg_opt_blueglow'],
+            // Translucent washes. Include the exact light()/dark() preset values.
+            'brandiconhover' => ['' => 'reg_opt_default',
+                'rgba(16, 24, 40, 0.08)' => 'reg_opt_lightsubtle',
+                'rgba(16, 24, 40, 0.16)' => 'reg_opt_lightstrong',
+                'rgba(255, 255, 255, 0.14)' => 'reg_opt_darksubtle',
+                'rgba(255, 255, 255, 0.24)' => 'reg_opt_darkstrong'],
+            'tok_overlay' => ['' => 'reg_opt_default',
+                'rgba(16, 24, 40, 0.06)' => 'reg_opt_lightsubtle',
+                'rgba(16, 24, 40, 0.12)' => 'reg_opt_lightstrong',
+                'rgba(255, 255, 255, 0.10)' => 'reg_opt_darksubtle',
+                'rgba(255, 255, 255, 0.18)' => 'reg_opt_darkstrong'],
+            'tok_overlaystrong' => ['' => 'reg_opt_default',
+                'rgba(0, 0, 0, 0.04)' => 'reg_opt_lightsubtle',
+                'rgba(0, 0, 0, 0.08)' => 'reg_opt_lightstrong',
+                'rgba(255, 255, 255, 0.06)' => 'reg_opt_darksubtle',
+                'rgba(255, 255, 255, 0.12)' => 'reg_opt_darkstrong'],
+            'tok_codebg' => ['' => 'reg_opt_default',
+                'rgba(0, 0, 0, 0.06)' => 'reg_opt_lightsubtle',
+                'rgba(0, 0, 0, 0.12)' => 'reg_opt_lightstrong',
+                'rgba(255, 255, 255, 0.08)' => 'reg_opt_darksubtle',
+                'rgba(255, 255, 255, 0.16)' => 'reg_opt_darkstrong'],
+            'tok_backdrop' => ['' => 'reg_opt_default',
+                'rgba(16, 24, 40, 0.30)' => 'reg_opt_subtle',
+                'rgba(16, 24, 40, 0.45)' => 'reg_opt_medium',
+                'rgba(16, 24, 40, 0.65)' => 'reg_opt_strong'],
+            'tok_focusring' => ['' => 'reg_opt_default',
+                '0 0 0 0.2rem rgba(16, 24, 40, 0.18)' => 'reg_opt_subtle',
+                '0 0 0 0.2rem rgba(16, 24, 40, 0.30)' => 'reg_opt_medium',
+                '0 0 0 0.25rem rgba(16, 24, 40, 0.40)' => 'reg_opt_strong'],
+            'brandfont' => ['' => 'reg_opt_default',
+                'system-ui, sans-serif' => 'reg_font_system',
+                'Inter, system-ui, sans-serif' => 'reg_font_inter',
+                'Georgia, "Times New Roman", serif' => 'reg_font_serif',
+                '"Trebuchet MS", Verdana, sans-serif' => 'reg_font_rounded',
+                '"Courier New", monospace' => 'reg_font_mono',
+                'Arial, Helvetica, sans-serif' => 'reg_font_classic'],
+        ];
+    }
+
+    /**
+     * The friendly named options for a key, or null when it has none.
+     *
+     * @param string $key Registry key.
+     * @return array<string, string>|null CSS value => option lang-key.
+     */
+    public static function choices(string $key): ?array {
+        $entry = self::get($key);
+        return $entry['choices'] ?? null;
+    }
+
+    /**
+     * Build a translated value => label option list for a choices-backed key,
+     * with a caller-supplied leading (empty-value) label and the current stored
+     * value appended as a "Current (…)" option when it is not one of the
+     * presets — so a legacy/imported custom value is shown and never silently
+     * overwritten on save.
+     *
+     * @param string $key Registry key.
+     * @param string $emptylabel Label for the empty value (e.g. "Use site default").
+     * @param string|null $current The currently stored value, or null.
+     * @return array<string, string> value => translated label.
+     */
+    public static function choice_select_options(string $key, string $emptylabel,
+            ?string $current = null): array {
+        $options = ['' => $emptylabel];
+        foreach ((self::choices($key) ?? []) as $value => $langkey) {
+            if ((string) $value === '') {
+                continue;
+            }
+            $options[(string) $value] = get_string($langkey, 'block_elediaaitutor');
+        }
+        if ($current !== null && (string) $current !== '' && !isset($options[(string) $current])) {
+            $options[(string) $current] = get_string('reg_opt_current', 'block_elediaaitutor', $current);
+        }
+        return $options;
     }
 
     /**

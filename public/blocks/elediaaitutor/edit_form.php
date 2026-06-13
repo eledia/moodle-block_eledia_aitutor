@@ -45,6 +45,7 @@ class block_elediaaitutor_edit_form extends block_edit_form {
      * @return void
      */
     protected function specific_definition($mform): void {
+        \block_elediaaitutor\local\formhelper::register_colour_element();
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
         // Import / export this instance's tutor (settings + images), or apply a
@@ -141,7 +142,8 @@ class block_elediaaitutor_edit_form extends block_edit_form {
                 break;
 
             case 'colour':
-                $mform->addElement('text', $field, $label, ['placeholder' => '#rrggbb']);
+                // Moodle's native colour picker (text field + swatch; paste a hex too).
+                $mform->addElement('eatcolour', $field, $label);
                 $mform->setType($field, PARAM_TEXT);
                 break;
 
@@ -168,14 +170,19 @@ class block_elediaaitutor_edit_form extends block_edit_form {
                 $mform->setDefault($field, '');
                 break;
 
-            case 'cssvalue':
-                $mform->addElement('text', $field, $label);
-                $mform->setType($field, PARAM_RAW_TRIMMED);
-                break;
-
-            default: // text / font.
-                $mform->addElement('text', $field, $label);
-                $mform->setType($field, PARAM_TEXT);
+            default:
+                // cssvalue / font / text. Tokens with friendly named options
+                // become a dropdown (no raw CSS); plain text stays a text box.
+                if (!empty($entry['choices'])) {
+                    $current = isset($this->block->config->$key) ? (string) $this->block->config->$key : null;
+                    $options = registry::choice_select_options($key,
+                        get_string('config_usesite', 'block_elediaaitutor'), $current);
+                    $mform->addElement('select', $field, $label, $options);
+                    $mform->setDefault($field, '');
+                } else {
+                    $mform->addElement('text', $field, $label);
+                    $mform->setType($field, PARAM_TEXT);
+                }
                 break;
         }
 

@@ -188,5 +188,16 @@ function xmldb_block_elediaaitutor_upgrade(int $oldversion): bool {
         upgrade_block_savepoint(true, 2026061321, 'elediaaitutor');
     }
 
+    if ($oldversion < 2026061330) {
+        // The default presentation is now the docked floating panel; migrate the
+        // old 'embedded' default (the new default reaches fresh installs via
+        // settings.php). An admin who deliberately chose another mode is left be.
+        if ((string) get_config('block_elediaaitutor', 'defaultdisplaymode') === 'embedded') {
+            set_config('defaultdisplaymode', 'docked', 'block_elediaaitutor');
+        }
+
+        upgrade_block_savepoint(true, 2026061330, 'elediaaitutor');
+    }
+
     return true;
 }

@@ -337,11 +337,20 @@ if ($hassiteconfig) {
             } else if ($entry['type'] === 'textarea') {
                 $settings->add(new admin_setting_configtextarea(
                     'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default));
+            } else if (!empty($entry['choices'])) {
+                // cssvalue / font with friendly named options → a dropdown so no
+                // one has to type raw CSS. The empty value is the built-in default.
+                $cfgname = registry::sitekey($key);
+                $current = get_config('block_elediaaitutor', $cfgname);
+                $options = registry::choice_select_options($key,
+                    get_string('reg_opt_default', 'block_elediaaitutor'),
+                    $current === false ? null : (string) $current);
+                $settings->add(new admin_setting_configselect(
+                    'block_elediaaitutor/' . $cfgname, $label, $desc, (string) $default, $options));
             } else {
-                // text / cssvalue / font: stored raw, sanitised at render time.
-                $paramtype = $entry['type'] === 'text' ? PARAM_TEXT : PARAM_RAW_TRIMMED;
+                // Free text (persona fields, labels, footer text).
                 $settings->add(new admin_setting_configtext(
-                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default, $paramtype));
+                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default, PARAM_TEXT));
             }
 
             // "Allow per-instance override" companion checkbox.

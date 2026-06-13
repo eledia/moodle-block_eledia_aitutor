@@ -163,7 +163,8 @@ class presets {
         if ($preset === null) {
             return [];
         }
-        $out = [];
+        // Every delivered preset uses the docked floating panel.
+        $out = ['displaymode' => 'docked'];
         $tokentokey = array_flip(registry::token_keys());
         foreach ($preset['tokens'] as $token => $value) {
             if (isset($tokentokey[$token]) && $value !== '') {

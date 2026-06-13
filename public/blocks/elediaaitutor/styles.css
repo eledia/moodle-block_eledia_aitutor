@@ -522,12 +522,19 @@ a.elediaaitutor-avatar:focus-visible {
     box-shadow: 0 0 0 0.18rem var(--eat-focus-ring);
 }
 
-/* Two-class specificity so the colour wins over Bootstrap's .btn/.btn-icon
-   (the header buttons carry both classes); also colour the icon glyph. */
-.elediaaitutor-actions .elediaaitutor-iconbtn,
-.elediaaitutor-actions .elediaaitutor-iconbtn .fa,
-.elediaaitutor-actions .elediaaitutor-iconbtn i {
+/* Every icon button in the panel uses the header foreground (two-class
+   specificity beats Bootstrap's .btn/.btn-icon colour), and — importantly — its
+   glyph inherits that colour. Bootstrap otherwise forces its own icon colour,
+   which is invisible on dark presets (e.g. the trash icon in the conversation-
+   history list). This makes the history delete icon match the four header
+   buttons on every preset. */
+.elediaaitutor-panel .elediaaitutor-iconbtn,
+.elediaaitutor-actions .elediaaitutor-iconbtn {
     color: var(--eat-header-fg);
+}
+.elediaaitutor-panel .elediaaitutor-iconbtn .fa,
+.elediaaitutor-panel .elediaaitutor-iconbtn i {
+    color: inherit;
 }
 
 .elediaaitutor-message-actions .elediaaitutor-iconbtn {
@@ -1243,9 +1250,23 @@ body.elediaaitutor-noscroll {
 }
 
 .elediaaitutor-modal .modal-title,
-.elediaaitutor-modal .close,
-.elediaaitutor-modal .btn-close {
+.elediaaitutor-modal .close {
     color: var(--eat-ink);
+}
+
+/* The Bootstrap 5 close button is an SVG background image with a fixed dark
+   fill, so a colour rule can't recolour it — it's low-contrast/invisible on dark
+   presets. Re-draw the same glyph as a mask filled with --eat-ink, which
+   contrasts the modal surface on every preset. */
+.elediaaitutor-modal .btn-close {
+    background: var(--eat-ink);
+    -webkit-mask: var(--bs-btn-close-bg) center / 1em auto no-repeat;
+    mask: var(--bs-btn-close-bg) center / 1em auto no-repeat;
+    opacity: 0.7;
+}
+.elediaaitutor-modal .btn-close:hover,
+.elediaaitutor-modal .btn-close:focus-visible {
+    opacity: 1;
 }
 
 .elediaaitutor-modal .elediaaitutor-privacy {
@@ -1536,4 +1557,107 @@ body.elediaaitutor-noscroll {
 }
 .eat-settings-callout .fa {
     color: #0b3d91;
+}
+
+/* --- Question-analytics report. --------------------------------------- */
+.eat-report .eat-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1rem;
+    margin: 0.5rem 0 1.5rem;
+}
+.eat-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+.eat-stat-icon {
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex: 0 0 auto;
+    background: #eef2fb;
+    color: #0b3d91;
+}
+.eat-stat-num {
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #1f2a37;
+}
+.eat-stat-label {
+    font-size: 0.82rem;
+    color: var(--eat-a-muted);
+    margin-top: 0.25rem;
+}
+.eat-report-card {
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: 14px;
+    padding: 1.1rem 1.3rem 1.3rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+.eat-report-card .eat-report-title {
+    margin: 0 0 0.9rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2a37;
+}
+.eat-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+.eat-bar-row {
+    display: grid;
+    grid-template-columns: minmax(6rem, 11rem) 1fr;
+    align-items: center;
+    gap: 0.9rem;
+}
+.eat-bar-label {
+    font-size: 0.85rem;
+    color: #2a3340;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.eat-bar-label a {
+    color: var(--eat-a-accent);
+}
+.eat-bar-track {
+    background: #eef2f7;
+    border-radius: 999px;
+    height: 1.5rem;
+    overflow: hidden;
+}
+.eat-bar-fill {
+    height: 100%;
+    min-width: 1.9rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1e3f59, #3a6ea5);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 0.55rem;
+    color: #fff;
+    font-size: 0.74rem;
+    font-weight: 700;
+    box-sizing: border-box;
+}
+.eat-bar-fill.eat-bar-zero {
+    background: #e3e8ef;
+    color: #5b6677;
+}
+.eat-report-card .generaltable {
+    margin-bottom: 0;
 }
