@@ -280,20 +280,25 @@ a.elediaaitutor-avatar:focus-visible {
 }
 
 .elediaaitutor-iconbtn {
-    color: var(--eat-muted);
+    /* Based on the header foreground (which every theme sets for contrast
+       against the header) rather than the faint --eat-muted, so the controls
+       stay visible on dark themes; opacity gives the secondary look. */
+    color: var(--eat-header-fg);
+    opacity: 0.7;
     background: transparent;
     border: 0;
     padding: 0.35rem 0.5rem;
     border-radius: 10px;
     line-height: 1;
     cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
 }
 
 .elediaaitutor-iconbtn:hover,
 .elediaaitutor-iconbtn:focus-visible {
     background: var(--eat-overlay);
     color: var(--eat-header-fg);
+    opacity: 1;
 }
 
 .elediaaitutor-message-actions .elediaaitutor-iconbtn {

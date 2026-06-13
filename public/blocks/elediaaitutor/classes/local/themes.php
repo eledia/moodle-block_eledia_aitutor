@@ -167,6 +167,10 @@ class themes {
             '--eat-tint' => '#1f1f22',
             '--eat-grounded-bg' => '#1f2a2e',
             '--eat-grounded-line' => '#33484f',
+            // Light translucent hovers so they show on dark surfaces.
+            '--eat-overlay' => 'rgba(255, 255, 255, 0.10)',
+            '--eat-overlay-strong' => 'rgba(255, 255, 255, 0.06)',
+            '--eat-code-bg' => 'rgba(255, 255, 255, 0.08)',
         ], $overrides);
     }
 }
