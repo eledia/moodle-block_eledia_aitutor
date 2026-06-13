@@ -148,14 +148,41 @@ class block_elediaaitutor extends block_base {
             'ragmode' => (string) $this->get_instance_config('ragmode', 'grounded'),
             'theme' => (string) $this->get_instance_config('theme', ''),
             'launchlabel' => (string) $this->get_instance_config('launchlabel', ''),
+            'launcherstyle' => (string) $this->get_instance_config('launcherstyle', ''),
             'brandaccent' => (string) $this->get_instance_config('brandaccent', ''),
             'brandbubble' => (string) $this->get_instance_config('brandbubble', ''),
+            'brandbotbubble' => (string) $this->get_instance_config('brandbotbubble', ''),
         ]);
 
         // Teachers reach the question-analytics report via the course
         // navigation; see block_elediaaitutor_extend_navigation_course().
 
         return $this->content;
+    }
+
+    /**
+     * Persist instance config, saving the per-instance logo/avatar uploads from
+     * their draft areas into the block context (mirrors block_html).
+     *
+     * @param stdClass $data Submitted config.
+     * @param bool $nolongerused Unused.
+     * @return void
+     */
+    public function instance_config_save($data, $nolongerused = false): void {
+        if ($this->context) {
+            foreach ([
+                'logo' => \block_elediaaitutor\local\branding::INSTANCE_LOGO_FILEAREA,
+                'avatar' => \block_elediaaitutor\local\branding::INSTANCE_AVATAR_FILEAREA,
+            ] as $field => $filearea) {
+                if (!empty($data->$field)) {
+                    file_save_draft_area_files((int) $data->$field, $this->context->id,
+                        'block_elediaaitutor', $filearea, 0, ['maxfiles' => 1, 'subdirs' => 0]);
+                }
+                // The draft id is not stored in config (the files live in the area).
+                unset($data->$field);
+            }
+        }
+        parent::instance_config_save($data, $nolongerused);
     }
 
     /**

@@ -104,6 +104,32 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         $mform->setType('config_brandbubble', PARAM_TEXT);
         $mform->addHelpButton('config_brandbubble', 'config_brandbubble', 'block_elediaaitutor');
 
+        $mform->addElement('text', 'config_brandbotbubble',
+            get_string('config_brandbotbubble', 'block_elediaaitutor'), ['placeholder' => '#ffffff']);
+        $mform->setType('config_brandbotbubble', PARAM_TEXT);
+        $mform->addHelpButton('config_brandbotbubble', 'config_brandbotbubble', 'block_elediaaitutor');
+
+        // Launcher button style ('' = follow the site setting).
+        $mform->addElement('select', 'config_launcherstyle',
+            get_string('config_launcherstyle', 'block_elediaaitutor'), [
+                '' => get_string('config_launcherstyle_site', 'block_elediaaitutor'),
+                'pill' => get_string('launcherstyle_pill', 'block_elediaaitutor'),
+                'solid' => get_string('launcherstyle_solid', 'block_elediaaitutor'),
+                'fab' => get_string('launcherstyle_fab', 'block_elediaaitutor'),
+            ]);
+        $mform->setDefault('config_launcherstyle', '');
+        $mform->addHelpButton('config_launcherstyle', 'config_launcherstyle', 'block_elediaaitutor');
+
+        // Per-instance logo + conversation avatar uploads (empty = site branding).
+        $imageopts = ['maxfiles' => 1, 'subdirs' => 0,
+            'accepted_types' => ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif']];
+        $mform->addElement('filemanager', 'config_logo',
+            get_string('config_logo', 'block_elediaaitutor'), null, $imageopts);
+        $mform->addHelpButton('config_logo', 'config_logo', 'block_elediaaitutor');
+        $mform->addElement('filemanager', 'config_avatar',
+            get_string('config_avatar', 'block_elediaaitutor'), null, $imageopts);
+        $mform->addHelpButton('config_avatar', 'config_avatar', 'block_elediaaitutor');
+
         // Pedagogical answer style.
         $styles = [
             'explain' => get_string('answerstyle_explain', 'block_elediaaitutor'),
@@ -162,6 +188,29 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         $mform->addElement('selectyesno', 'config_historyenabled',
             get_string('config_historyenabled', 'block_elediaaitutor'));
         $mform->setDefault('config_historyenabled', 1);
+    }
+
+    /**
+     * Prepare the per-instance logo/avatar file-manager draft areas from the
+     * stored block-context files (mirrors the block_html pattern).
+     *
+     * @param array|\stdClass $defaults The instance config defaults.
+     * @return void
+     */
+    public function set_data($defaults) {
+        if (!empty($this->block->instance->id)) {
+            $context = $this->block->context;
+            foreach ([
+                'config_logo' => \block_elediaaitutor\local\branding::INSTANCE_LOGO_FILEAREA,
+                'config_avatar' => \block_elediaaitutor\local\branding::INSTANCE_AVATAR_FILEAREA,
+            ] as $field => $filearea) {
+                $draftid = file_get_submitted_draft_itemid($field);
+                file_prepare_draft_area($draftid, $context->id, 'block_elediaaitutor',
+                    $filearea, 0, ['maxfiles' => 1, 'subdirs' => 0]);
+                $defaults->{$field} = $draftid;
+            }
+        }
+        parent::set_data($defaults);
     }
 
     /**

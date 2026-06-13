@@ -48,12 +48,14 @@
     <script type="application/json" data-region="elediaaitutor-config">{{{configjson}}}</script>
 
     {{^embedded}}
-        <button type="button" class="btn btn-primary elediaaitutor-launch"
-                data-action="launch" aria-haspopup="dialog" aria-expanded="false">
+        <button type="button"
+                class="btn btn-primary elediaaitutor-launch elediaaitutor-launch--{{launcherstyle}}"
+                data-action="launch" aria-haspopup="dialog" aria-expanded="false"
+                {{#launchfab}}aria-label="{{launchlabel}}" title="{{launchlabel}}"{{/launchfab}}>
             <span class="elediaaitutor-launch-icon" aria-hidden="true">
-                <img class="elediaaitutor-launch-img" src="{{avatarurl}}" alt="" width="20" height="20">
+                <img class="elediaaitutor-launch-img" src="{{logourl}}" alt="" width="20" height="20">
             </span>
-            <span class="elediaaitutor-launch-text">{{launchlabel}}</span>
+            {{^launchfab}}<span class="elediaaitutor-launch-text">{{launchlabel}}</span>{{/launchfab}}
         </button>
     {{/embedded}}
 
@@ -73,7 +75,7 @@
                        target="_blank" rel="noopener"
                        title="{{#str}}eledialink, block_elediaaitutor{{/str}}"
                        aria-label="{{#str}}eledialink, block_elediaaitutor{{/str}}">
-                        <img class="elediaaitutor-avatar-img" src="{{avatarurl}}" alt="" width="34" height="34">
+                        <img class="elediaaitutor-avatar-img" src="{{logourl}}" alt="" width="34" height="34">
                         <span class="elediaaitutor-status-dot"></span>
                     </a>
                     <span class="elediaaitutor-identity-text">

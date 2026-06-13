@@ -52,8 +52,17 @@ class branding {
     /** @var string Footer hidden entirely (full white-label). */
     public const FOOTER_NONE = 'none';
 
-    /** @var string File area for the site-level brand logo. */
+    /** @var string File area for the site-level brand logo (tutor logo). */
     public const LOGO_FILEAREA = 'brandlogo';
+
+    /** @var string File area for the site-level conversation avatar. */
+    public const AVATAR_FILEAREA = 'brandavatar';
+
+    /** @var string Block-instance file area for the tutor logo override. */
+    public const INSTANCE_LOGO_FILEAREA = 'instancelogo';
+
+    /** @var string Block-instance file area for the conversation avatar override. */
+    public const INSTANCE_AVATAR_FILEAREA = 'instanceavatar';
 
     /**
      * The effective branding kit, merging per-instance overrides over the site
@@ -95,6 +104,11 @@ class branding {
         if ($bubble !== null) {
             $tokens['--eat-user-bg'] = $bubble;
         }
+        $botbubble = self::sanitise_colour((string) ($instance['brandbotbubble'] ?? ''))
+            ?? self::sanitise_colour(security::brand_bot_bubble());
+        if ($botbubble !== null) {
+            $tokens['--eat-bot-bg'] = $botbubble;
+        }
         $surface = self::sanitise_colour(security::brand_surface());
         if ($surface !== null) {
             $tokens['--eat-body-bg'] = $surface;
@@ -112,15 +126,43 @@ class branding {
             $launchlabel = get_string('launch', 'block_elediaaitutor');
         }
 
+        // Launcher style: per-instance ('' = follow site) over the site default.
+        $launcherstyle = trim((string) ($instance['launcherstyle'] ?? ''));
+        if (!in_array($launcherstyle, ['pill', 'solid', 'fab'], true)) {
+            $launcherstyle = security::launcher_style();
+        }
+
         return [
             'theme' => $themeid,
             'tokens' => $tokens,
             'accent' => (string) ($accent ?? ''),
             'bubble' => (string) ($bubble ?? ''),
+            'botbubble' => (string) ($botbubble ?? ''),
             'launchlabel' => $launchlabel,
+            'launcherstyle' => $launcherstyle,
             'footermode' => self::footer_mode(),
             'footertext' => self::footer_text(),
         ];
+    }
+
+    /**
+     * The site-level conversation avatar URL (assistant message avatar), or ''.
+     *
+     * @return string
+     */
+    public static function site_avatar_url(): string {
+        $filename = (string) get_config('block_elediaaitutor', self::AVATAR_FILEAREA);
+        if ($filename === '') {
+            return '';
+        }
+        return moodle_url::make_pluginfile_url(
+            context_system::instance()->id,
+            'block_elediaaitutor',
+            self::AVATAR_FILEAREA,
+            0,
+            '/',
+            ltrim($filename, '/')
+        )->out(false);
     }
 
     /**
@@ -159,6 +201,31 @@ class branding {
             '/',
             ltrim($filename, '/')
         )->out(false);
+    }
+
+    /**
+     * URL of a per-instance uploaded file (logo/avatar), or '' when none.
+     *
+     * Files live in the block context; only block contexts can carry them
+     * (the standalone view.php uses the system context and has none).
+     *
+     * @param \context $context The widget context.
+     * @param string $filearea INSTANCE_LOGO_FILEAREA or INSTANCE_AVATAR_FILEAREA.
+     * @return string
+     */
+    public static function instance_file_url(\context $context, string $filearea): string {
+        if ($context->contextlevel !== CONTEXT_BLOCK) {
+            return '';
+        }
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($context->id, 'block_elediaaitutor', $filearea,
+            0, 'itemid, filepath, filename', false);
+        if (empty($files)) {
+            return '';
+        }
+        $file = reset($files);
+        return moodle_url::make_pluginfile_url($context->id, 'block_elediaaitutor', $filearea,
+            0, $file->get_filepath(), $file->get_filename())->out(false);
     }
 
     /**

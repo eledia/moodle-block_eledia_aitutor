@@ -281,13 +281,24 @@ if ($hassiteconfig) {
         \block_elediaaitutor\local\themes::menu()
     ));
 
+    $imageopts = ['maxfiles' => 1, 'accepted_types' => ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif']];
+
     $settings->add(new admin_setting_configstoredfile(
         'block_elediaaitutor/brandlogo',
         get_string('setting_brandlogo', 'block_elediaaitutor'),
         get_string('setting_brandlogo_desc', 'block_elediaaitutor'),
         \block_elediaaitutor\local\branding::LOGO_FILEAREA,
         0,
-        ['maxfiles' => 1, 'accepted_types' => ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif']]
+        $imageopts
+    ));
+
+    $settings->add(new admin_setting_configstoredfile(
+        'block_elediaaitutor/brandavatar',
+        get_string('setting_brandavatar', 'block_elediaaitutor'),
+        get_string('setting_brandavatar_desc', 'block_elediaaitutor'),
+        \block_elediaaitutor\local\branding::AVATAR_FILEAREA,
+        0,
+        $imageopts
     ));
 
     $settings->add(new admin_setting_configcolourpicker(
@@ -302,6 +313,25 @@ if ($hassiteconfig) {
         get_string('setting_brandbubble', 'block_elediaaitutor'),
         get_string('setting_brandbubble_desc', 'block_elediaaitutor'),
         ''
+    ));
+
+    $settings->add(new admin_setting_configcolourpicker(
+        'block_elediaaitutor/brandbotbubble',
+        get_string('setting_brandbotbubble', 'block_elediaaitutor'),
+        get_string('setting_brandbotbubble_desc', 'block_elediaaitutor'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_configselect(
+        'block_elediaaitutor/launcherstyle',
+        get_string('setting_launcherstyle', 'block_elediaaitutor'),
+        get_string('setting_launcherstyle_desc', 'block_elediaaitutor'),
+        'pill',
+        [
+            'pill' => get_string('launcherstyle_pill', 'block_elediaaitutor'),
+            'solid' => get_string('launcherstyle_solid', 'block_elediaaitutor'),
+            'fab' => get_string('launcherstyle_fab', 'block_elediaaitutor'),
+        ]
     ));
 
     $settings->add(new admin_setting_configcolourpicker(

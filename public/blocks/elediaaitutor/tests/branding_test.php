@@ -120,6 +120,50 @@ final class branding_test extends \advanced_testcase {
     }
 
     /**
+     * Every non-default theme defines the full required token set, so no
+     * component falls back to a clashing/illegible default on any theme.
+     */
+    public function test_all_themes_define_required_tokens(): void {
+        $required = themes::required_tokens();
+        foreach (themes::all() as $id => $theme) {
+            if ($id === themes::DEFAULT) {
+                continue;
+            }
+            $missing = array_diff($required, array_keys($theme['tokens']));
+            $this->assertSame([], $missing,
+                "Theme '{$id}' is missing tokens: " . implode(', ', $missing));
+        }
+    }
+
+    /**
+     * The tutor (assistant) bubble colour is settable, instance over site.
+     */
+    public function test_bot_bubble_colour(): void {
+        $this->resetAfterTest();
+        set_config('brandbotbubble', '#101820', 'block_elediaaitutor');
+
+        $css = branding::css_variables(branding::resolve([]));
+        $this->assertStringContainsString('--eat-bot-bg:#101820;', $css);
+
+        $css = branding::css_variables(branding::resolve(['brandbotbubble' => '#abcdef']));
+        $this->assertStringContainsString('--eat-bot-bg:#abcdef;', $css);
+    }
+
+    /**
+     * Launcher style resolves instance-over-site with a safe fallback.
+     */
+    public function test_launcher_style(): void {
+        $this->resetAfterTest();
+        $this->assertSame('pill', branding::resolve([])['launcherstyle']);
+
+        set_config('launcherstyle', 'fab', 'block_elediaaitutor');
+        $this->assertSame('fab', branding::resolve([])['launcherstyle']);
+        // Instance override wins; a bogus value falls back to the site setting.
+        $this->assertSame('solid', branding::resolve(['launcherstyle' => 'solid'])['launcherstyle']);
+        $this->assertSame('fab', branding::resolve(['launcherstyle' => 'bogus'])['launcherstyle']);
+    }
+
+    /**
      * Footer modes: custom text, and white-label removal.
      */
     public function test_footer_modes(): void {

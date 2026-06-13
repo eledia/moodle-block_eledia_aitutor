@@ -54,3 +54,44 @@ function block_elediaaitutor_extend_navigation_course(navigation_node $navigatio
         new pix_icon('i/report', '')
     );
 }
+
+/**
+ * Serve per-instance branding files (logo / conversation avatar) stored in the
+ * block context. The images are non-sensitive branding shown to every learner
+ * who can see the block, so any logged-in user may fetch them.
+ *
+ * @param stdClass $course Course (or site) record.
+ * @param stdClass $birecord_or_cm The block instance record.
+ * @param context $context The block context.
+ * @param string $filearea The requested file area.
+ * @param array $args The file path/name args.
+ * @param bool $forcedownload Whether to force download.
+ * @param array $options Serving options.
+ * @return void Sends the file and exits, or returns false on failure.
+ */
+function block_elediaaitutor_pluginfile($course, $birecord_or_cm, $context, $filearea, $args,
+        $forcedownload, array $options = []) {
+    if ($context->contextlevel != CONTEXT_BLOCK) {
+        send_file_not_found();
+    }
+
+    $allowed = [
+        \block_elediaaitutor\local\branding::INSTANCE_LOGO_FILEAREA,
+        \block_elediaaitutor\local\branding::INSTANCE_AVATAR_FILEAREA,
+    ];
+    if (!in_array($filearea, $allowed, true)) {
+        send_file_not_found();
+    }
+
+    require_login();
+
+    $fs = get_file_storage();
+    $filename = array_pop($args);
+    $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+    $file = $fs->get_file($context->id, 'block_elediaaitutor', $filearea, 0, $filepath, $filename);
+    if (!$file || $file->is_directory()) {
+        send_file_not_found();
+    }
+
+    send_stored_file($file, null, 0, $forcedownload, $options);
+}

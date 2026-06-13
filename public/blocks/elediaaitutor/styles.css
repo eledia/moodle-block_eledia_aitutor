@@ -32,7 +32,8 @@
  * so the panel must carry its own variables or it would render unstyled.
  */
 .elediaaitutor-root,
-.elediaaitutor-panel {
+.elediaaitutor-panel,
+.elediaaitutor-modal {
     /* Single accent (deep navy) carries primary actions and text. */
     --eat-accent: #1e3f59;
     --eat-accent-dark: #16314a;
@@ -111,21 +112,63 @@
     background: var(--eat-surface);
     border: 1px solid var(--eat-line);
     color: var(--eat-accent);
-    box-shadow: 0 1px 2px rgba(30, 63, 89, 0.06), 0 10px 24px rgba(30, 63, 89, 0.10);
+    box-shadow: var(--eat-shadow-md);
     transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
 
 .elediaaitutor-root .elediaaitutor-launch:hover,
 .elediaaitutor-root .elediaaitutor-launch:focus-visible {
     background: var(--eat-surface);
-    border-color: #cfd6dd;
+    border-color: var(--eat-accent);
     color: var(--eat-accent);
-    box-shadow: 0 2px 4px rgba(30, 63, 89, 0.08), 0 14px 30px rgba(30, 63, 89, 0.16);
+    box-shadow: var(--eat-shadow-lg);
     transform: translateY(-1px);
 }
 
 .elediaaitutor-root .elediaaitutor-launch:active {
     transform: translateY(1px);
+}
+
+/* Solid variant: accent-filled pill. */
+.elediaaitutor-root .elediaaitutor-launch--solid {
+    background: var(--eat-accent);
+    border-color: var(--eat-accent);
+    color: var(--eat-accent-contrast);
+}
+
+.elediaaitutor-root .elediaaitutor-launch--solid:hover,
+.elediaaitutor-root .elediaaitutor-launch--solid:focus-visible {
+    background: var(--eat-accent-dark);
+    border-color: var(--eat-accent-dark);
+    color: var(--eat-accent-contrast);
+}
+
+/* FAB variant: fixed circular floating button, bottom-right of the viewport. */
+.elediaaitutor-root .elediaaitutor-launch--fab {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: var(--eat-z);
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--eat-accent);
+    border-color: var(--eat-accent);
+    color: var(--eat-accent-contrast);
+    box-shadow: var(--eat-shadow-lg);
+}
+
+.elediaaitutor-root .elediaaitutor-launch--fab:hover,
+.elediaaitutor-root .elediaaitutor-launch--fab:focus-visible {
+    background: var(--eat-accent-dark);
+    border-color: var(--eat-accent-dark);
+}
+
+.elediaaitutor-launch--fab .elediaaitutor-launch-icon {
+    width: 2rem;
+    height: 2rem;
 }
 
 .elediaaitutor-launch-icon,
@@ -988,6 +1031,18 @@ body.elediaaitutor-noscroll {
 
 .elediaaitutor-modal .elediaaitutor-privacy h5 {
     color: var(--eat-header-fg);
+}
+
+/* Token-styled accuracy callout (replaces Bootstrap .alert-warning so it reads
+   on every theme, light or dark). */
+.elediaaitutor-callout {
+    background: var(--eat-grounded-bg);
+    color: var(--eat-ink);
+    border: 1px solid var(--eat-grounded-line);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
 }
 
 /* --- Reduced motion. --------------------------------------------------- */

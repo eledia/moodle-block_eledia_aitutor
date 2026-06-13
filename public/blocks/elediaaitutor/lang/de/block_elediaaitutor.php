@@ -85,6 +85,26 @@ $string['config_brandaccent'] = 'Akzentfarbe';
 $string['config_brandaccent_help'] = 'Eine Hex-Farbe (z. B. #1e3f59), die die Akzentfarbe nur für diesen Block überschreibt. Leer lassen, um das Website-Branding zu verwenden.';
 $string['config_brandbubble'] = 'Farbe der Nutzer-Sprechblase';
 $string['config_brandbubble_help'] = 'Eine Hex-Farbe (z. B. #fce9db) für die Nachrichten-Sprechblasen der lernenden Person nur in diesem Block. Leer lassen, um das Website-Branding zu verwenden.';
+$string['config_brandbotbubble'] = 'Farbe der Tutor-Sprechblase';
+$string['config_brandbotbubble_help'] = 'Eine Hex-Farbe (z. B. #ffffff) für die Nachrichten-Sprechblasen des Tutors nur in diesem Block. Leer lassen, um das Website-Branding zu verwenden.';
+$string['config_launcherstyle'] = 'Stil der Start-Schaltfläche';
+$string['config_launcherstyle_site'] = 'Website-Standard verwenden';
+$string['config_launcherstyle_help'] = 'Aussehen der Schaltfläche „Tutor öffnen“ in den Modi angedockt/modal/Vollbild für diesen Block. „Website-Standard verwenden“ folgt der Website-Einstellung.';
+$string['config_logo'] = 'Tutor-Logo (dieser Block)';
+$string['config_logo_help'] = 'Ein Logo für die Startschaltfläche und die Chat-Kopfzeile nur dieses Blocks. Leer lassen, um das Website-Logo zu verwenden.';
+$string['config_avatar'] = 'Gesprächs-Avatar (dieser Block)';
+$string['config_avatar_help'] = 'Der Avatar neben den Nachrichten des Tutors nur in diesem Block. Leer lassen, um den Website-Gesprächs-Avatar zu verwenden.';
+
+// Branding: weitere Administrationseinstellungen.
+$string['setting_brandavatar'] = 'Gesprächs-Avatar';
+$string['setting_brandavatar_desc'] = 'Der Avatar neben den Nachrichten des Tutors im Gespräch. Ein quadratisches Bild eignet sich am besten. Fällt auf das Tutor-Logo zurück, wenn nicht gesetzt.';
+$string['setting_brandbotbubble'] = 'Farbe der Tutor-Sprechblase';
+$string['setting_brandbotbubble_desc'] = 'Hintergrundfarbe der Nachrichten-Sprechblasen des Tutors (Assistenten). Leer lassen für die standardmäßige weiße Karte.';
+$string['setting_launcherstyle'] = 'Stil der Start-Schaltfläche';
+$string['setting_launcherstyle_desc'] = 'Aussehen der Schaltfläche, die den Tutor öffnet (Modi angedockt/modal/Vollbild). Block-Instanzen können dies überschreiben.';
+$string['launcherstyle_pill'] = 'Pille (Umriss)';
+$string['launcherstyle_solid'] = 'Gefüllt (Akzentfarbe)';
+$string['launcherstyle_fab'] = 'Schwebende Schaltfläche (untere Ecke)';
 $string['send'] = 'Nachricht senden';
 $string['messagelabel'] = 'Ihre Nachricht an den Tutor';
 $string['inputplaceholder'] = 'Fragen Sie den Tutor etwas …';

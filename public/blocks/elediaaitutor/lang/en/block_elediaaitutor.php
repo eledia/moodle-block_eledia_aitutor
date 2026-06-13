@@ -85,6 +85,26 @@ $string['config_brandaccent'] = 'Accent colour';
 $string['config_brandaccent_help'] = 'A hex colour (e.g. #1e3f59) overriding the accent for this block only. Leave empty to use the site branding.';
 $string['config_brandbubble'] = 'User bubble colour';
 $string['config_brandbubble_help'] = 'A hex colour (e.g. #fce9db) for the learner\'s message bubbles in this block only. Leave empty to use the site branding.';
+$string['config_brandbotbubble'] = 'Tutor bubble colour';
+$string['config_brandbotbubble_help'] = 'A hex colour (e.g. #ffffff) for the tutor\'s message bubbles in this block only. Leave empty to use the site branding.';
+$string['config_launcherstyle'] = 'Launcher button style';
+$string['config_launcherstyle_site'] = 'Use site default';
+$string['config_launcherstyle_help'] = 'How the "open the tutor" button looks in docked/modal/fullscreen modes for this block. "Use site default" follows the site setting.';
+$string['config_logo'] = 'Tutor logo (this block)';
+$string['config_logo_help'] = 'A logo for the launcher and chat header of this block only. Leave empty to use the site logo.';
+$string['config_avatar'] = 'Conversation avatar (this block)';
+$string['config_avatar_help'] = 'The avatar shown next to the tutor\'s messages in this block only. Leave empty to use the site conversation avatar.';
+
+// Branding: more admin settings.
+$string['setting_brandavatar'] = 'Conversation avatar';
+$string['setting_brandavatar_desc'] = 'The avatar shown next to the tutor\'s messages in the conversation. A square image works best. Falls back to the tutor logo when unset.';
+$string['setting_brandbotbubble'] = 'Tutor bubble colour';
+$string['setting_brandbotbubble_desc'] = 'Background colour of the tutor\'s (assistant\'s) message bubbles. Leave empty for the default white card.';
+$string['setting_launcherstyle'] = 'Launcher button style';
+$string['setting_launcherstyle_desc'] = 'How the button that opens the tutor looks in docked/modal/fullscreen modes. Block instances may override this.';
+$string['launcherstyle_pill'] = 'Pill (outline)';
+$string['launcherstyle_solid'] = 'Solid (accent-filled)';
+$string['launcherstyle_fab'] = 'Floating button (bottom corner)';
 $string['send'] = 'Send message';
 $string['messagelabel'] = 'Your message to the tutor';
 $string['inputplaceholder'] = 'Ask the tutor anything…';

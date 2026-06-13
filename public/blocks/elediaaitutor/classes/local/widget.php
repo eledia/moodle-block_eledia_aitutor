@@ -142,10 +142,15 @@ class widget {
         $consented = consent::has_consented((int) $USER->id);
 
         // Resolve institutional branding (per-instance overrides over the site
-        // defaults). The logo is the site brand logo when uploaded, otherwise
-        // the built-in eLeDia mark.
+        // defaults). Two logos: the tutor logo (header + launcher) and the
+        // conversation avatar (per-message). Each: instance upload ?: site
+        // upload ?: (avatar) the logo ?: the built-in eLeDia mark.
         $brand = branding::resolve($options);
-        $avatarurl = branding::site_logo_url() ?: $OUTPUT->image_url('logo', 'block_elediaaitutor')->out(false);
+        $defaultlogo = $OUTPUT->image_url('logo', 'block_elediaaitutor')->out(false);
+        $logourl = branding::instance_file_url($context, branding::INSTANCE_LOGO_FILEAREA)
+            ?: branding::site_logo_url() ?: $defaultlogo;
+        $avatarurl = branding::instance_file_url($context, branding::INSTANCE_AVATAR_FILEAREA)
+            ?: branding::site_avatar_url() ?: $logourl;
         $brandstyle = branding::css_variables($brand);
 
         // Institution-specific privacy guidelines (admin setting). When set, the
@@ -188,10 +193,13 @@ class widget {
             'displaymode' => $displaymode,
             'embedded' => $displaymode === 'embedded',
             'persona' => format_string($persona),
+            'logourl' => $logourl,
             'avatarurl' => $avatarurl,
             'welcome' => format_text($welcome, FORMAT_MOODLE, ['context' => $context, 'filter' => false]),
             'historyenabled' => $historyenabled,
             'launchlabel' => $brand['launchlabel'],
+            'launcherstyle' => $brand['launcherstyle'],
+            'launchfab' => $brand['launcherstyle'] === 'fab',
             'stylechoice' => $allowstylechange,
             'styles' => $styles,
             'stylelocked' => !$allowstylechange && $answerstyle !== 'explain',

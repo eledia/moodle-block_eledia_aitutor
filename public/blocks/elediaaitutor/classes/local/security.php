@@ -242,12 +242,31 @@ class security {
     }
 
     /**
+     * Institution user-bubble colour (hex), or '' when unset.
+     *
+     * @return string
+     */
+    public static function brand_bot_bubble(): string {
+        return trim((string) self::get_config('brandbotbubble', ''));
+    }
+
+    /**
      * Institution surface/background tint (hex), or '' when unset.
      *
      * @return string
      */
     public static function brand_surface(): string {
         return trim((string) self::get_config('brandsurface', ''));
+    }
+
+    /**
+     * The configured launcher button style (pill|solid|fab).
+     *
+     * @return string
+     */
+    public static function launcher_style(): string {
+        $style = trim((string) self::get_config('launcherstyle', 'pill'));
+        return in_array($style, ['pill', 'solid', 'fab'], true) ? $style : 'pill';
     }
 
     /**
