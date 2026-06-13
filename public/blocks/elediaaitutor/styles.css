@@ -68,6 +68,9 @@
     --eat-status-online: #22c55e;
     /* Hover wash for the header icon buttons (settable + per-theme). */
     --eat-icon-hover: rgba(16, 24, 40, 0.06);
+    /* Focus / pressed ring. Derived from the accent so it is theme-specific and
+       follows the brand colour; override the token to tune it independently. */
+    --eat-focus-ring: color-mix(in srgb, var(--eat-accent) 35%, transparent);
     --eat-overlay: rgba(16, 24, 40, 0.06);
     --eat-overlay-strong: rgba(0, 0, 0, 0.04);
     --eat-code-bg: rgba(0, 0, 0, 0.06);
@@ -104,6 +107,85 @@
     font-family: inherit;
 }
 
+/* --- Bootstrap button state re-skin. ----------------------------------- */
+/*
+ * Moodle ships Bootstrap 5.3, whose buttons are painted entirely from --bs-btn-*
+ * custom properties (hover/active/focus colours, focus ring). Bootstrap's own
+ * state selectors (e.g. `.btn:first-child:active`, specificity 0,3,0) tie or beat
+ * our overrides, so re-colouring those states by selector is a losing fight.
+ * Instead we override the VARIABLES on our buttons: Bootstrap's rules then read
+ * our accent values, so pressing/focusing any control follows the theme rather
+ * than Bootstrap's blue. Each selector carries two classes (0,2,0), which beats
+ * Bootstrap's own `.btn { --bs-btn-*: ... }` declaration (0,1,0), so our values win.
+ * The focus ring follows --eat-focus-ring (accent-derived, adjustable).
+ */
+.elediaaitutor-root .elediaaitutor-launch,
+.elediaaitutor-launch.elediaaitutor-launch--fab,
+.elediaaitutor-panel .elediaaitutor-iconbtn,
+.elediaaitutor-panel .elediaaitutor-consent-accept,
+.elediaaitutor-panel .elediaaitutor-consent-link {
+    --bs-btn-focus-box-shadow: 0 0 0 0.2rem var(--eat-focus-ring);
+    --bs-btn-active-shadow: none;
+    --bs-btn-box-shadow: none;
+}
+
+/* Pill launch: stays on the light surface with accent text when hovered/pressed. */
+.elediaaitutor-root .elediaaitutor-launch {
+    --bs-btn-bg: var(--eat-surface);
+    --bs-btn-color: var(--eat-accent);
+    --bs-btn-border-color: var(--eat-line);
+    --bs-btn-hover-bg: var(--eat-surface);
+    --bs-btn-hover-color: var(--eat-accent);
+    --bs-btn-hover-border-color: var(--eat-accent);
+    --bs-btn-active-bg: var(--eat-surface);
+    --bs-btn-active-color: var(--eat-accent);
+    --bs-btn-active-border-color: var(--eat-accent);
+}
+
+/* Solid pill + floating button: accent fill, darker accent when hovered/pressed. */
+.elediaaitutor-root .elediaaitutor-launch--solid,
+.elediaaitutor-launch.elediaaitutor-launch--fab {
+    --bs-btn-bg: var(--eat-accent);
+    --bs-btn-color: var(--eat-accent-contrast);
+    --bs-btn-border-color: var(--eat-accent);
+    --bs-btn-hover-bg: var(--eat-accent-dark);
+    --bs-btn-hover-color: var(--eat-accent-contrast);
+    --bs-btn-hover-border-color: var(--eat-accent-dark);
+    --bs-btn-active-bg: var(--eat-accent-dark);
+    --bs-btn-active-color: var(--eat-accent-contrast);
+    --bs-btn-active-border-color: var(--eat-accent-dark);
+}
+
+/* Header / message icon buttons: only the soft hover wash, never a blue fill. */
+.elediaaitutor-panel .elediaaitutor-iconbtn {
+    --bs-btn-hover-bg: var(--eat-icon-hover);
+    --bs-btn-hover-color: var(--eat-header-fg);
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-bg: var(--eat-icon-hover);
+    --bs-btn-active-color: var(--eat-header-fg);
+    --bs-btn-active-border-color: transparent;
+    --bs-btn-focus-box-shadow: 0 0 0 0.18rem var(--eat-focus-ring);
+}
+
+/* Consent "accept" (accent fill) + privacy link (accent text). */
+.elediaaitutor-panel .elediaaitutor-consent-accept {
+    --bs-btn-bg: var(--eat-accent);
+    --bs-btn-color: var(--eat-accent-contrast);
+    --bs-btn-border-color: var(--eat-accent);
+    --bs-btn-hover-bg: var(--eat-accent-dark);
+    --bs-btn-hover-color: var(--eat-accent-contrast);
+    --bs-btn-hover-border-color: var(--eat-accent-dark);
+    --bs-btn-active-bg: var(--eat-accent-dark);
+    --bs-btn-active-color: var(--eat-accent-contrast);
+    --bs-btn-active-border-color: var(--eat-accent-dark);
+}
+
+.elediaaitutor-panel .elediaaitutor-consent-link {
+    --bs-btn-color: var(--eat-accent);
+    --bs-btn-hover-color: var(--eat-accent-dark);
+    --bs-btn-active-color: var(--eat-accent-dark);
+}
+
 /* --- Launch button (overlay modes). ----------------------------------- */
 /*
  * Scoped under .elediaaitutor-root so the flex layout beats Bootstrap's
@@ -134,8 +216,24 @@
     transform: translateY(-1px);
 }
 
+/* Mouse press / non-keyboard focus: keep the themed look instead of Bootstrap's
+   blue .btn-primary pressed background and focus ring. */
+.elediaaitutor-root .elediaaitutor-launch:focus,
+.elediaaitutor-root .elediaaitutor-launch:active {
+    background: var(--eat-surface);
+    border-color: var(--eat-accent);
+    color: var(--eat-accent);
+    box-shadow: var(--eat-shadow-md);
+    outline: none;
+}
+
 .elediaaitutor-root .elediaaitutor-launch:active {
     transform: translateY(1px);
+}
+
+/* Keyboard focus gets a clear accent ring (adjustable via --eat-focus-ring). */
+.elediaaitutor-root .elediaaitutor-launch:focus-visible {
+    box-shadow: 0 0 0 0.2rem var(--eat-focus-ring), var(--eat-shadow-lg);
 }
 
 /* Solid variant: accent-filled pill. */
@@ -146,7 +244,9 @@
 }
 
 .elediaaitutor-root .elediaaitutor-launch--solid:hover,
-.elediaaitutor-root .elediaaitutor-launch--solid:focus-visible {
+.elediaaitutor-root .elediaaitutor-launch--solid:focus,
+.elediaaitutor-root .elediaaitutor-launch--solid:focus-visible,
+.elediaaitutor-root .elediaaitutor-launch--solid:active {
     background: var(--eat-accent-dark);
     border-color: var(--eat-accent-dark);
     color: var(--eat-accent-contrast);
@@ -159,16 +259,24 @@
    block drawer; it carries the brand vars inline (see launcher.mustache) and is
    itself a token root, so it is fully theme-coloured wherever it lives. The logo
    sits on a small light disc so any logo reads on the accent fill. */
-.elediaaitutor-launch--fab {
+/* The FAB is portalled to <body> by the JS, so it lives OUTSIDE .elediaaitutor-root
+   and cannot rely on the root-scoped base launch rules above. It must therefore be
+   fully self-contained, and its selector doubles the class (specificity 0,2,0) so it
+   beats Bootstrap's `.btn-primary` (0,1,0) regardless of stylesheet order — otherwise
+   it falls back to a blue inline-block square with an off-centre icon. */
+.elediaaitutor-launch.elediaaitutor-launch--fab {
     position: fixed;
     right: var(--eat-fab-right, 2rem);
     bottom: var(--eat-fab-bottom, 5.5rem);
     z-index: var(--eat-z);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 3.5rem;
     height: 3.5rem;
     padding: 0;
     gap: 0;
-    justify-content: center;
+    line-height: 1;
     border-radius: 50%;
     background: var(--eat-accent);
     border: 0;
@@ -177,11 +285,27 @@
     transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.elediaaitutor-launch--fab:hover,
-.elediaaitutor-launch--fab:focus-visible {
+.elediaaitutor-launch.elediaaitutor-launch--fab:hover,
+.elediaaitutor-launch.elediaaitutor-launch--fab:focus,
+.elediaaitutor-launch.elediaaitutor-launch--fab:focus-visible {
     background: var(--eat-accent-dark);
     transform: translateY(-2px) scale(1.04);
     box-shadow: var(--eat-shadow-lg);
+    border: 0;
+    color: var(--eat-accent-contrast);
+    outline: none;
+}
+
+/* Keyboard focus gets the accent ring; mouse press stays accent, never blue. */
+.elediaaitutor-launch.elediaaitutor-launch--fab:focus-visible {
+    box-shadow: 0 0 0 0.25rem var(--eat-focus-ring), var(--eat-shadow-lg);
+}
+
+.elediaaitutor-launch.elediaaitutor-launch--fab:active {
+    background: var(--eat-accent-dark);
+    transform: translateY(0) scale(0.98);
+    box-shadow: var(--eat-shadow-md);
+    color: var(--eat-accent-contrast);
 }
 
 .elediaaitutor-launch--fab .elediaaitutor-launch-icon {
@@ -191,6 +315,9 @@
     border-radius: 50%;
     padding: 4px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    /* Clip any non-square uploaded logo to the disc so its corners never spill
+       past the circle. object-fit:contain on the img keeps the whole logo visible. */
+    overflow: hidden;
 }
 
 /* On phones, sit closer to the corner (host help buttons are smaller / hidden). */
@@ -369,10 +496,30 @@ a.elediaaitutor-avatar:focus-visible {
 }
 
 .elediaaitutor-iconbtn:hover,
-.elediaaitutor-iconbtn:focus-visible {
+.elediaaitutor-iconbtn:focus,
+.elediaaitutor-iconbtn:focus-visible,
+.elediaaitutor-iconbtn:active {
     background: var(--eat-icon-hover);
     color: var(--eat-header-fg);
     opacity: 1;
+    box-shadow: none;
+    outline: none;
+}
+
+/* Two-class specificity so this beats Bootstrap's blue .btn pressed/focus state
+   on the header buttons (which carry .btn). Keyboard focus shows the accent ring. */
+.elediaaitutor-actions .elediaaitutor-iconbtn:focus,
+.elediaaitutor-actions .elediaaitutor-iconbtn:active,
+.elediaaitutor-message-actions .elediaaitutor-iconbtn:focus,
+.elediaaitutor-message-actions .elediaaitutor-iconbtn:active {
+    background: var(--eat-icon-hover);
+    box-shadow: none;
+    outline: none;
+}
+
+.elediaaitutor-actions .elediaaitutor-iconbtn:focus-visible,
+.elediaaitutor-message-actions .elediaaitutor-iconbtn:focus-visible {
+    box-shadow: 0 0 0 0.18rem var(--eat-focus-ring);
 }
 
 /* Two-class specificity so the colour wins over Bootstrap's .btn/.btn-icon
@@ -460,6 +607,8 @@ a.elediaaitutor-avatar:focus-visible {
     flex: 0 0 auto;
     padding: 2px;
     border: 1px solid var(--eat-line);
+    /* Clip non-square logos to the circle (matches the header avatar). */
+    overflow: hidden;
 }
 
 .elediaaitutor-msg-avatar-img {
@@ -567,6 +716,15 @@ a.elediaaitutor-avatar:focus-visible {
 .elediaaitutor-starter:hover,
 .elediaaitutor-starter:focus-visible {
     border-color: var(--eat-accent);
+    background: var(--eat-tint);
+}
+
+.elediaaitutor-starter:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.18rem var(--eat-focus-ring);
+}
+
+.elediaaitutor-starter:active {
     background: var(--eat-tint);
 }
 
@@ -803,8 +961,38 @@ a.elediaaitutor-avatar:focus-visible {
     padding: 0.3rem 1rem;
 }
 
+.elediaaitutor-panel .elediaaitutor-consent-accept:hover,
+.elediaaitutor-panel .elediaaitutor-consent-accept:focus,
+.elediaaitutor-panel .elediaaitutor-consent-accept:active {
+    background: var(--eat-accent-dark);
+    border-color: var(--eat-accent-dark);
+    color: var(--eat-accent-contrast);
+    box-shadow: none;
+    outline: none;
+}
+
+.elediaaitutor-panel .elediaaitutor-consent-accept:focus-visible {
+    box-shadow: 0 0 0 0.2rem var(--eat-focus-ring);
+}
+
 .elediaaitutor-panel .elediaaitutor-consent-accept:disabled {
     opacity: 0.45;
+}
+
+/* The privacy link in the consent gate carries Bootstrap's btn-link (blue); keep
+   it on the brand accent in every state. */
+.elediaaitutor-panel .elediaaitutor-consent-link,
+.elediaaitutor-panel .elediaaitutor-consent-link:hover,
+.elediaaitutor-panel .elediaaitutor-consent-link:focus,
+.elediaaitutor-panel .elediaaitutor-consent-link:active {
+    color: var(--eat-accent);
+    box-shadow: none;
+    outline: none;
+}
+
+.elediaaitutor-panel .elediaaitutor-consent-link:focus-visible {
+    box-shadow: 0 0 0 0.2rem var(--eat-focus-ring);
+    border-radius: 4px;
 }
 
 /* While the gate is shown the composer is disabled; make that visible. */
@@ -839,6 +1027,11 @@ a.elediaaitutor-avatar:focus-visible {
 .elediaaitutor-stylechip:hover,
 .elediaaitutor-stylechip:focus-visible {
     border-color: var(--eat-accent);
+}
+
+.elediaaitutor-stylechip:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.18rem var(--eat-focus-ring);
 }
 
 .elediaaitutor-stylechip-active {
@@ -1092,3 +1285,255 @@ body.elediaaitutor-noscroll {
  * colour scheme, so it reads as a clean, consistent product embedded in any
  * Moodle theme rather than flipping to a dark card on a light page.
  */
+
+/* =======================================================================
+ * Admin / management pages (Manage tutors, the per-instance tutor page).
+ * Scoped under .eat-admin so nothing here touches the chat widget or the
+ * surrounding Moodle theme. Uses neutral surfaces that sit well on the admin
+ * layout; the accent for primary actions is the eLeDia navy.
+ * ======================================================================= */
+.eat-admin {
+    --eat-a-accent: #1e3f59;
+    --eat-a-line: #e0e4ea;
+    --eat-a-muted: #5b6677;
+    --eat-a-card: #ffffff;
+}
+
+.eat-admin-intro {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    background: linear-gradient(180deg, #f7f9fc, #eef2f7);
+    border: 1px solid var(--eat-a-line);
+    border-left: 4px solid var(--eat-a-accent);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    margin: 0.5rem 0 1.25rem;
+    color: #2a3340;
+}
+.eat-admin-intro .fa {
+    color: var(--eat-a-accent);
+    font-size: 1.2rem;
+    margin-top: 0.1rem;
+}
+
+.eat-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 1.5rem;
+}
+
+.eat-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 1.75rem 0 0.85rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid var(--eat-a-line);
+    color: #1f2a37;
+}
+
+/* Tutor card grid. */
+.eat-tutor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.eat-tutor-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.eat-tutor-card:hover {
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+    transform: translateY(-2px);
+}
+
+/* Mini chat-mockup preview rendered from the tutor's own palette. */
+.eat-preview {
+    height: 116px;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--eat-a-line);
+}
+.eat-preview-head {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.7rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+.eat-preview-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #46d18a;
+    flex: 0 0 auto;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+.eat-preview-body {
+    flex: 1;
+    padding: 0.55rem 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    overflow: hidden;
+}
+.eat-preview-bubble {
+    font-size: 0.72rem;
+    line-height: 1;
+    padding: 0.35rem 0.55rem;
+    border-radius: 12px;
+    max-width: 78%;
+}
+.eat-preview-bot {
+    align-self: flex-start;
+    border: 1px solid rgba(16, 24, 40, 0.08);
+}
+.eat-preview-user {
+    align-self: flex-end;
+}
+
+.eat-tutor-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.8rem 0.9rem 0.95rem;
+    flex: 1;
+}
+.eat-tutor-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.eat-tutor-name {
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: #1f2a37;
+}
+.eat-tutor-persona {
+    font-size: 0.82rem;
+    color: var(--eat-a-muted);
+    min-height: 1.1em;
+}
+.eat-badge {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.eat-badge-preset {
+    background: #eef2fb;
+    color: #0b3d91;
+}
+.eat-badge-custom {
+    background: #e7f6ee;
+    color: #1f6f54;
+}
+.eat-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: auto;
+    padding-top: 0.3rem;
+}
+.eat-admin .eat-actions .btn {
+    font-size: 0.78rem;
+    padding: 0.25rem 0.6rem;
+}
+
+/* Per-instance cards. */
+.eat-instance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+}
+.eat-instance-card {
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.eat-instance-loc {
+    font-weight: 600;
+    color: #1f2a37;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.eat-instance-loc .fa {
+    color: var(--eat-a-muted);
+}
+.eat-instance-id {
+    font-size: 0.75rem;
+    color: var(--eat-a-muted);
+    font-weight: 400;
+}
+.eat-instance-apply {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.eat-instance-apply select {
+    max-width: 12rem;
+}
+
+/* Card layout for the per-instance teacher page sections. */
+.eat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+.eat-card {
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: 14px;
+    padding: 1.1rem 1.2rem;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+.eat-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    color: #1f2a37;
+}
+.eat-card h3 .fa {
+    color: var(--eat-a-accent);
+}
+.eat-card p {
+    color: var(--eat-a-muted);
+    font-size: 0.88rem;
+}
+
+/* A small inline note/callout used on the settings page heading. */
+.eat-settings-callout {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    background: #eef4fb;
+    border: 1px solid #cfe0f3;
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    margin-top: 0.5rem;
+}
+.eat-settings-callout .fa {
+    color: #0b3d91;
+}

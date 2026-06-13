@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/elediaaitutor/db" VERSION="20260609" COMMENT="eLeDia.ai Tutor block database schema."
+<XMLDB PATH="blocks/elediaaitutor/db" VERSION="20260613" COMMENT="eLeDia.ai Tutor block database schema."
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -73,6 +73,25 @@
       <INDEXES>
         <INDEX NAME="userid-daykey" UNIQUE="true" FIELDS="userid,daykey" COMMENT="One counter per user per day."/>
         <INDEX NAME="daykey" UNIQUE="false" FIELDS="daykey" COMMENT="Retention pruning."/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_elediaaitutor_tutor" COMMENT="Saved site-wide tutor profiles: a named, reusable bundle of tutor settings (persona + every design token + behaviour/launcher/footer) serialised as JSON, plus optional logo/avatar images stored in the system context (file areas tutorlogo/tutoravatar, itemid = this row id). Admins create these by duplicating a built-in preset or importing a bundle; applying a profile snapshot-copies its values into the site config or a block instance.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Human-readable tutor name."/>
+        <FIELD NAME="shortname" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Stable machine name, unique; used in export bundles."/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Optional admin notes describing the tutor."/>
+        <FIELD NAME="settings" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="JSON map of registry key => value defining the tutor's persona and design."/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Display order in the management list."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Creation timestamp."/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Last-modified timestamp."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="shortname" UNIQUE="true" FIELDS="shortname" COMMENT="One profile per machine name."/>
+        <INDEX NAME="sortorder" UNIQUE="false" FIELDS="sortorder" COMMENT="Listing order."/>
       </INDEXES>
     </TABLE>
   </TABLES>

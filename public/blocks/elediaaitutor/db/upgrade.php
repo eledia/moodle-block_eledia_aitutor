@@ -110,5 +110,83 @@ function xmldb_block_elediaaitutor_upgrade(int $oldversion): bool {
         upgrade_block_savepoint(true, 2026061114, 'elediaaitutor');
     }
 
+    if ($oldversion < 2026061320) {
+        // Saved site-wide tutor profiles (see classes/local/tutor_profile.php).
+        $table = new xmldb_table('block_elediaaitutor_tutor');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $table->add_field('shortname', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $table->add_field('description', XMLDB_TYPE_TEXT);
+        $table->add_field('settings', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('shortname', XMLDB_INDEX_UNIQUE, ['shortname']);
+        $table->add_index('sortorder', XMLDB_INDEX_NOTUNIQUE, ['sortorder']);
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Themes are replaced by tutor profiles. Preserve any existing look by
+        // snapshotting the old theme's palette into the individual token
+        // settings (site + each instance), then dropping the obsolete 'theme'.
+        $sitetheme = (string) get_config('block_elediaaitutor', 'theme');
+        if ($sitetheme !== '' && \block_elediaaitutor\local\presets::exists($sitetheme)
+                && $sitetheme !== \block_elediaaitutor\local\presets::DEFAULT) {
+            foreach (\block_elediaaitutor\local\presets::settings($sitetheme) as $key => $value) {
+                $cfgkey = \block_elediaaitutor\local\registry::sitekey($key);
+                if ((string) get_config('block_elediaaitutor', $cfgkey) === '') {
+                    set_config($cfgkey, $value, 'block_elediaaitutor');
+                }
+            }
+        }
+        unset_config('theme', 'block_elediaaitutor');
+
+        // Per-instance theme overrides → explicit token overrides in the config.
+        $instances = $DB->get_records('block_instances', ['blockname' => 'elediaaitutor']);
+        foreach ($instances as $bi) {
+            if (empty($bi->configdata)) {
+                continue;
+            }
+            $config = unserialize(base64_decode($bi->configdata));
+            if (!is_object($config) || empty($config->theme)) {
+                continue;
+            }
+            $theme = (string) $config->theme;
+            if (\block_elediaaitutor\local\presets::exists($theme)
+                    && $theme !== \block_elediaaitutor\local\presets::DEFAULT) {
+                foreach (\block_elediaaitutor\local\presets::settings($theme) as $key => $value) {
+                    if (!isset($config->$key) || $config->$key === '') {
+                        $config->$key = $value;
+                    }
+                }
+            }
+            unset($config->theme);
+            $DB->set_field('block_instances', 'configdata', base64_encode(serialize($config)),
+                ['id' => $bi->id]);
+        }
+
+        upgrade_block_savepoint(true, 2026061320, 'elediaaitutor');
+    }
+
+    if ($oldversion < 2026061321) {
+        // Every optical/persona setting is now overridable per instance by
+        // default. The 0.13.0 install persisted the old (mostly off) expose_*
+        // defaults to config, so re-sync each instanceable key's expose flag to
+        // its new default. Safe one-off: 0.13.0 was never released, so no admin
+        // could have chosen these yet.
+        foreach (\block_elediaaitutor\local\registry::all() as $key => $entry) {
+            if (empty($entry['instanceable'])) {
+                continue;
+            }
+            set_config(\block_elediaaitutor\local\registry::EXPOSE_PREFIX . $key,
+                !empty($entry['exposedefault']) ? 1 : 0, 'block_elediaaitutor');
+        }
+
+        upgrade_block_savepoint(true, 2026061321, 'elediaaitutor');
+    }
+
     return true;
 }

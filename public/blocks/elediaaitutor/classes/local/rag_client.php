@@ -125,6 +125,8 @@ class rag_client {
      *                              knowledge-base tool. When false the agent
      *                              answers from the model alone (LLM-only). Null
      *                              omits the flag (server default: enabled).
+     * @param array|null $persona Structured persona (any of name/role/tone/
+     *                            audience/instructions); empty/null sends none.
      * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, iserror: bool}
      * @throws rag_exception On transport or protocol failure.
      */
@@ -138,7 +140,8 @@ class rag_client {
         ?bool $ltmenabled = null,
         ?string $answerstyle = null,
         ?string $userlang = null,
-        ?bool $ragenabled = null
+        ?bool $ragenabled = null,
+        ?array $persona = null
     ): array {
         $arguments = [
             'system_url' => $systemurl,
@@ -162,6 +165,12 @@ class rag_client {
         }
         if ($ragenabled !== null) {
             $arguments['rag_enabled'] = $ragenabled;
+        }
+        // Structured persona (name/role/tone/audience/instructions) — only the
+        // populated sub-fields are sent; the server uses them as system-prompt
+        // guidance for the tutor's voice. See docs/rag_server_spec.md A.1.
+        if (!empty($persona)) {
+            $arguments['persona'] = $persona;
         }
 
         $result = $this->call_tool($toolname, $arguments);

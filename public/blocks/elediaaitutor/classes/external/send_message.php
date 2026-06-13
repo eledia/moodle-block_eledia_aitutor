@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_elediaaitutor\external;
 
+use block_elediaaitutor\local\branding;
 use block_elediaaitutor\local\chat_mode;
 use block_elediaaitutor\local\chat_service;
 use block_elediaaitutor\local\security;
@@ -133,8 +134,12 @@ class send_message extends external_api {
         }
         $ragenabled = chat_mode::rag_enabled_for($mode);
 
+        // The effective structured persona (instance-over-site) shapes the
+        // tutor's voice; only populated sub-fields are sent to the RAG server.
+        $persona = branding::persona((array) $blockconfig);
+
         $result = chat_service::send((int) $USER->id, $params['message'], $courseid, $conv, $context, null,
-            $effectivestyle, $dailylimit, $ragenabled);
+            $effectivestyle, $dailylimit, $ragenabled, $persona);
 
         return [
             'answerhtml' => $result['answerhtml'],

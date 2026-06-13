@@ -50,6 +50,8 @@ class chat_service {
      *                             null falls back to the site setting.
      * @param bool|null $ragenabled Whether the RAG agent may use its knowledge-base
      *                              tool (false = LLM-only); null omits the flag.
+     * @param array|null $persona Structured persona to send to the RAG server
+     *                            (name/role/tone/audience/instructions); null sends none.
      * @return array{answerhtml: string, answermarkdown: string, conversationid: ?string, sources: array, iserror: bool}
      * @throws \moodle_exception On validation, configuration, quota or RAG failure.
      */
@@ -62,7 +64,8 @@ class chat_service {
         ?rag_client $client = null,
         ?string $answerstyle = null,
         ?int $dailylimit = null,
-        ?bool $ragenabled = null
+        ?bool $ragenabled = null,
+        ?array $persona = null
     ): array {
         global $CFG;
 
@@ -101,7 +104,7 @@ class chat_service {
         try {
             $token = token_provider::get_token($userid);
             $result = $client->chat($systemurl, $token, $message, $courseparam, $conversationid, $toolname,
-                $ltmflag, $answerstyle, $userlang, $ragenabled);
+                $ltmflag, $answerstyle, $userlang, $ragenabled, $persona);
         } catch (rag_exception $e) {
             // The cached token may have been revoked/expired server-side: drop it,
             // mint a fresh one and retry exactly once before giving up.
@@ -109,7 +112,7 @@ class chat_service {
             try {
                 $token = token_provider::get_token($userid);
                 $result = $client->chat($systemurl, $token, $message, $courseparam, $conversationid, $toolname,
-                    $ltmflag, $answerstyle, $userlang, $ragenabled);
+                    $ltmflag, $answerstyle, $userlang, $ragenabled, $persona);
             } catch (rag_exception $retry) {
                 self::log_failure($userid, $context, 'rag_error');
                 throw $retry;

@@ -22,19 +22,22 @@ use context_system;
 use moodle_url;
 
 /**
- * Resolves the effective institutional branding for the tutor widget.
+ * Resolves the effective tutor branding + persona for the widget.
  *
- * Branding has two layers: institution-wide **site** defaults (admin settings)
- * and optional **per-instance** overrides set on a block. An instance value
- * wins when present; otherwise the site value applies; otherwise the built-in
- * design defaults in styles.css remain (we simply emit no override for that
- * token). The colour/font parts are turned into scoped CSS custom-property
- * overrides ({@see css_variables()}) injected under the widget's unique id, so
- * two differently-branded instances can coexist on one page.
+ * Branding has two layers: institution-wide **site** values (admin settings) and
+ * optional **per-instance** overrides set on a block. An instance value wins when
+ * the admin has exposed that key and it is set; otherwise the site value applies;
+ * otherwise the built-in design default in styles.css stands (we simply emit no
+ * override for that token).
  *
- * White-label and custom CSS are institution-level (admin) only; the per-answer
- * visual identity (accent, user-bubble colour, launcher label, logo) may also
- * be overridden per instance.
+ * Every settable visual property is a `--eat-*` design token described in the
+ * {@see registry}. {@see resolve()} walks the registry, reads each token's
+ * effective value (instance-over-site), sanitises it, and produces a token map
+ * that {@see css_variables()} serialises into a scoped inline style — so two
+ * differently-branded instances can coexist on one page.
+ *
+ * The persona fields (name/role/tone/audience/instructions) are resolved the same
+ * way and assembled by {@see persona()} for transmission to the RAG server.
  *
  * @package     block_elediaaitutor
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
@@ -64,116 +67,107 @@ class branding {
     /** @var string Block-instance file area for the conversation avatar override. */
     public const INSTANCE_AVATAR_FILEAREA = 'instanceavatar';
 
+    /** @var string System-context file area for a saved tutor profile's logo. */
+    public const TUTOR_LOGO_FILEAREA = 'tutorlogo';
+
+    /** @var string System-context file area for a saved tutor profile's avatar. */
+    public const TUTOR_AVATAR_FILEAREA = 'tutoravatar';
+
     /**
      * The effective branding kit, merging per-instance overrides over the site
-     * defaults.
+     * defaults, driven entirely by the {@see registry}.
      *
-     * @param array<string, mixed> $instance Per-instance overrides. Recognised:
-     *        theme, brandaccent, brandbubble, launchlabel.
-     * @return array{accent: string, bubble: string, theme: string,
-     *         tokens: array<string, string>, launchlabel: string,
+     * @param array<string, mixed> $instance Per-instance overrides keyed by
+     *        registry key (e.g. 'brandaccent', 'launcherstyle', 'persona').
+     * @return array{tokens: array<string, string>, accent: string, bubble: string,
+     *         botbubble: string, launchlabel: string, launcherstyle: string,
      *         footermode: string, footertext: string}
      */
     public static function resolve(array $instance = []): array {
-        // 1. Theme provides the base palette (instance theme wins over site).
-        $themeid = trim((string) ($instance['theme'] ?? ''));
-        if ($themeid === '') {
-            $themeid = trim((string) security::get_config('theme', themes::DEFAULT));
-        }
-        if (!isset(themes::all()[$themeid])) {
-            $themeid = themes::DEFAULT;
-        }
-        $tokens = themes::tokens($themeid);
-        $themed = themes::is_themed($themeid);
-
-        // 2. Explicit institutional colour/font overrides layer on top.
-        $accent = self::sanitise_colour((string) ($instance['brandaccent'] ?? ''))
-            ?? self::sanitise_colour(security::brand_accent());
-        if ($accent !== null) {
-            $tokens['--eat-accent'] = $accent;
-            $tokens['--eat-accent-dark'] = self::darken($accent, 0.12);
-            // In the default (light) palette the ink equals the accent; only
-            // map it there, so a dark theme's light text stays intact.
-            if (!$themed) {
-                $tokens['--eat-ink'] = $accent;
-                $tokens['--eat-header-fg'] = $accent;
+        // 1. Assemble the design-token map from every token key in the registry.
+        $tokens = [];
+        foreach (registry::token_keys() as $key => $tokenname) {
+            $value = self::effective_value($key, $instance);
+            if ($value === null || $value === '') {
+                continue;
             }
-        }
-        $bubble = self::sanitise_colour((string) ($instance['brandbubble'] ?? ''))
-            ?? self::sanitise_colour(security::brand_bubble());
-        if ($bubble !== null) {
-            $tokens['--eat-user-bg'] = $bubble;
-        }
-        $botbubble = self::sanitise_colour((string) ($instance['brandbotbubble'] ?? ''))
-            ?? self::sanitise_colour(security::brand_bot_bubble());
-        if ($botbubble !== null) {
-            $tokens['--eat-bot-bg'] = $botbubble;
-        }
-        $surface = self::sanitise_colour(security::brand_surface());
-        if ($surface !== null) {
-            $tokens['--eat-body-bg'] = $surface;
-        }
-        $iconhover = self::sanitise_colour(security::brand_icon_hover());
-        if ($iconhover !== null) {
-            $tokens['--eat-icon-hover'] = $iconhover;
-        }
-        $font = self::sanitise_font(security::brand_font());
-        if ($font !== '') {
-            $tokens['--eat-font'] = $font;
+            $clean = registry::sanitise($key, $value);
+            if ($clean === null || $clean === '') {
+                continue;
+            }
+            $tokens[$tokenname] = (string) $clean;
         }
 
-        $launchlabel = trim((string) ($instance['launchlabel'] ?? ''));
-        if ($launchlabel === '') {
-            $launchlabel = security::brand_launch_label();
+        // 2. Derive the accent-hover shade from the accent when not set explicitly.
+        if (isset($tokens['--eat-accent']) && !isset($tokens['--eat-accent-dark'])) {
+            $tokens['--eat-accent-dark'] = self::darken($tokens['--eat-accent'], 0.12);
         }
+
+        // 3. Launcher label: instance → site → built-in default string.
+        $launchlabel = trim((string) self::effective_value('launchlabel', $instance));
         if ($launchlabel === '') {
             $launchlabel = get_string('launch', 'block_elediaaitutor');
         }
 
-        // Launcher style: per-instance ('' = follow site) over the site default.
-        $launcherstyle = trim((string) ($instance['launcherstyle'] ?? ''));
-        if (!in_array($launcherstyle, ['pill', 'solid', 'fab'], true)) {
-            $launcherstyle = security::launcher_style();
+        // 4. Launcher style: validated against the registry's option set.
+        $launcherstyle = (string) self::effective_value('launcherstyle', $instance);
+        if (!isset(registry::get('launcherstyle')['options'][$launcherstyle])) {
+            $launcherstyle = (string) registry::default_for('launcherstyle');
         }
 
         return [
-            'theme' => $themeid,
             'tokens' => $tokens,
-            'accent' => (string) ($accent ?? ''),
-            'bubble' => (string) ($bubble ?? ''),
-            'botbubble' => (string) ($botbubble ?? ''),
+            'accent' => $tokens['--eat-accent'] ?? '',
+            'bubble' => $tokens['--eat-user-bg'] ?? '',
+            'botbubble' => $tokens['--eat-bot-bg'] ?? '',
             'launchlabel' => $launchlabel,
             'launcherstyle' => $launcherstyle,
-            'footermode' => self::footer_mode(),
-            'footertext' => self::footer_text(),
+            'footermode' => self::footer_mode($instance),
+            'footertext' => self::footer_text($instance),
         ];
     }
 
     /**
-     * The site-level conversation avatar URL (assistant message avatar), or ''.
+     * The effective persona for transmission to the RAG server.
      *
-     * @return string
+     * Returns only the populated sub-fields (name/role/tone/audience/instructions),
+     * each resolved instance-over-site. Empty when nothing is configured.
+     *
+     * @param array<string, mixed> $instance Per-instance overrides keyed by registry key.
+     * @return array<string, string>
      */
-    public static function site_avatar_url(): string {
-        $filename = (string) get_config('block_elediaaitutor', self::AVATAR_FILEAREA);
-        if ($filename === '') {
-            return '';
+    public static function persona(array $instance = []): array {
+        $out = [];
+        foreach (registry::persona_keys() as $key) {
+            $value = trim((string) self::effective_value($key, $instance));
+            if ($value === '') {
+                continue;
+            }
+            $field = $key === 'persona' ? 'name' : substr($key, strlen('persona_'));
+            $out[$field] = $value;
         }
-        return moodle_url::make_pluginfile_url(
-            context_system::instance()->id,
-            'block_elediaaitutor',
-            self::AVATAR_FILEAREA,
-            0,
-            '/',
-            ltrim($filename, '/')
-        )->out(false);
+        return $out;
+    }
+
+    /**
+     * The effective value of a registry key (instance-over-site).
+     *
+     * Thin wrapper over {@see registry::effective()} so branding reads the same
+     * precedence as the rest of the plugin.
+     *
+     * @param string $key Registry key.
+     * @param array<string, mixed> $instance Per-instance overrides keyed by registry key.
+     * @return mixed
+     */
+    private static function effective_value(string $key, array $instance): mixed {
+        return registry::effective($key, $instance);
     }
 
     /**
      * Serialise a kit's resolved `--eat-*` token map into CSS declarations.
      *
-     * Empty when nothing is themed/branded, so the styles.css defaults stand.
-     * The caller wraps these in a selector keyed on the widget's unique id.
+     * Empty when nothing is branded, so the styles.css defaults stand. The caller
+     * injects these as a scoped inline style on the widget root + panel + launcher.
      *
      * @param array<string, mixed> $brand A kit from {@see resolve()}.
      * @return string CSS declarations (may be empty).
@@ -187,24 +181,40 @@ class branding {
     }
 
     /**
+     * The site-level conversation avatar URL (assistant message avatar), or ''.
+     *
+     * @return string
+     */
+    public static function site_avatar_url(): string {
+        return self::system_file_url(self::AVATAR_FILEAREA);
+    }
+
+    /**
      * The site-level brand logo URL, or '' when none is uploaded.
      *
      * @return string
      */
     public static function site_logo_url(): string {
-        $filename = (string) get_config('block_elediaaitutor', self::LOGO_FILEAREA);
-        if ($filename === '') {
+        return self::system_file_url(self::LOGO_FILEAREA);
+    }
+
+    /**
+     * URL of a single file stored in the system context for a given file area.
+     *
+     * @param string $filearea System-context file area.
+     * @return string Empty string when no file is present.
+     */
+    private static function system_file_url(string $filearea): string {
+        $fs = get_file_storage();
+        $files = $fs->get_area_files(context_system::instance()->id, 'block_elediaaitutor',
+            $filearea, 0, 'itemid, filepath, filename', false);
+        if (empty($files)) {
             return '';
         }
-        // admin_setting_configstoredfile stores the file in the system context.
-        return moodle_url::make_pluginfile_url(
-            context_system::instance()->id,
-            'block_elediaaitutor',
-            self::LOGO_FILEAREA,
-            0,
-            '/',
-            ltrim($filename, '/')
-        )->out(false);
+        $file = reset($files);
+        return moodle_url::make_pluginfile_url(context_system::instance()->id,
+            'block_elediaaitutor', $filearea, 0, $file->get_filepath(),
+            $file->get_filename())->out(false);
     }
 
     /**
@@ -233,27 +243,31 @@ class branding {
     }
 
     /**
-     * The configured footer mode.
+     * The configured footer mode, instance-over-site (when the admin has exposed
+     * the footer for per-instance override).
      *
+     * @param array<string, mixed> $instance Per-instance overrides keyed by registry key.
      * @return string One of the FOOTER_* constants.
      */
-    public static function footer_mode(): string {
-        $mode = (string) security::get_config('footermode', self::FOOTER_DEFAULT);
+    public static function footer_mode(array $instance = []): string {
+        $mode = (string) registry::effective('footermode', $instance);
         return in_array($mode, [self::FOOTER_DEFAULT, self::FOOTER_CUSTOM, self::FOOTER_NONE], true)
             ? $mode : self::FOOTER_DEFAULT;
     }
 
     /**
-     * The effective footer text for the current mode ('' when hidden).
+     * The effective footer text for the current mode ('' when hidden),
+     * instance-over-site.
      *
+     * @param array<string, mixed> $instance Per-instance overrides keyed by registry key.
      * @return string
      */
-    public static function footer_text(): string {
-        switch (self::footer_mode()) {
+    public static function footer_text(array $instance = []): string {
+        switch (self::footer_mode($instance)) {
             case self::FOOTER_NONE:
                 return '';
             case self::FOOTER_CUSTOM:
-                $text = trim((string) security::get_config('footertext', ''));
+                $text = trim((string) registry::effective('footertext', $instance));
                 return $text !== '' ? $text : get_string('poweredby', 'block_elediaaitutor');
             default:
                 return get_string('poweredby', 'block_elediaaitutor');
@@ -269,6 +283,40 @@ class branding {
     public static function sanitise_colour(string $value): ?string {
         $value = trim($value);
         return preg_match('/^#[0-9a-fA-F]{3,8}$/', $value) ? $value : null;
+    }
+
+    /**
+     * Reduce a free-text CSS token value to one that cannot break out of an
+     * inline `style="…"` declaration.
+     *
+     * Used for non-colour tokens (radii, gaps, shadows, glows, translucent
+     * washes, fab offsets). Allows the small character set needed for lengths,
+     * rgba()/color-mix()/calc() and comma lists; rejects anything that could
+     * terminate the declaration or inject (`;`, `{`, `}`, `<`, `>`, backslash,
+     * `url(`, `expression`, comments, at-rules). Returns '' when unusable.
+     *
+     * @param string $value Candidate value.
+     * @return string Sanitised value, or '' when nothing safe remains.
+     */
+    public static function sanitise_css_value(string $value): string {
+        $value = trim($value);
+        if ($value === '') {
+            return '';
+        }
+        if (preg_match('/[;{}<>\\\\]/', $value)) {
+            return '';
+        }
+        $lower = strtolower($value);
+        foreach (['url(', 'expression', 'javascript:', '/*', '*/', '@'] as $bad) {
+            if (strpos($lower, $bad) !== false) {
+                return '';
+            }
+        }
+        // Allowlist: hex, alphanumerics, spaces, commas, dots, %, parentheses, hyphen.
+        if (!preg_match('/^[#a-z0-9 ,.%()\-]+$/i', $value)) {
+            return '';
+        }
+        return $value;
     }
 
     /**
@@ -292,7 +340,7 @@ class branding {
      * @param float $fraction Amount to darken (0..1).
      * @return string A `#rrggbb` colour.
      */
-    private static function darken(string $hex, float $fraction): string {
+    public static function darken(string $hex, float $fraction): string {
         $hex = ltrim($hex, '#');
         if (strlen($hex) === 3) {
             $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];

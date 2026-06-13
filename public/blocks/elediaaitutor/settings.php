@@ -17,6 +17,12 @@
 /**
  * Global admin settings for the eLeDia.ai Tutor block.
  *
+ * The infrastructure/security settings (RAG server, MCP token, limits, privacy)
+ * are declared by hand. Everything that defines a *tutor* — persona, every visual
+ * `--eat-*` token, launcher, footer, images and a few behaviour toggles — is
+ * generated from {@see \block_elediaaitutor\local\registry}, each followed by an
+ * "allow per-instance override" checkbox (expose_<key>).
+ *
  * @package     block_elediaaitutor
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
@@ -26,7 +32,18 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use block_elediaaitutor\local\branding;
+use block_elediaaitutor\local\registry;
+
 if ($hassiteconfig) {
+
+    // The tutor library / import-export management page.
+    $ADMIN->add('blocksettings', new admin_externalpage(
+        'block_elediaaitutor_managetutors',
+        get_string('managetutors', 'block_elediaaitutor'),
+        new moodle_url('/blocks/elediaaitutor/manage_tutors.php'),
+        'moodle/site:config'
+    ));
 
     // --- RAG / Tutor MCP server connection. -------------------------------.
     $settings->add(new admin_setting_heading(
@@ -171,24 +188,11 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
-    // --- Behaviour and limits. --------------------------------------------.
+    // --- Behaviour and limits (infrastructure). ---------------------------.
     $settings->add(new admin_setting_heading(
         'block_elediaaitutor/headerbehaviour',
         get_string('setting_header_behaviour', 'block_elediaaitutor'),
         ''
-    ));
-
-    $settings->add(new admin_setting_configselect(
-        'block_elediaaitutor/defaultdisplaymode',
-        get_string('setting_defaultdisplaymode', 'block_elediaaitutor'),
-        get_string('setting_defaultdisplaymode_desc', 'block_elediaaitutor'),
-        'embedded',
-        [
-            'embedded' => get_string('displaymode_embedded', 'block_elediaaitutor'),
-            'docked' => get_string('displaymode_docked', 'block_elediaaitutor'),
-            'modal' => get_string('displaymode_modal', 'block_elediaaitutor'),
-            'fullscreen' => get_string('displaymode_fullscreen', 'block_elediaaitutor'),
-        ]
     ));
 
     $settings->add(new admin_setting_configcheckbox(
@@ -229,13 +233,6 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
-    $settings->add(new admin_setting_configtextarea(
-        'block_elediaaitutor/promptstarters',
-        get_string('setting_promptstarters', 'block_elediaaitutor'),
-        get_string('setting_promptstarters_desc', 'block_elediaaitutor'),
-        ''
-    ));
-
     $settings->add(new admin_setting_configcheckbox(
         'block_elediaaitutor/allowllmonly',
         get_string('setting_allowllmonly', 'block_elediaaitutor'),
@@ -266,127 +263,100 @@ if ($hassiteconfig) {
         PARAM_ALPHANUMEXT
     ));
 
-    // --- Branding. ----------------------------------------------------------.
+    // --- The default tutor (persona + every design token), from the registry.
+    // Each setting is the site-wide default; the following "expose" checkbox
+    // decides whether a block instance may override it. To set a whole look at
+    // once, use the Manage tutors page to apply a preset.
     $settings->add(new admin_setting_heading(
-        'block_elediaaitutor/headerbranding',
-        get_string('setting_header_branding', 'block_elediaaitutor'),
-        get_string('setting_header_branding_desc', 'block_elediaaitutor')
+        'block_elediaaitutor/headertutor',
+        get_string('setting_header_tutor', 'block_elediaaitutor'),
+        get_string('setting_header_tutor_desc', 'block_elediaaitutor') .
+        html_writer::div(
+            html_writer::tag('i', '', ['class' => 'fa fa-paint-brush', 'aria-hidden' => 'true']) .
+            html_writer::span(get_string('setting_tutor_managehint', 'block_elediaaitutor')) .
+            html_writer::link(new moodle_url('/blocks/elediaaitutor/manage_tutors.php'),
+                get_string('managetutors', 'block_elediaaitutor'),
+                ['class' => 'btn btn-sm btn-primary ml-2']),
+            'eat-settings-callout')
     ));
 
-    $settings->add(new admin_setting_configselect(
-        'block_elediaaitutor/theme',
-        get_string('setting_theme', 'block_elediaaitutor'),
-        get_string('setting_theme_desc', 'block_elediaaitutor'),
-        \block_elediaaitutor\local\themes::DEFAULT,
-        \block_elediaaitutor\local\themes::menu()
-    ));
-
+    // Friendly label/description with a sensible fallback for the ~40 raw tokens.
+    $reglabel = function (string $key, array $entry): string {
+        if (get_string_manager()->string_exists('reg_' . $key, 'block_elediaaitutor')) {
+            return get_string('reg_' . $key, 'block_elediaaitutor');
+        }
+        return (string) ($entry['token'] ?? $key);
+    };
+    $regdesc = function (string $key): string {
+        if (get_string_manager()->string_exists('reg_' . $key . '_desc', 'block_elediaaitutor')) {
+            return get_string('reg_' . $key . '_desc', 'block_elediaaitutor');
+        }
+        return get_string('reg_tokenhint', 'block_elediaaitutor');
+    };
+    // Registry key => [storedfile config name, file area] for the image settings.
+    $filemap = [
+        'logo' => ['brandlogo', branding::LOGO_FILEAREA],
+        'avatar' => ['brandavatar', branding::AVATAR_FILEAREA],
+    ];
     $imageopts = ['maxfiles' => 1, 'accepted_types' => ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif']];
 
-    $settings->add(new admin_setting_configstoredfile(
-        'block_elediaaitutor/brandlogo',
-        get_string('setting_brandlogo', 'block_elediaaitutor'),
-        get_string('setting_brandlogo_desc', 'block_elediaaitutor'),
-        \block_elediaaitutor\local\branding::LOGO_FILEAREA,
-        0,
-        $imageopts
-    ));
+    foreach (registry::groups() as $group) {
+        $keys = registry::group_keys($group);
+        if (empty($keys)) {
+            continue;
+        }
+        $settings->add(new admin_setting_heading(
+            'block_elediaaitutor/reggroup_' . $group,
+            get_string('reggroup_' . $group, 'block_elediaaitutor'),
+            ''
+        ));
 
-    $settings->add(new admin_setting_configstoredfile(
-        'block_elediaaitutor/brandavatar',
-        get_string('setting_brandavatar', 'block_elediaaitutor'),
-        get_string('setting_brandavatar_desc', 'block_elediaaitutor'),
-        \block_elediaaitutor\local\branding::AVATAR_FILEAREA,
-        0,
-        $imageopts
-    ));
+        foreach ($keys as $key) {
+            $entry = registry::get($key);
+            $label = $reglabel($key, $entry);
+            $desc = $regdesc($key);
+            $default = $entry['default'];
 
-    $settings->add(new admin_setting_configcolourpicker(
-        'block_elediaaitutor/brandaccent',
-        get_string('setting_brandaccent', 'block_elediaaitutor'),
-        get_string('setting_brandaccent_desc', 'block_elediaaitutor'),
-        ''
-    ));
+            if ($entry['type'] === 'file') {
+                [$cfgname, $filearea] = $filemap[$key];
+                $settings->add(new admin_setting_configstoredfile(
+                    'block_elediaaitutor/' . $cfgname, $label, $desc, $filearea, 0, $imageopts));
+            } else if ($entry['type'] === 'colour') {
+                $settings->add(new admin_setting_configcolourpicker(
+                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default));
+            } else if ($entry['type'] === 'checkbox') {
+                $settings->add(new admin_setting_configcheckbox(
+                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (int) $default));
+            } else if ($entry['type'] === 'select') {
+                $options = [];
+                foreach ($entry['options'] as $value => $optkey) {
+                    $options[$value] = get_string($optkey, 'block_elediaaitutor');
+                }
+                $settings->add(new admin_setting_configselect(
+                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default, $options));
+            } else if ($entry['type'] === 'textarea') {
+                $settings->add(new admin_setting_configtextarea(
+                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default));
+            } else {
+                // text / cssvalue / font: stored raw, sanitised at render time.
+                $paramtype = $entry['type'] === 'text' ? PARAM_TEXT : PARAM_RAW_TRIMMED;
+                $settings->add(new admin_setting_configtext(
+                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default, $paramtype));
+            }
 
-    $settings->add(new admin_setting_configcolourpicker(
-        'block_elediaaitutor/brandbubble',
-        get_string('setting_brandbubble', 'block_elediaaitutor'),
-        get_string('setting_brandbubble_desc', 'block_elediaaitutor'),
-        ''
-    ));
+            // "Allow per-instance override" companion checkbox.
+            if (!empty($entry['instanceable'])) {
+                $settings->add(new admin_setting_configcheckbox(
+                    'block_elediaaitutor/' . registry::EXPOSE_PREFIX . $key,
+                    get_string('expose_label', 'block_elediaaitutor', $label),
+                    get_string('expose_desc', 'block_elediaaitutor'),
+                    !empty($entry['exposedefault']) ? 1 : 0
+                ));
+            }
+        }
+    }
 
-    $settings->add(new admin_setting_configcolourpicker(
-        'block_elediaaitutor/brandbotbubble',
-        get_string('setting_brandbotbubble', 'block_elediaaitutor'),
-        get_string('setting_brandbotbubble_desc', 'block_elediaaitutor'),
-        ''
-    ));
-
-    $settings->add(new admin_setting_configselect(
-        'block_elediaaitutor/launcherstyle',
-        get_string('setting_launcherstyle', 'block_elediaaitutor'),
-        get_string('setting_launcherstyle_desc', 'block_elediaaitutor'),
-        'pill',
-        [
-            'pill' => get_string('launcherstyle_pill', 'block_elediaaitutor'),
-            'solid' => get_string('launcherstyle_solid', 'block_elediaaitutor'),
-            'fab' => get_string('launcherstyle_fab', 'block_elediaaitutor'),
-        ]
-    ));
-
-    $settings->add(new admin_setting_configcolourpicker(
-        'block_elediaaitutor/brandsurface',
-        get_string('setting_brandsurface', 'block_elediaaitutor'),
-        get_string('setting_brandsurface_desc', 'block_elediaaitutor'),
-        ''
-    ));
-
-    $settings->add(new admin_setting_configcolourpicker(
-        'block_elediaaitutor/brandiconhover',
-        get_string('setting_brandiconhover', 'block_elediaaitutor'),
-        get_string('setting_brandiconhover_desc', 'block_elediaaitutor'),
-        ''
-    ));
-
-    $settings->add(new admin_setting_configtext(
-        'block_elediaaitutor/brandfont',
-        get_string('setting_brandfont', 'block_elediaaitutor'),
-        get_string('setting_brandfont_desc', 'block_elediaaitutor'),
-        '',
-        PARAM_TEXT
-    ));
-
-    $settings->add(new admin_setting_configtext(
-        'block_elediaaitutor/brandlaunchlabel',
-        get_string('setting_brandlaunchlabel', 'block_elediaaitutor'),
-        get_string('setting_brandlaunchlabel_desc', 'block_elediaaitutor'),
-        '',
-        PARAM_TEXT
-    ));
-
-    $settings->add(new admin_setting_configselect(
-        'block_elediaaitutor/footermode',
-        get_string('setting_footermode', 'block_elediaaitutor'),
-        get_string('setting_footermode_desc', 'block_elediaaitutor'),
-        \block_elediaaitutor\local\branding::FOOTER_DEFAULT,
-        [
-            \block_elediaaitutor\local\branding::FOOTER_DEFAULT =>
-                get_string('footermode_default', 'block_elediaaitutor'),
-            \block_elediaaitutor\local\branding::FOOTER_CUSTOM =>
-                get_string('footermode_custom', 'block_elediaaitutor'),
-            \block_elediaaitutor\local\branding::FOOTER_NONE =>
-                get_string('footermode_none', 'block_elediaaitutor'),
-        ]
-    ));
-
-    $settings->add(new admin_setting_configtext(
-        'block_elediaaitutor/footertext',
-        get_string('setting_footertext', 'block_elediaaitutor'),
-        get_string('setting_footertext_desc', 'block_elediaaitutor'),
-        '',
-        PARAM_TEXT
-    ));
-
+    // Admin custom CSS (trusted; targets the widget's .elediaaitutor-* classes).
     $settings->add(new admin_setting_configtextarea(
         'block_elediaaitutor/customcss',
         get_string('setting_customcss', 'block_elediaaitutor'),

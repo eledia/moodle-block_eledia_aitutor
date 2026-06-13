@@ -131,28 +131,13 @@ class block_elediaaitutor extends block_base {
         }
 
         // The shared widget builder assembles the shell + AMD init; the block
-        // contributes its per-instance configuration. The standalone page
-        // (view.php, used for Moodle App embedding) renders the same widget.
-        $this->content->text = widget::render($context, $this->resolve_course_id(), [
-            'instanceid' => (int) $this->instance->id,
-            'displaymode' => $this->get_instance_config('displaymode',
-                get_config('block_elediaaitutor', 'defaultdisplaymode') ?: 'embedded'),
-            'historyenabled' => (int) $this->get_instance_config('historyenabled', 1) === 1,
-            'welcomemessage' => (string) $this->get_instance_config('welcomemessage',
-                get_string('default_welcome', 'block_elediaaitutor')),
-            'persona' => (string) $this->get_instance_config('persona',
-                get_string('default_persona', 'block_elediaaitutor')),
-            'answerstyle' => (string) $this->get_instance_config('answerstyle', 'explain'),
-            'allowstylechange' => (int) $this->get_instance_config('allowstylechange', 1) === 1,
-            'promptstarters' => (string) $this->get_instance_config('promptstarters', ''),
-            'ragmode' => (string) $this->get_instance_config('ragmode', 'grounded'),
-            'theme' => (string) $this->get_instance_config('theme', ''),
-            'launchlabel' => (string) $this->get_instance_config('launchlabel', ''),
-            'launcherstyle' => (string) $this->get_instance_config('launcherstyle', ''),
-            'brandaccent' => (string) $this->get_instance_config('brandaccent', ''),
-            'brandbubble' => (string) $this->get_instance_config('brandbubble', ''),
-            'brandbotbubble' => (string) $this->get_instance_config('brandbotbubble', ''),
-        ]);
+        // contributes its per-instance configuration as a registry-key => value
+        // map (the stored config keys already match the registry keys). The
+        // widget resolves every setting instance-over-site through the registry.
+        // The standalone page (view.php, App embedding) renders the same widget.
+        $instance = (array) ($this->config ?? new stdClass());
+        $instance['instanceid'] = (int) $this->instance->id;
+        $this->content->text = widget::render($context, $this->resolve_course_id(), $instance);
 
         // Teachers reach the question-analytics report via the course
         // navigation; see block_elediaaitutor_extend_navigation_course().

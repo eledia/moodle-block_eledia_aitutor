@@ -17,12 +17,20 @@
 /**
  * Per-instance configuration form for the eLeDia.ai Tutor block.
  *
+ * Structural fields (title, course wiring, limits, answer source) are fixed. The
+ * persona, every visual token and the behaviour/launcher/footer toggles are
+ * generated from {@see \block_elediaaitutor\local\registry}, and only the keys
+ * the admin has exposed (expose_<key>) appear — empty always means "follow site".
+ *
  * @package     block_elediaaitutor
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @link        https://eledia.de
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+use block_elediaaitutor\local\branding;
+use block_elediaaitutor\local\registry;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -39,117 +47,31 @@ class block_elediaaitutor_edit_form extends block_edit_form {
     protected function specific_definition($mform): void {
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
+        // Import / export this instance's tutor (settings + images), or apply a
+        // site preset — available once the block exists.
+        if (!empty($this->block->instance->id)) {
+            $link = new \moodle_url('/blocks/elediaaitutor/instance_tutor.php',
+                ['blockid' => (int) $this->block->instance->id]);
+            $mform->addElement('static', 'tutorio', '',
+                \html_writer::link($link, get_string('instancetutor_link', 'block_elediaaitutor')));
+        }
+
         // Title.
         $mform->addElement('text', 'config_title', get_string('config_title', 'block_elediaaitutor'));
         $mform->setType('config_title', PARAM_TEXT);
         $mform->setDefault('config_title', get_string('pluginname', 'block_elediaaitutor'));
 
-        // Display mode.
-        $modes = [
-            'embedded' => get_string('displaymode_embedded', 'block_elediaaitutor'),
-            'docked' => get_string('displaymode_docked', 'block_elediaaitutor'),
-            'modal' => get_string('displaymode_modal', 'block_elediaaitutor'),
-            'fullscreen' => get_string('displaymode_fullscreen', 'block_elediaaitutor'),
-        ];
-        $mform->addElement('select', 'config_displaymode', get_string('config_displaymode', 'block_elediaaitutor'), $modes);
-        $mform->setDefault('config_displaymode', get_config('block_elediaaitutor', 'defaultdisplaymode') ?: 'embedded');
-        $mform->addHelpButton('config_displaymode', 'config_displaymode', 'block_elediaaitutor');
-
-        // Course context.
+        // Course context wiring.
         $mform->addElement('selectyesno', 'config_passcoursecontext',
             get_string('config_passcoursecontext', 'block_elediaaitutor'));
         $mform->setDefault('config_passcoursecontext', 1);
         $mform->addHelpButton('config_passcoursecontext', 'config_passcoursecontext', 'block_elediaaitutor');
 
-        // Optional fixed course id.
         $mform->addElement('text', 'config_fixedcourseid', get_string('config_fixedcourseid', 'block_elediaaitutor'));
         $mform->setType('config_fixedcourseid', PARAM_INT);
         $mform->setDefault('config_fixedcourseid', 0);
         $mform->addHelpButton('config_fixedcourseid', 'config_fixedcourseid', 'block_elediaaitutor');
         $mform->disabledIf('config_fixedcourseid', 'config_passcoursecontext', 'eq', 0);
-
-        // Welcome message.
-        $mform->addElement('textarea', 'config_welcomemessage',
-            get_string('config_welcomemessage', 'block_elediaaitutor'), ['rows' => 3, 'cols' => 50]);
-        $mform->setType('config_welcomemessage', PARAM_TEXT);
-        $mform->setDefault('config_welcomemessage', get_string('default_welcome', 'block_elediaaitutor'));
-
-        // Persona label.
-        $mform->addElement('text', 'config_persona', get_string('config_persona', 'block_elediaaitutor'));
-        $mform->setType('config_persona', PARAM_TEXT);
-        $mform->setDefault('config_persona', get_string('default_persona', 'block_elediaaitutor'));
-
-        // Per-instance branding overrides (empty = use the site branding). The
-        // logo, footer/white-label, font and custom CSS are institution-level
-        // (site admin) only.
-        $thememenu = ['' => get_string('config_theme_site', 'block_elediaaitutor')]
-            + \block_elediaaitutor\local\themes::menu();
-        $mform->addElement('select', 'config_theme',
-            get_string('config_theme', 'block_elediaaitutor'), $thememenu);
-        $mform->setDefault('config_theme', '');
-        $mform->addHelpButton('config_theme', 'config_theme', 'block_elediaaitutor');
-
-        $mform->addElement('text', 'config_launchlabel',
-            get_string('config_launchlabel', 'block_elediaaitutor'));
-        $mform->setType('config_launchlabel', PARAM_TEXT);
-        $mform->addHelpButton('config_launchlabel', 'config_launchlabel', 'block_elediaaitutor');
-
-        $mform->addElement('text', 'config_brandaccent',
-            get_string('config_brandaccent', 'block_elediaaitutor'), ['placeholder' => '#1e3f59']);
-        $mform->setType('config_brandaccent', PARAM_TEXT);
-        $mform->addHelpButton('config_brandaccent', 'config_brandaccent', 'block_elediaaitutor');
-
-        $mform->addElement('text', 'config_brandbubble',
-            get_string('config_brandbubble', 'block_elediaaitutor'), ['placeholder' => '#fce9db']);
-        $mform->setType('config_brandbubble', PARAM_TEXT);
-        $mform->addHelpButton('config_brandbubble', 'config_brandbubble', 'block_elediaaitutor');
-
-        $mform->addElement('text', 'config_brandbotbubble',
-            get_string('config_brandbotbubble', 'block_elediaaitutor'), ['placeholder' => '#ffffff']);
-        $mform->setType('config_brandbotbubble', PARAM_TEXT);
-        $mform->addHelpButton('config_brandbotbubble', 'config_brandbotbubble', 'block_elediaaitutor');
-
-        // Launcher button style ('' = follow the site setting).
-        $mform->addElement('select', 'config_launcherstyle',
-            get_string('config_launcherstyle', 'block_elediaaitutor'), [
-                '' => get_string('config_launcherstyle_site', 'block_elediaaitutor'),
-                'pill' => get_string('launcherstyle_pill', 'block_elediaaitutor'),
-                'solid' => get_string('launcherstyle_solid', 'block_elediaaitutor'),
-                'fab' => get_string('launcherstyle_fab', 'block_elediaaitutor'),
-            ]);
-        $mform->setDefault('config_launcherstyle', '');
-        $mform->addHelpButton('config_launcherstyle', 'config_launcherstyle', 'block_elediaaitutor');
-
-        // Per-instance logo + conversation avatar uploads (empty = site branding).
-        $imageopts = ['maxfiles' => 1, 'subdirs' => 0,
-            'accepted_types' => ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif']];
-        $mform->addElement('filemanager', 'config_logo',
-            get_string('config_logo', 'block_elediaaitutor'), null, $imageopts);
-        $mform->addHelpButton('config_logo', 'config_logo', 'block_elediaaitutor');
-        $mform->addElement('filemanager', 'config_avatar',
-            get_string('config_avatar', 'block_elediaaitutor'), null, $imageopts);
-        $mform->addHelpButton('config_avatar', 'config_avatar', 'block_elediaaitutor');
-
-        // Pedagogical answer style.
-        $styles = [
-            'explain' => get_string('answerstyle_explain', 'block_elediaaitutor'),
-            'hint' => get_string('answerstyle_hint', 'block_elediaaitutor'),
-            'quiz' => get_string('answerstyle_quiz', 'block_elediaaitutor'),
-        ];
-        $mform->addElement('select', 'config_answerstyle', get_string('config_answerstyle', 'block_elediaaitutor'),
-            $styles);
-        $mform->setDefault('config_answerstyle', 'explain');
-        $mform->addHelpButton('config_answerstyle', 'config_answerstyle', 'block_elediaaitutor');
-
-        $mform->addElement('selectyesno', 'config_allowstylechange',
-            get_string('config_allowstylechange', 'block_elediaaitutor'));
-        $mform->setDefault('config_allowstylechange', 1);
-
-        // Prompt starters (one per line; empty falls back to the site default).
-        $mform->addElement('textarea', 'config_promptstarters',
-            get_string('config_promptstarters', 'block_elediaaitutor'), ['rows' => 4, 'cols' => 50]);
-        $mform->setType('config_promptstarters', PARAM_TEXT);
-        $mform->addHelpButton('config_promptstarters', 'config_promptstarters', 'block_elediaaitutor');
 
         // Daily message limit override (-1 = site default, 0 = unlimited).
         $mform->addElement('text', 'config_dailylimit', get_string('config_dailylimit', 'block_elediaaitutor'));
@@ -157,11 +79,8 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         $mform->setDefault('config_dailylimit', -1);
         $mform->addHelpButton('config_dailylimit', 'config_dailylimit', 'block_elediaaitutor');
 
-        // Answer source (grounded vs LLM-only). The choice is only offered when
-        // it is real: LLM-only must be allowed site-wide, and grounded answers
-        // require the course to have an ingested knowledge base. When grounding
-        // is unavailable the form states the effective mode instead of offering
-        // an inert option (the server forces it either way).
+        // Answer source (grounded vs LLM-only). Offered only when it is a real
+        // choice: LLM-only allowed site-wide AND the course has a knowledge base.
         $grounding = \block_elediaaitutor\local\chat_mode::ingestion_available($this->effective_courseid());
         $llmallowed = \block_elediaaitutor\local\chat_mode::is_llm_allowed();
         if ($llmallowed && $grounding) {
@@ -175,8 +94,6 @@ class block_elediaaitutor_edit_form extends block_edit_form {
             $mform->setDefault('config_ragmode', \block_elediaaitutor\local\chat_mode::MODE_GROUNDED);
             $mform->addHelpButton('config_ragmode', 'config_ragmode', 'block_elediaaitutor');
         } else if (!$grounding) {
-            // No knowledge base: state the effective mode (LLM-only, or
-            // unavailable when LLM-only is disallowed) instead of a dead select.
             $mform->addElement('static', 'ragmode_note',
                 get_string('config_ragmode', 'block_elediaaitutor'),
                 $llmallowed
@@ -184,15 +101,106 @@ class block_elediaaitutor_edit_form extends block_edit_form {
                     : get_string('llmonly_unavailable', 'block_elediaaitutor'));
         }
 
-        // History enabled.
-        $mform->addElement('selectyesno', 'config_historyenabled',
-            get_string('config_historyenabled', 'block_elediaaitutor'));
-        $mform->setDefault('config_historyenabled', 1);
+        // Registry-driven tutor fields: persona, design tokens, behaviour,
+        // launcher, footer and images — grouped, and only the keys the admin
+        // has exposed for per-instance override. Empty = follow the site.
+        foreach (registry::groups() as $group) {
+            $exposed = array_filter(registry::group_keys($group),
+                static fn(string $k): bool => registry::is_exposed($k));
+            if (empty($exposed)) {
+                continue;
+            }
+            $mform->addElement('header', 'insgroup_' . $group,
+                get_string('reggroup_' . $group, 'block_elediaaitutor'));
+            $mform->setExpanded('insgroup_' . $group, false);
+            foreach ($exposed as $key) {
+                $this->add_instance_field($mform, $key, registry::get($key));
+            }
+        }
+    }
+
+    /**
+     * Add one per-instance field for a registry key. Empty/blank always means
+     * "follow the site value", so selects gain a leading "use site" option and
+     * checkboxes become a tri-state select.
+     *
+     * @param MoodleQuickForm $mform The form.
+     * @param string $key Registry key.
+     * @param array<string, mixed> $entry Registry descriptor.
+     * @return void
+     */
+    private function add_instance_field($mform, string $key, array $entry): void {
+        $field = 'config_' . $key;
+        $label = $this->reglabel($key, $entry);
+
+        switch ($entry['type']) {
+            case 'file':
+                $imageopts = ['maxfiles' => 1, 'subdirs' => 0,
+                    'accepted_types' => ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif']];
+                $mform->addElement('filemanager', $field, $label, null, $imageopts);
+                break;
+
+            case 'colour':
+                $mform->addElement('text', $field, $label, ['placeholder' => '#rrggbb']);
+                $mform->setType($field, PARAM_TEXT);
+                break;
+
+            case 'textarea':
+                $mform->addElement('textarea', $field, $label, ['rows' => 3, 'cols' => 50]);
+                $mform->setType($field, PARAM_TEXT);
+                break;
+
+            case 'select':
+                $options = ['' => get_string('config_usesite', 'block_elediaaitutor')];
+                foreach ($entry['options'] as $value => $optkey) {
+                    $options[$value] = get_string($optkey, 'block_elediaaitutor');
+                }
+                $mform->addElement('select', $field, $label, $options);
+                $mform->setDefault($field, '');
+                break;
+
+            case 'checkbox':
+                $mform->addElement('select', $field, $label, [
+                    '' => get_string('config_usesite', 'block_elediaaitutor'),
+                    '1' => get_string('yes'),
+                    '0' => get_string('no'),
+                ]);
+                $mform->setDefault($field, '');
+                break;
+
+            case 'cssvalue':
+                $mform->addElement('text', $field, $label);
+                $mform->setType($field, PARAM_RAW_TRIMMED);
+                break;
+
+            default: // text / font.
+                $mform->addElement('text', $field, $label);
+                $mform->setType($field, PARAM_TEXT);
+                break;
+        }
+
+        if (get_string_manager()->string_exists($field . '_help', 'block_elediaaitutor')) {
+            $mform->addHelpButton($field, $field, 'block_elediaaitutor');
+        }
+    }
+
+    /**
+     * Friendly label for a registry key, falling back to the raw token name.
+     *
+     * @param string $key Registry key.
+     * @param array<string, mixed> $entry Registry descriptor.
+     * @return string
+     */
+    private function reglabel(string $key, array $entry): string {
+        if (get_string_manager()->string_exists('reg_' . $key, 'block_elediaaitutor')) {
+            return get_string('reg_' . $key, 'block_elediaaitutor');
+        }
+        return (string) ($entry['token'] ?? $key);
     }
 
     /**
      * Prepare the per-instance logo/avatar file-manager draft areas from the
-     * stored block-context files (mirrors the block_html pattern).
+     * stored block-context files (only for areas the admin has exposed).
      *
      * @param array|\stdClass $defaults The instance config defaults.
      * @return void
@@ -200,10 +208,14 @@ class block_elediaaitutor_edit_form extends block_edit_form {
     public function set_data($defaults) {
         if (!empty($this->block->instance->id)) {
             $context = $this->block->context;
-            foreach ([
-                'config_logo' => \block_elediaaitutor\local\branding::INSTANCE_LOGO_FILEAREA,
-                'config_avatar' => \block_elediaaitutor\local\branding::INSTANCE_AVATAR_FILEAREA,
-            ] as $field => $filearea) {
+            $filemap = [
+                'config_logo' => [branding::INSTANCE_LOGO_FILEAREA, 'logo'],
+                'config_avatar' => [branding::INSTANCE_AVATAR_FILEAREA, 'avatar'],
+            ];
+            foreach ($filemap as $field => [$filearea, $key]) {
+                if (!registry::is_exposed($key)) {
+                    continue;
+                }
                 $draftid = file_get_submitted_draft_itemid($field);
                 file_prepare_draft_area($draftid, $context->id, 'block_elediaaitutor',
                     $filearea, 0, ['maxfiles' => 1, 'subdirs' => 0]);

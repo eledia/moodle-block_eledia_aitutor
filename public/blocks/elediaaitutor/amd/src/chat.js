@@ -219,6 +219,10 @@ class TutorChat {
             if (this.config.launchfab && launch.parentNode !== document.body) {
                 document.body.appendChild(launch);
             }
+            // Keep a handle: once portalled to <body> the button leaves the root,
+            // so this.root.querySelector can no longer find it (open/close need it
+            // to toggle aria-expanded).
+            this.launch = launch;
             launch.addEventListener('click', () => this.open());
         }
 
@@ -324,9 +328,8 @@ class TutorChat {
         }
         document.body.classList.toggle('elediaaitutor-noscroll',
             this.config.displaymode === 'fullscreen' || this.config.displaymode === 'modal');
-        const launch = this.root.querySelector('[data-action="launch"]');
-        if (launch) {
-            launch.setAttribute('aria-expanded', 'true');
+        if (this.launch) {
+            this.launch.setAttribute('aria-expanded', 'true');
         }
         window.setTimeout(() => this.input && this.input.focus(), 50);
     }
@@ -345,7 +348,7 @@ class TutorChat {
             this.backdrop.setAttribute('hidden', 'hidden');
         }
         document.body.classList.remove('elediaaitutor-noscroll');
-        const launch = this.root.querySelector('[data-action="launch"]');
+        const launch = this.launch;
         if (launch) {
             launch.setAttribute('aria-expanded', 'false');
         }

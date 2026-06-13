@@ -56,13 +56,16 @@ function block_elediaaitutor_extend_navigation_course(navigation_node $navigatio
 }
 
 /**
- * Serve per-instance branding files (logo / conversation avatar) stored in the
- * block context. The images are non-sensitive branding shown to every learner
- * who can see the block, so any logged-in user may fetch them.
+ * Serve branding files (tutor logo / conversation avatar). Two layers exist:
+ * site-wide files set in the admin settings live in the SYSTEM context
+ * (brandlogo / brandavatar); per-instance overrides set on a block live in that
+ * BLOCK's context (instancelogo / instanceavatar). The images are non-sensitive
+ * branding shown to every learner who can see the tutor, so any logged-in user
+ * may fetch them.
  *
  * @param stdClass $course Course (or site) record.
- * @param stdClass $birecord_or_cm The block instance record.
- * @param context $context The block context.
+ * @param stdClass $birecord_or_cm The block instance record (null for site files).
+ * @param context $context The system or block context.
  * @param string $filearea The requested file area.
  * @param array $args The file path/name args.
  * @param bool $forcedownload Whether to force download.
@@ -71,24 +74,38 @@ function block_elediaaitutor_extend_navigation_course(navigation_node $navigatio
  */
 function block_elediaaitutor_pluginfile($course, $birecord_or_cm, $context, $filearea, $args,
         $forcedownload, array $options = []) {
-    if ($context->contextlevel != CONTEXT_BLOCK) {
-        send_file_not_found();
-    }
-
-    $allowed = [
+    $sitefileareas = [
+        \block_elediaaitutor\local\branding::LOGO_FILEAREA,
+        \block_elediaaitutor\local\branding::AVATAR_FILEAREA,
+        \block_elediaaitutor\local\branding::TUTOR_LOGO_FILEAREA,
+        \block_elediaaitutor\local\branding::TUTOR_AVATAR_FILEAREA,
+    ];
+    $instancefileareas = [
         \block_elediaaitutor\local\branding::INSTANCE_LOGO_FILEAREA,
         \block_elediaaitutor\local\branding::INSTANCE_AVATAR_FILEAREA,
     ];
-    if (!in_array($filearea, $allowed, true)) {
+
+    if ($context->contextlevel == CONTEXT_SYSTEM) {
+        if (!in_array($filearea, $sitefileareas, true)) {
+            send_file_not_found();
+        }
+    } else if ($context->contextlevel == CONTEXT_BLOCK) {
+        if (!in_array($filearea, $instancefileareas, true)) {
+            send_file_not_found();
+        }
+    } else {
         send_file_not_found();
     }
 
     require_login();
 
+    // The pluginfile URL carries the itemid (always 0 for these single-file areas)
+    // as the first path segment; shift it off so the remainder is the filepath.
+    $itemid = (int) array_shift($args);
     $fs = get_file_storage();
     $filename = array_pop($args);
     $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
-    $file = $fs->get_file($context->id, 'block_elediaaitutor', $filearea, 0, $filepath, $filename);
+    $file = $fs->get_file($context->id, 'block_elediaaitutor', $filearea, $itemid, $filepath, $filename);
     if (!$file || $file->is_directory()) {
         send_file_not_found();
     }

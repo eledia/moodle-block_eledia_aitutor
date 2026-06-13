@@ -83,8 +83,9 @@ class widget {
      *
      * @param \context $context Context the AJAX calls will run against.
      * @param int $courseid Course id passed to the RAG server, 0 for global chat.
-     * @param array $options Overrides: displaymode, welcomemessage, persona,
-     *                       answerstyle, allowstylechange, historyenabled, instanceid.
+     * @param array $instance Per-instance config as a registry-key => value map
+     *                        (plus 'instanceid' and the structural 'ragmode').
+     *                        Empty values fall back to the site settings.
      * @return string The widget HTML.
      */
     /**
@@ -107,13 +108,13 @@ class widget {
         return $css;
     }
 
-    public static function render(\context $context, int $courseid, array $options = []): string {
+    public static function render(\context $context, int $courseid, array $instance = []): string {
         global $OUTPUT, $PAGE, $USER;
 
         // Resolve the answer mode (grounded / LLM-only / unavailable). When the
         // tutor cannot answer here (no knowledge base and LLM-only disallowed),
         // show a friendly notice and skip the chat UI entirely.
-        $blockconfig = (object) ['ragmode' => (string) ($options['ragmode'] ?? chat_mode::MODE_GROUNDED)];
+        $blockconfig = (object) ['ragmode' => (string) ($instance['ragmode'] ?? chat_mode::MODE_GROUNDED)];
         $mode = chat_mode::resolve($courseid, $blockconfig);
         if ($mode === chat_mode::MODE_UNAVAILABLE) {
             return $OUTPUT->render_from_template('block_elediaaitutor/unavailable', [
@@ -122,21 +123,25 @@ class widget {
             ]);
         }
 
-        $displaymode = (string) ($options['displaymode']
-            ?? (get_config('block_elediaaitutor', 'defaultdisplaymode') ?: 'embedded'));
-        $historyenabled = (bool) ($options['historyenabled'] ?? true)
+        // Behaviour settings resolved instance-over-site through the registry.
+        $displaymode = (string) registry::effective('displaymode', $instance);
+        $historyenabled = ((int) registry::effective('historyenabled', $instance) === 1)
             && has_capability('block/elediaaitutor:viewhistory', $context);
-        $welcome = (string) ($options['welcomemessage']
-            ?? get_string('default_welcome', 'block_elediaaitutor'));
-        $persona = (string) ($options['persona']
-            ?? get_string('default_persona', 'block_elediaaitutor'));
+        $welcome = (string) registry::effective('welcomemessage', $instance);
+        if (trim($welcome) === '') {
+            $welcome = get_string('default_welcome', 'block_elediaaitutor');
+        }
+        $persona = (string) registry::effective('persona', $instance);
+        if (trim($persona) === '') {
+            $persona = get_string('default_persona', 'block_elediaaitutor');
+        }
 
         // Pedagogical answer style: default plus whether learners may switch.
-        $answerstyle = (string) ($options['answerstyle'] ?? 'explain');
+        $answerstyle = (string) registry::effective('answerstyle', $instance);
         if (!in_array($answerstyle, ['explain', 'hint', 'quiz'], true)) {
             $answerstyle = 'explain';
         }
-        $allowstylechange = (bool) ($options['allowstylechange'] ?? true);
+        $allowstylechange = (int) registry::effective('allowstylechange', $instance) === 1;
 
         $uniqid = 'elediaaitutor_' . uniqid();
         $consented = consent::has_consented((int) $USER->id);
@@ -145,7 +150,7 @@ class widget {
         // defaults). Two logos: the tutor logo (header + launcher) and the
         // conversation avatar (per-message). Each: instance upload ?: site
         // upload ?: (avatar) the logo ?: the built-in eLeDia mark.
-        $brand = branding::resolve($options);
+        $brand = branding::resolve($instance);
         $defaultlogo = $OUTPUT->image_url('logo', 'block_elediaaitutor')->out(false);
         $logourl = branding::instance_file_url($context, branding::INSTANCE_LOGO_FILEAREA)
             ?: branding::site_logo_url() ?: $defaultlogo;
@@ -161,12 +166,9 @@ class widget {
             ? format_text($privacytext, FORMAT_HTML, ['context' => $context])
             : '';
 
-        // Prompt starters: instance value, falling back to the site default.
-        // One per line, capped so the welcome area stays tidy.
-        $startersraw = (string) ($options['promptstarters'] ?? '');
-        if (trim($startersraw) === '') {
-            $startersraw = (string) get_config('block_elediaaitutor', 'promptstarters');
-        }
+        // Prompt starters: instance value, falling back to the site default
+        // (resolved by the registry). One per line, capped so the welcome stays tidy.
+        $startersraw = (string) registry::effective('promptstarters', $instance);
         $starters = [];
         foreach (preg_split('/\R/', $startersraw) ?: [] as $line) {
             $line = trim($line);
@@ -189,7 +191,7 @@ class widget {
 
         $templatecontext = [
             'uniqid' => $uniqid,
-            'instanceid' => (int) ($options['instanceid'] ?? 0),
+            'instanceid' => (int) ($instance['instanceid'] ?? 0),
             'displaymode' => $displaymode,
             'embedded' => $displaymode === 'embedded',
             'persona' => format_string($persona),

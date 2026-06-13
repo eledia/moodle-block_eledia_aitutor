@@ -224,81 +224,12 @@ class security {
     }
 
     /**
-     * Institution accent colour (hex), or '' when unset.
-     *
-     * @return string
-     */
-    public static function brand_accent(): string {
-        return trim((string) self::get_config('brandaccent', ''));
-    }
-
-    /**
-     * Institution user-bubble colour (hex), or '' when unset.
-     *
-     * @return string
-     */
-    public static function brand_bubble(): string {
-        return trim((string) self::get_config('brandbubble', ''));
-    }
-
-    /**
-     * Institution user-bubble colour (hex), or '' when unset.
-     *
-     * @return string
-     */
-    public static function brand_bot_bubble(): string {
-        return trim((string) self::get_config('brandbotbubble', ''));
-    }
-
-    /**
-     * Institution surface/background tint (hex), or '' when unset.
-     *
-     * @return string
-     */
-    public static function brand_surface(): string {
-        return trim((string) self::get_config('brandsurface', ''));
-    }
-
-    /**
-     * Hover wash colour for the header icon buttons (hex), or '' when unset.
-     *
-     * @return string
-     */
-    public static function brand_icon_hover(): string {
-        return trim((string) self::get_config('brandiconhover', ''));
-    }
-
-    /**
-     * The configured launcher button style (pill|solid|fab).
-     *
-     * @return string
-     */
-    public static function launcher_style(): string {
-        $style = trim((string) self::get_config('launcherstyle', 'pill'));
-        return in_array($style, ['pill', 'solid', 'fab'], true) ? $style : 'pill';
-    }
-
-    /**
-     * Institution font stack, or '' when unset.
-     *
-     * @return string
-     */
-    public static function brand_font(): string {
-        return trim((string) self::get_config('brandfont', ''));
-    }
-
-    /**
-     * Institution launcher-button label override, or '' when unset.
-     *
-     * @return string
-     */
-    public static function brand_launch_label(): string {
-        return trim((string) self::get_config('brandlaunchlabel', ''));
-    }
-
-    /**
      * Admin custom CSS (trusted; targets the widget's .elediaaitutor-* classes),
      * or '' when unset.
+     *
+     * The per-token branding values, persona fields and other tutor settings are
+     * resolved through the {@see registry} and {@see branding}, not via dedicated
+     * getters here; this class keeps only the infrastructure/security settings.
      *
      * @return string
      */

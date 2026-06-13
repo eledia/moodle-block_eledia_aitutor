@@ -382,3 +382,207 @@ $string['privacy:metadata:block_elediaaitutor_qlog:timecreated'] = 'Wann die Fra
 // Cache definitions.
 $string['cachedef_usertoken'] = 'Kurzlebiger Speicher für nutzerbezogene Moodle-MCP-Tokens';
 $string['cachedef_ratelimit'] = 'Zähler für die Chat-Ratenbegrenzung pro Nutzer';
+
+// Tutor library / management page.
+$string['managetutors'] = 'Tutoren (Design & Import/Export)';
+$string['managetutors_intro'] = 'Verwalten Sie Tutor-Designs: Wenden Sie eine Vorlage oder einen gespeicherten Tutor auf die gesamte Website an, erstellen und bearbeiten Sie eigene, und importieren oder exportieren Sie Tutoren (Einstellungen + Bilder) als Paket. Jede Blockinstanz kann unten ebenfalls einen eigenen Tutor erhalten.';
+
+// Default-tutor settings section + registry groups.
+$string['setting_header_tutor'] = 'Standard-Tutor (Design & Persona)';
+$string['setting_header_tutor_desc'] = 'Die websiteweiten Standardwerte für die Persona und das visuelle Design des Tutors. Jede Einstellung kann über das Kontrollkästchen darunter für die Überschreibung pro Instanz freigegeben werden. Um ein komplettes Erscheinungsbild auf einmal festzulegen, wenden Sie auf der Tutoren-Seite eine Vorlage an.';
+$string['reggroup_persona'] = 'Persona & System-Prompt';
+$string['reggroup_accent'] = 'Akzentfarben';
+$string['reggroup_surfaces'] = 'Flächen & Linien';
+$string['reggroup_text'] = 'Text';
+$string['reggroup_bubbles'] = 'Nachrichtenblasen';
+$string['reggroup_states'] = 'Zustände & Status';
+$string['reggroup_shape'] = 'Form & Abstände';
+$string['reggroup_effects'] = 'Schatten & Effekte';
+$string['reggroup_behaviour'] = 'Verhalten';
+$string['reggroup_launcher'] = 'Start-Schaltfläche';
+$string['reggroup_footer'] = 'Fußzeile';
+$string['reggroup_files'] = 'Logo & Avatar';
+$string['reg_tokenhint'] = 'Ein beliebiger gültiger CSS-Wert für dieses Design-Token. Leer lassen, um den eingebauten Standard zu verwenden.';
+$string['expose_label'] = 'Überschreibung pro Instanz erlauben: {$a}';
+$string['expose_desc'] = 'Wenn aktiviert, kann eine Blockinstanz diese Einstellung überschreiben; andernfalls folgt sie stets dem Website-Wert oben.';
+$string['config_usesite'] = 'Website-Standard verwenden';
+
+// Persona fields.
+$string['reg_persona'] = 'Persona-Name';
+$string['reg_persona_desc'] = 'Der Name, unter dem der Tutor auftritt (in der Kopfzeile angezeigt und an die KI gesendet).';
+$string['reg_persona_role'] = 'Rolle';
+$string['reg_persona_role_desc'] = 'Was der Tutor ist, z. B. „ein geduldiger Mathe-Tutor“. Wird der KI als Persona-Vorgabe gesendet.';
+$string['reg_persona_tone'] = 'Tonfall';
+$string['reg_persona_tone_desc'] = 'Wie der Tutor klingen soll, z. B. „warm und ermutigend“.';
+$string['reg_persona_audience'] = 'Zielgruppe';
+$string['reg_persona_audience_desc'] = 'Wem der Tutor hilft, z. B. „Studierende im ersten Jahr“.';
+$string['reg_persona_instructions'] = 'Eigene Anweisungen';
+$string['reg_persona_instructions_desc'] = 'Freitext-Vorgaben für Stimme und Verhalten des Tutors. Niemals Geheimnisse angeben; dies wird der KI als System-Prompt-Vorgabe gesendet und kann Sicherheit, Antwortstil oder Grounding-Regeln nicht außer Kraft setzen.';
+
+// Named branding tokens.
+$string['reg_brandaccent'] = 'Akzentfarbe';
+$string['reg_brandaccent_desc'] = 'Hauptfarbe für Schaltflächen, Links und die Kopfzeile.';
+$string['reg_brandbubble'] = 'Farbe der Lernenden-Blase';
+$string['reg_brandbubble_desc'] = 'Hintergrund der Nachrichtenblasen der Lernenden.';
+$string['reg_brandbotbubble'] = 'Farbe der Tutor-Blase';
+$string['reg_brandbotbubble_desc'] = 'Hintergrund der Nachrichtenblasen des Tutors.';
+$string['reg_brandsurface'] = 'Gesprächshintergrund';
+$string['reg_brandsurface_desc'] = 'Hintergrundton des Gesprächsbereichs.';
+$string['reg_brandiconhover'] = 'Hover-Färbung der Symbole';
+$string['reg_brandiconhover_desc'] = 'Hover-Hintergrund für die Symbolschaltflächen in der Kopfzeile (eine Farbe oder ein rgba()-Wert).';
+$string['reg_brandfont'] = 'Schriftart';
+$string['reg_brandfont_desc'] = 'Schriftstapel für das Widget, z. B. „Inter, sans-serif“.';
+
+// Behaviour.
+$string['reg_welcomemessage'] = 'Begrüßungsnachricht';
+$string['reg_welcomemessage_desc'] = 'Einleitende Nachricht oberhalb des Gesprächs.';
+$string['reg_promptstarters'] = 'Vorschlagsfragen';
+$string['reg_promptstarters_desc'] = 'Vorgeschlagene Fragen, eine pro Zeile (bis zu sechs werden angezeigt).';
+$string['reg_answerstyle'] = 'Standard-Antwortstil';
+$string['reg_answerstyle_desc'] = 'Der pädagogische Stil, mit dem der Tutor beginnt.';
+$string['reg_allowstylechange'] = 'Stilwechsel erlauben';
+$string['reg_allowstylechange_desc'] = 'Ob Lernende den Antwortstil wechseln dürfen.';
+$string['reg_displaymode'] = 'Anzeigemodus';
+$string['reg_displaymode_desc'] = 'Wie das Widget dargestellt wird.';
+$string['reg_historyenabled'] = 'Gesprächsverlauf';
+$string['reg_historyenabled_desc'] = 'Ob Lernende frühere Gespräche durchsuchen und fortsetzen können.';
+
+// Launcher + footer.
+$string['reg_launcherstyle'] = 'Stil der Schaltfläche';
+$string['reg_launcherstyle_desc'] = 'Der Stil der Schaltfläche, die den Chat öffnet.';
+$string['reg_launchlabel'] = 'Beschriftung der Schaltfläche';
+$string['reg_launchlabel_desc'] = 'Text auf der Start-Schaltfläche.';
+$string['reg_footermode'] = 'Fußzeile';
+$string['reg_footermode_desc'] = 'Was die Fußzeile des Gesprächs anzeigt.';
+$string['reg_footertext'] = 'Fußzeilentext';
+$string['reg_footertext_desc'] = 'Eigener Fußzeilentext (wird verwendet, wenn die Fußzeile auf „benutzerdefiniert“ steht).';
+
+// Images.
+$string['reg_logo'] = 'Tutor-Logo';
+$string['reg_logo_desc'] = 'Logo in der Kopfzeile und auf der Start-Schaltfläche.';
+$string['reg_avatar'] = 'Gesprächs-Avatar';
+$string['reg_avatar_desc'] = 'Avatar neben den Nachrichten des Tutors. Fällt auf das Logo zurück.';
+
+// Built-in presets.
+$string['preset_default'] = 'eLeDia (Standard)';
+$string['preset_forest'] = 'Wald (grün)';
+$string['preset_midnight'] = 'Mitternacht (dunkel)';
+$string['preset_contrast'] = 'Hoher Kontrast';
+$string['preset_hal'] = 'HAL 9000';
+
+// Tutor management UI.
+$string['tutor_name'] = 'Name';
+$string['tutor_shortname'] = 'Kurzname';
+$string['tutor_shortname_help'] = 'Ein stabiler Maschinenname, der in Export-Paketen verwendet wird. Wird einmalig bei der Erstellung des Tutors festgelegt.';
+$string['tutor_description'] = 'Beschreibung';
+$string['tutor_notset'] = '(nicht gesetzt)';
+$string['tutor_bundle'] = 'Tutor-Paket (.zip)';
+$string['tutor_import'] = 'Importieren';
+$string['tutor_import_help'] = 'Laden Sie ein Tutor-Paket (.zip) hoch, das von dieser oder einer anderen Website exportiert wurde. Unbekannte Einstellungen werden ignoriert.';
+$string['tutor_new'] = 'Tutor erstellen';
+$string['tutor_preset'] = 'Vorlage';
+$string['tutor_custom'] = 'Eigener';
+$string['tutor_type'] = 'Typ';
+$string['tutor_sitetutors'] = 'Website-Tutoren';
+$string['tutor_instances'] = 'Blockinstanzen';
+$string['tutor_instance'] = 'Instanz';
+$string['tutor_location'] = 'Ort';
+$string['tutor_apply'] = 'Anwenden';
+$string['tutor_applysite'] = 'Auf Website anwenden';
+$string['tutor_export'] = 'Exportieren';
+$string['tutor_duplicate'] = 'Duplizieren';
+$string['tutor_copysuffix'] = '(Kopie)';
+$string['tutor_saved'] = 'Tutor gespeichert.';
+$string['tutor_deleted'] = 'Tutor gelöscht.';
+$string['tutor_delete_confirm'] = 'Den Tutor „{$a}“ löschen? Dies kann nicht rückgängig gemacht werden.';
+$string['tutor_applysite_confirm'] = 'Diesen Tutor auf die gesamte Website anwenden? Dies ersetzt die aktuellen websiteweiten Design- und Persona-Standards.';
+$string['tutor_applied_site'] = 'Tutor auf die Website angewendet.';
+$string['tutor_applied_instance'] = 'Tutor auf die Blockinstanz angewendet.';
+$string['tutor_imported'] = 'Tutor importiert.';
+$string['tutor_untitled'] = 'Unbenannter Tutor';
+
+// Import/export errors.
+$string['error_export_failed'] = 'Das Export-Paket konnte nicht erstellt werden.';
+$string['error_import_invalid'] = 'Diese Datei ist kein gültiges Tutor-Paket.';
+
+// Plain-language names for the individual design tokens.
+$string['reg_tok_accentdark'] = 'Akzent (Hover/Gedrückt)';
+$string['reg_tok_accentdark_desc'] = 'Der dunklere Akzentton für Hover- und Gedrückt-Zustände.';
+$string['reg_tok_accentcontrast'] = 'Text auf Akzent';
+$string['reg_tok_accentcontrast_desc'] = 'Text-/Symbolfarbe auf der Akzentfarbe (z. B. Schaltflächenbeschriftungen).';
+$string['reg_tok_brand'] = 'Markenakzent';
+$string['reg_tok_brand_desc'] = 'Eine sekundäre Markenfarbe, sparsam verwendet (z. B. das Logo).';
+$string['reg_tok_focusring'] = 'Tastatur-Fokusring';
+$string['reg_tok_focusring_desc'] = 'Farbe des Fokusrings um Schaltflächen und Felder. Akzeptiert eine Farbe oder einen rgba()-Wert.';
+$string['reg_tok_surface'] = 'Panel-Hintergrund';
+$string['reg_tok_surface_desc'] = 'Hintergrundfarbe des Chat-Panels selbst.';
+$string['reg_tok_line'] = 'Rahmen & Trennlinien';
+$string['reg_tok_line_desc'] = 'Farbe von Rahmen, Trennern und feinen Linien.';
+$string['reg_tok_tint'] = 'Dezente Tönung';
+$string['reg_tok_tint_desc'] = 'Eine schwache Tönung im Hintergrund einiger Elemente.';
+$string['reg_tok_overlay'] = 'Hover-Overlay';
+$string['reg_tok_overlay_desc'] = 'Durchscheinendes Overlay bei Hover. Akzeptiert eine Farbe oder einen rgba()-Wert.';
+$string['reg_tok_overlaystrong'] = 'Starkes Overlay';
+$string['reg_tok_overlaystrong_desc'] = 'Ein stärkeres durchscheinendes Overlay. Akzeptiert eine Farbe oder einen rgba()-Wert.';
+$string['reg_tok_codebg'] = 'Code-Hintergrund';
+$string['reg_tok_codebg_desc'] = 'Hintergrund hinter Inline-Code und Codeblöcken.';
+$string['reg_tok_backdrop'] = 'Dialog-Hintergrund';
+$string['reg_tok_backdrop_desc'] = 'Der abgedunkelte Hintergrund hinter dem Chat im Dialogmodus.';
+$string['reg_tok_ink'] = 'Haupttextfarbe';
+$string['reg_tok_ink_desc'] = 'Die primäre Textfarbe im gesamten Tutor.';
+$string['reg_tok_headerfg'] = 'Kopfzeilentext & -symbole';
+$string['reg_tok_headerfg_desc'] = 'Text- und Symbolfarbe in der Kopfzeile des Tutors.';
+$string['reg_tok_muted'] = 'Gedämpfter Text';
+$string['reg_tok_muted_desc'] = 'Farbe für sekundären, weniger auffälligen Text.';
+$string['reg_tok_mutedsoft'] = 'Gedämpfter Text (weich)';
+$string['reg_tok_mutedsoft_desc'] = 'Ein weicherer Ton der sekundären Textfarbe.';
+$string['reg_tok_userfg'] = 'Text der Lernenden-Nachricht';
+$string['reg_tok_userfg_desc'] = 'Textfarbe in den Nachrichtenblasen der Lernenden.';
+$string['reg_tok_botfg'] = 'Text der Tutor-Nachricht';
+$string['reg_tok_botfg_desc'] = 'Textfarbe in den Nachrichtenblasen des Tutors.';
+$string['reg_tok_assistantbg'] = 'Eingabe-Hintergrund';
+$string['reg_tok_assistantbg_desc'] = 'Hintergrundfarbe des Eingabefelds.';
+$string['reg_tok_assistantfg'] = 'Eingabetext';
+$string['reg_tok_assistantfg_desc'] = 'Textfarbe im Eingabefeld.';
+$string['reg_tok_statusonline'] = 'Online-Anzeige';
+$string['reg_tok_statusonline_desc'] = 'Farbe des Online-Statuspunkts des Tutors.';
+$string['reg_tok_errorbg'] = 'Fehler-Hintergrund';
+$string['reg_tok_errorbg_desc'] = 'Hintergrundfarbe von Fehlermeldungen.';
+$string['reg_tok_errorfg'] = 'Fehlertext';
+$string['reg_tok_errorfg_desc'] = 'Textfarbe von Fehlermeldungen.';
+$string['reg_tok_errorline'] = 'Fehler-Rahmen';
+$string['reg_tok_errorline_desc'] = 'Rahmenfarbe von Fehlermeldungen.';
+$string['reg_tok_groundedbg'] = 'Quellen-Badge-Hintergrund';
+$string['reg_tok_groundedbg_desc'] = 'Hintergrund des Badges, das bei Antworten mit Kursmaterial-Bezug erscheint.';
+$string['reg_tok_groundedline'] = 'Quellen-Badge-Rahmen';
+$string['reg_tok_groundedline_desc'] = 'Rahmenfarbe des Kursmaterial-Badges.';
+$string['reg_tok_radius'] = 'Eckenrundung';
+$string['reg_tok_radius_desc'] = 'Eckenradius von Panel und Karten (z. B. 18px).';
+$string['reg_tok_bubbleradius'] = 'Blasenrundung';
+$string['reg_tok_bubbleradius_desc'] = 'Eckenradius der Nachrichtenblasen (z. B. 16px).';
+$string['reg_tok_gap'] = 'Abstände';
+$string['reg_tok_gap_desc'] = 'Allgemeiner Abstand zwischen Elementen (z. B. 0.8rem).';
+$string['reg_tok_z'] = 'Stapelreihenfolge';
+$string['reg_tok_z_desc'] = 'Der z-index der schwebenden Elemente. Erhöhen, falls der Tutor hinter anderen Seitenelementen verschwindet.';
+$string['reg_tok_fabbottom'] = 'Schwebende Schaltfläche – Abstand unten';
+$string['reg_tok_fabbottom_desc'] = 'Abstand der schwebenden Schaltfläche vom unteren Rand (z. B. 5.5rem).';
+$string['reg_tok_fabright'] = 'Schwebende Schaltfläche – Abstand rechts';
+$string['reg_tok_fabright_desc'] = 'Abstand der schwebenden Schaltfläche vom rechten Rand (z. B. 2rem).';
+$string['reg_tok_shadowsm'] = 'Kleiner Schatten';
+$string['reg_tok_shadowsm_desc'] = 'Der dezente (kleine) Schlagschatten. Ein CSS-box-shadow-Wert.';
+$string['reg_tok_shadowmd'] = 'Mittlerer Schatten';
+$string['reg_tok_shadowmd_desc'] = 'Der mittlere Schlagschatten. Ein CSS-box-shadow-Wert.';
+$string['reg_tok_shadowlg'] = 'Großer Schatten';
+$string['reg_tok_shadowlg_desc'] = 'Der große, erhabene Schlagschatten. Ein CSS-box-shadow-Wert.';
+$string['reg_tok_avatarglow'] = 'Avatar-Leuchten';
+$string['reg_tok_avatarglow_desc'] = 'Leuchten/Schatten um den Tutor-Avatar (z. B. HALs rotes Auge). Ein CSS-box-shadow-Wert.';
+
+// Teacher-facing per-instance tutor import/export page.
+$string['instancetutor_title'] = 'Tutor-Design – Import / Export';
+$string['instancetutor_intro'] = 'Exportieren Sie das Design und die Persona dieses Tutors als Datei zur Wiederverwendung, importieren Sie eine Tutor-Datei in diesen Block oder wenden Sie einen der vorgefertigten Tutoren der Website an. Es werden nur die Einstellungen geändert, die Ihre Administration freigegeben hat.';
+$string['instancetutor_exportbtn'] = 'Diesen Tutor exportieren';
+$string['instancetutor_applyheading'] = 'Vorgefertigten Tutor anwenden';
+$string['instancetutor_link'] = 'Diesen Tutor importieren / exportieren …';
+$string['instancetutor_exporthelp'] = 'Laden Sie den aktuellen Tutor dieses Blocks (Design, Persona und Bilder) als Datei herunter, die Sie anderswo importieren können.';
+$string['instancetutor_applyhelp'] = 'Ersetzen Sie das Erscheinungsbild und die Persona dieses Blocks durch einen der vorgefertigten Tutoren der Website. Es werden nur die von Ihrer Administration freigegebenen Einstellungen geändert.';
+$string['setting_tutor_managehint'] = 'Lieber das gesamte Erscheinungsbild auf einmal festlegen?';
