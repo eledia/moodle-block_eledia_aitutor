@@ -210,10 +210,11 @@ class widget {
             'customcss' => self::custom_css_once(),
         ];
 
-        $html = $OUTPUT->render_from_template('block_elediaaitutor/launcher', $templatecontext);
-
-        // The JS module owns all behaviour; it only receives non-secret config.
-        $PAGE->requires->js_call_amd('block_elediaaitutor/chat', 'init', [[
+        // Non-secret JS config. This can be large (institution privacy HTML,
+        // brand variables), so it is embedded as a JSON data-island in the
+        // template rather than passed through js_call_amd, whose argument
+        // string Moodle caps at 1024 chars.
+        $jsconfig = [
             'uniqid' => $uniqid,
             'contextid' => $context->id,
             'courseid' => $courseid,
@@ -233,7 +234,15 @@ class widget {
             // Brand variables so JS-created modals (portalled to <body>) can be
             // themed too — see TutorChat.applyBrand().
             'brandvars' => $brandstyle,
-        ]]);
+        ];
+        // JSON_HEX_TAG keeps any HTML in privacyhtml from closing the <script>.
+        $templatecontext['configjson'] = json_encode($jsconfig,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+        $html = $OUTPUT->render_from_template('block_elediaaitutor/launcher', $templatecontext);
+
+        // Pass only the element id; the JS reads the rest from the data-island.
+        $PAGE->requires->js_call_amd('block_elediaaitutor/chat', 'init', [$uniqid]);
 
         return $html;
     }

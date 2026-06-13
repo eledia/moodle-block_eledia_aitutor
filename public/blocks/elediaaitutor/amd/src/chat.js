@@ -1085,15 +1085,31 @@ export default {
     /**
      * Initialise a block instance.
      *
-     * @param {object} config Non-secret configuration injected from PHP.
+     * Only the element id is passed from PHP; the (potentially large) non-secret
+     * config — privacy HTML, brand variables, etc. — is read from a JSON
+     * data-island inside the widget, so it never inflates the js_call_amd
+     * argument string (Moodle warns past 1024 chars).
+     *
+     * @param {string} uniqid The widget root element id.
      * @return {void}
      */
-    init: function(config) {
-        const root = document.getElementById(config.uniqid);
+    init: function(uniqid) {
+        const root = document.getElementById(uniqid);
         if (!root || root.dataset.initialised) {
             return;
         }
         root.dataset.initialised = '1';
+
+        let config = {};
+        const island = root.querySelector('[data-region="elediaaitutor-config"]');
+        if (island) {
+            try {
+                config = JSON.parse(island.textContent || '{}');
+            } catch (e) {
+                config = {};
+            }
+        }
+        config.uniqid = uniqid;
 
         const requests = STRING_DEFS.map(([, key, component]) => ({
             key: key,
