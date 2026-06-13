@@ -200,9 +200,11 @@ class widget {
             'starters' => $starters,
             'hasstarters' => !empty($starters),
             'llmonly' => $mode === chat_mode::MODE_LLMONLY,
-            // Branding: scoped CSS-variable overrides + footer/white-label.
-            'brandstyle' => $brandstyle !== '' ? '#' . $uniqid . '{' . $brandstyle . '}' : '',
-            'hasbrandstyle' => $brandstyle !== '',
+            // Branding: CSS-variable overrides applied inline on the root AND the
+            // panel. The panel re-declares the --eat-* tokens on itself (it is
+            // portalled out of the root in overlay modes), so an inline style is
+            // what reliably wins for both elements.
+            'brandvars' => $brandstyle,
             'showfooter' => $brand['footertext'] !== '',
             'footertext' => $brand['footertext'],
             'customcss' => self::custom_css_once(),

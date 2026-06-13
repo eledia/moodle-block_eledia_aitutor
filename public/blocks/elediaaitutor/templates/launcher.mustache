@@ -39,14 +39,11 @@
         "consented": true
     }
 }}
-{{#hasbrandstyle}}
-    <style>{{{brandstyle}}}</style>
-{{/hasbrandstyle}}
 {{#customcss}}
     <style>{{{customcss}}}</style>
 {{/customcss}}
 <div class="elediaaitutor-root" data-region="elediaaitutor" id="{{uniqid}}"
-     data-mode="{{displaymode}}">
+     data-mode="{{displaymode}}" style="{{brandvars}}">
 
     {{^embedded}}
         <button type="button" class="btn btn-primary elediaaitutor-launch"
@@ -59,6 +56,7 @@
     {{/embedded}}
 
     <div class="elediaaitutor-panel {{#embedded}}elediaaitutor-embedded{{/embedded}}"
+         style="{{brandvars}}"
          data-region="panel"
          role="region"
          aria-label="{{persona}}"
