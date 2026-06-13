@@ -46,6 +46,16 @@ $string['poweredby'] = 'Powered by eLeDia.ai';
 // Branding (admin settings).
 $string['setting_header_branding'] = 'Branding';
 $string['setting_header_branding_desc'] = 'Adapt the tutor\'s appearance to your institution. All fields are optional; leave them empty to use the built-in eLeDia.ai design. Colours and the launcher label can also be overridden per block instance.';
+$string['setting_theme'] = 'Theme';
+$string['setting_theme_desc'] = 'A preset palette for the tutor widget. Your colour overrides below still apply on top of the chosen theme. Block instances may pick a different theme.';
+$string['theme_default'] = 'eLeDia (default)';
+$string['theme_forest'] = 'Forest (green)';
+$string['theme_midnight'] = 'Midnight (dark)';
+$string['theme_contrast'] = 'High contrast';
+$string['theme_hal'] = 'HAL 9000';
+$string['config_theme'] = 'Theme';
+$string['config_theme_site'] = 'Use site theme';
+$string['config_theme_help'] = 'Visual theme for this block only. "Use site theme" follows the site-wide setting.';
 $string['setting_brandlogo'] = 'Logo';
 $string['setting_brandlogo_desc'] = 'The logo/avatar shown in the launcher and the chat header. A square image works best. Replaces the built-in eLeDia.ai mark.';
 $string['setting_brandaccent'] = 'Accent colour';

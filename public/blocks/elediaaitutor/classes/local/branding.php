@@ -60,17 +60,49 @@ class branding {
      * defaults.
      *
      * @param array<string, mixed> $instance Per-instance overrides. Recognised:
-     *        brandaccent, brandbubble, launchlabel, logourl (already resolved).
-     * @return array{accent: string, accentdark: string, bubble: string,
-     *         surface: string, font: string, launchlabel: string,
+     *        theme, brandaccent, brandbubble, launchlabel.
+     * @return array{accent: string, bubble: string, theme: string,
+     *         tokens: array<string, string>, launchlabel: string,
      *         footermode: string, footertext: string}
      */
     public static function resolve(array $instance = []): array {
+        // 1. Theme provides the base palette (instance theme wins over site).
+        $themeid = trim((string) ($instance['theme'] ?? ''));
+        if ($themeid === '') {
+            $themeid = trim((string) security::get_config('theme', themes::DEFAULT));
+        }
+        if (!isset(themes::all()[$themeid])) {
+            $themeid = themes::DEFAULT;
+        }
+        $tokens = themes::tokens($themeid);
+        $themed = themes::is_themed($themeid);
+
+        // 2. Explicit institutional colour/font overrides layer on top.
         $accent = self::sanitise_colour((string) ($instance['brandaccent'] ?? ''))
             ?? self::sanitise_colour(security::brand_accent());
+        if ($accent !== null) {
+            $tokens['--eat-accent'] = $accent;
+            $tokens['--eat-accent-dark'] = self::darken($accent, 0.12);
+            // In the default (light) palette the ink equals the accent; only
+            // map it there, so a dark theme's light text stays intact.
+            if (!$themed) {
+                $tokens['--eat-ink'] = $accent;
+                $tokens['--eat-header-fg'] = $accent;
+            }
+        }
         $bubble = self::sanitise_colour((string) ($instance['brandbubble'] ?? ''))
             ?? self::sanitise_colour(security::brand_bubble());
+        if ($bubble !== null) {
+            $tokens['--eat-user-bg'] = $bubble;
+        }
         $surface = self::sanitise_colour(security::brand_surface());
+        if ($surface !== null) {
+            $tokens['--eat-body-bg'] = $surface;
+        }
+        $font = self::sanitise_font(security::brand_font());
+        if ($font !== '') {
+            $tokens['--eat-font'] = $font;
+        }
 
         $launchlabel = trim((string) ($instance['launchlabel'] ?? ''));
         if ($launchlabel === '') {
@@ -81,11 +113,10 @@ class branding {
         }
 
         return [
-            'accent' => (string) $accent,
-            'accentdark' => $accent !== null ? self::darken((string) $accent, 0.12) : '',
-            'bubble' => (string) $bubble,
-            'surface' => (string) $surface,
-            'font' => self::sanitise_font(security::brand_font()),
+            'theme' => $themeid,
+            'tokens' => $tokens,
+            'accent' => (string) ($accent ?? ''),
+            'bubble' => (string) ($bubble ?? ''),
             'launchlabel' => $launchlabel,
             'footermode' => self::footer_mode(),
             'footertext' => self::footer_text(),
@@ -93,37 +124,17 @@ class branding {
     }
 
     /**
-     * Build the scoped CSS custom-property overrides for a brand kit.
+     * Serialise a kit's resolved `--eat-*` token map into CSS declarations.
      *
-     * Only set, validated values are emitted, so anything left unbranded keeps
-     * the design default from styles.css. The declarations are wrapped in a
-     * selector keyed on the widget's unique id by the caller.
+     * Empty when nothing is themed/branded, so the styles.css defaults stand.
+     * The caller wraps these in a selector keyed on the widget's unique id.
      *
      * @param array<string, mixed> $brand A kit from {@see resolve()}.
      * @return string CSS declarations (may be empty).
      */
     public static function css_variables(array $brand): string {
-        $vars = [];
-        if (!empty($brand['accent'])) {
-            $vars['--eat-accent'] = $brand['accent'];
-            $vars['--eat-ink'] = $brand['accent'];
-            $vars['--eat-header-fg'] = $brand['accent'];
-        }
-        if (!empty($brand['accentdark'])) {
-            $vars['--eat-accent-dark'] = $brand['accentdark'];
-        }
-        if (!empty($brand['bubble'])) {
-            $vars['--eat-user-bg'] = $brand['bubble'];
-        }
-        if (!empty($brand['surface'])) {
-            $vars['--eat-body-bg'] = $brand['surface'];
-        }
-        if (!empty($brand['font'])) {
-            $vars['--eat-font'] = $brand['font'];
-        }
-
         $out = '';
-        foreach ($vars as $name => $value) {
+        foreach (($brand['tokens'] ?? []) as $name => $value) {
             $out .= $name . ':' . $value . ';';
         }
         return $out;

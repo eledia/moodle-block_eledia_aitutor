@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace block_elediaaitutor;
 
 use block_elediaaitutor\local\branding;
+use block_elediaaitutor\local\themes;
 
 /**
  * Unit tests for institutional branding resolution.
@@ -88,6 +89,34 @@ final class branding_test extends \advanced_testcase {
         $this->assertSame('Inter, sans-serif',
             branding::sanitise_font('Inter, sans-serif }')); // brace stripped.
         $this->assertStringNotContainsString('{', branding::sanitise_font('a{}<b>'));
+    }
+
+    /**
+     * A theme supplies a full base palette; an explicit accent layers on top
+     * without clobbering the theme's (light) text colour.
+     */
+    public function test_theme_base_and_override_layering(): void {
+        $this->resetAfterTest();
+
+        // HAL: dark palette with a red accent and the glowing-eye avatar.
+        set_config('theme', 'hal', 'block_elediaaitutor');
+        $css = branding::css_variables(branding::resolve([]));
+        $this->assertStringContainsString('--eat-accent:#ff1a1a;', $css);
+        $this->assertStringContainsString('--eat-body-bg:#0c0c0e;', $css);
+        $this->assertStringContainsString('--eat-ink:#e8e8ea;', $css);   // light text
+        $this->assertStringContainsString('--eat-avatar-glow:', $css);   // the eye
+
+        // An explicit accent overrides the theme's accent but the theme's light
+        // ink survives (accent must NOT be mapped onto --eat-ink when themed).
+        $brand = branding::resolve(['brandaccent' => '#00ddff']);
+        $css = branding::css_variables($brand);
+        $this->assertStringContainsString('--eat-accent:#00ddff;', $css);
+        $this->assertStringContainsString('--eat-ink:#e8e8ea;', $css);
+
+        // A per-instance theme overrides the site theme.
+        $brand = branding::resolve(['theme' => themes::DEFAULT]);
+        $this->assertSame(themes::DEFAULT, $brand['theme']);
+        $this->assertSame('', branding::css_variables($brand));
     }
 
     /**

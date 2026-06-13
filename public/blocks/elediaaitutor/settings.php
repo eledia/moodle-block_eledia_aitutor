@@ -273,6 +273,14 @@ if ($hassiteconfig) {
         get_string('setting_header_branding_desc', 'block_elediaaitutor')
     ));
 
+    $settings->add(new admin_setting_configselect(
+        'block_elediaaitutor/theme',
+        get_string('setting_theme', 'block_elediaaitutor'),
+        get_string('setting_theme_desc', 'block_elediaaitutor'),
+        \block_elediaaitutor\local\themes::DEFAULT,
+        \block_elediaaitutor\local\themes::menu()
+    ));
+
     $settings->add(new admin_setting_configstoredfile(
         'block_elediaaitutor/brandlogo',
         get_string('setting_brandlogo', 'block_elediaaitutor'),

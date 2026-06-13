@@ -79,6 +79,8 @@
     --eat-shadow-sm: 0 1px 2px rgba(30, 63, 89, 0.06);
     --eat-shadow-md: 0 2px 8px rgba(30, 63, 89, 0.10), 0 1px 2px rgba(30, 63, 89, 0.06);
     --eat-shadow-lg: 0 10px 40px rgba(16, 24, 40, 0.16);
+    /* Avatar elevation/glow — themes (e.g. HAL) can turn this into a glow. */
+    --eat-avatar-glow: 0 4px 12px rgba(16, 24, 40, 0.12);
 }
 
 .elediaaitutor-root,
@@ -214,7 +216,8 @@
     flex: 0 0 auto;
     padding: 4px;
     border: 1px solid rgba(16, 24, 40, 0.08);
-    box-shadow: 0 4px 12px rgba(16, 24, 40, 0.12);
+    box-shadow: var(--eat-avatar-glow);
+    transition: box-shadow 0.3s ease;
 }
 
 /* The header avatar links to eledia.ai; keep the badge look, signal the link. */

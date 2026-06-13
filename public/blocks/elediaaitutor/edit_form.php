@@ -82,6 +82,13 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         // Per-instance branding overrides (empty = use the site branding). The
         // logo, footer/white-label, font and custom CSS are institution-level
         // (site admin) only.
+        $thememenu = ['' => get_string('config_theme_site', 'block_elediaaitutor')]
+            + \block_elediaaitutor\local\themes::menu();
+        $mform->addElement('select', 'config_theme',
+            get_string('config_theme', 'block_elediaaitutor'), $thememenu);
+        $mform->setDefault('config_theme', '');
+        $mform->addHelpButton('config_theme', 'config_theme', 'block_elediaaitutor');
+
         $mform->addElement('text', 'config_launchlabel',
             get_string('config_launchlabel', 'block_elediaaitutor'));
         $mform->setType('config_launchlabel', PARAM_TEXT);

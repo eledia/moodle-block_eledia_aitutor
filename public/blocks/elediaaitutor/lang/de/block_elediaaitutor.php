@@ -46,6 +46,16 @@ $string['poweredby'] = 'Bereitgestellt von eLeDia.ai';
 // Branding (Administrationseinstellungen).
 $string['setting_header_branding'] = 'Branding';
 $string['setting_header_branding_desc'] = 'Passen Sie das Erscheinungsbild des Tutors an Ihre Einrichtung an. Alle Felder sind optional; leer lassen, um das eingebaute eLeDia.ai-Design zu verwenden. Farben und die Beschriftung der Schaltfläche lassen sich auch pro Block-Instanz überschreiben.';
+$string['setting_theme'] = 'Design-Thema';
+$string['setting_theme_desc'] = 'Eine vordefinierte Farbpalette für das Tutor-Widget. Ihre Farbüberschreibungen unten gelten weiterhin zusätzlich zum gewählten Thema. Block-Instanzen können ein anderes Thema wählen.';
+$string['theme_default'] = 'eLeDia (Standard)';
+$string['theme_forest'] = 'Wald (grün)';
+$string['theme_midnight'] = 'Mitternacht (dunkel)';
+$string['theme_contrast'] = 'Hoher Kontrast';
+$string['theme_hal'] = 'HAL 9000';
+$string['config_theme'] = 'Design-Thema';
+$string['config_theme_site'] = 'Website-Thema verwenden';
+$string['config_theme_help'] = 'Visuelles Thema nur für diesen Block. „Website-Thema verwenden“ folgt der website-weiten Einstellung.';
 $string['setting_brandlogo'] = 'Logo';
 $string['setting_brandlogo_desc'] = 'Das Logo/Avatar in der Startschaltfläche und der Chat-Kopfzeile. Ein quadratisches Bild eignet sich am besten. Ersetzt die eingebaute eLeDia.ai-Marke.';
 $string['setting_brandaccent'] = 'Akzentfarbe';
