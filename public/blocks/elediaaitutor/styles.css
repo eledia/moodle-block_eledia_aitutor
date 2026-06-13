@@ -301,6 +301,14 @@ a.elediaaitutor-avatar:focus-visible {
     opacity: 1;
 }
 
+/* Two-class specificity so the colour wins over Bootstrap's .btn/.btn-icon
+   (the header buttons carry both classes); also colour the icon glyph. */
+.elediaaitutor-actions .elediaaitutor-iconbtn,
+.elediaaitutor-actions .elediaaitutor-iconbtn .fa,
+.elediaaitutor-actions .elediaaitutor-iconbtn i {
+    color: var(--eat-header-fg);
+}
+
 .elediaaitutor-message-actions .elediaaitutor-iconbtn {
     color: var(--eat-muted);
 }
@@ -791,8 +799,9 @@ a.elediaaitutor-avatar:focus-visible {
     flex: 0 0 auto;
     max-height: 40%;
     overflow-y: auto;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
-    background: #fafbfd;
+    border-bottom: 1px solid var(--eat-line);
+    background: var(--eat-surface);
+    color: var(--eat-ink);
     padding: 0.4rem;
 }
 
@@ -828,6 +837,7 @@ a.elediaaitutor-avatar:focus-visible {
     padding: 0.35rem 0.4rem;
     cursor: pointer;
     min-width: 0;
+    color: var(--eat-ink);
 }
 
 .elediaaitutor-history-title {
@@ -947,6 +957,36 @@ body.elediaaitutor-noscroll {
     .elediaaitutor-message {
         max-width: 95%;
     }
+}
+
+/* --- Themed modals (privacy guidelines, confirmations). ----------------- *
+ * Core modals are portalled to <body>, outside the widget, so they don't
+ * inherit the --eat-* tokens. The JS sets the brand variables inline on the
+ * modal root and adds .elediaaitutor-modal; these rules then theme it. */
+.elediaaitutor-modal .modal-content {
+    background: var(--eat-surface);
+    color: var(--eat-ink);
+}
+
+.elediaaitutor-modal .modal-header,
+.elediaaitutor-modal .modal-footer {
+    background: var(--eat-surface);
+    color: var(--eat-ink);
+    border-color: var(--eat-line);
+}
+
+.elediaaitutor-modal .modal-title,
+.elediaaitutor-modal .close,
+.elediaaitutor-modal .btn-close {
+    color: var(--eat-ink);
+}
+
+.elediaaitutor-modal .elediaaitutor-privacy {
+    color: var(--eat-ink);
+}
+
+.elediaaitutor-modal .elediaaitutor-privacy h5 {
+    color: var(--eat-header-fg);
 }
 
 /* --- Reduced motion. --------------------------------------------------- */

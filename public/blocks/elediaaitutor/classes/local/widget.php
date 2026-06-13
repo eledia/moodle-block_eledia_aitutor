@@ -230,6 +230,9 @@ class widget {
             'consented' => $consented,
             'privacyhtml' => $privacyhtml,
             'ragmode' => $mode,
+            // Brand variables so JS-created modals (portalled to <body>) can be
+            // themed too — see TutorChat.applyBrand().
+            'brandvars' => $brandstyle,
         ]]);
 
         return $html;
