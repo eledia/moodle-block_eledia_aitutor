@@ -113,6 +113,10 @@ class branding {
         if ($surface !== null) {
             $tokens['--eat-body-bg'] = $surface;
         }
+        $iconhover = self::sanitise_colour(security::brand_icon_hover());
+        if ($iconhover !== null) {
+            $tokens['--eat-icon-hover'] = $iconhover;
+        }
         $font = self::sanitise_font(security::brand_font());
         if ($font !== '') {
             $tokens['--eat-font'] = $font;

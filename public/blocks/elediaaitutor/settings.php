@@ -341,6 +341,13 @@ if ($hassiteconfig) {
         ''
     ));
 
+    $settings->add(new admin_setting_configcolourpicker(
+        'block_elediaaitutor/brandiconhover',
+        get_string('setting_brandiconhover', 'block_elediaaitutor'),
+        get_string('setting_brandiconhover_desc', 'block_elediaaitutor'),
+        ''
+    ));
+
     $settings->add(new admin_setting_configtext(
         'block_elediaaitutor/brandfont',
         get_string('setting_brandfont', 'block_elediaaitutor'),

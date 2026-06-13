@@ -210,10 +210,15 @@ class TutorChat {
             this.handleAction(actionEl.getAttribute('data-action'), actionEl, e);
         });
 
-        // The launch button is the only action outside the panel (it stays in
-        // the block while the panel is portalled), so bind it directly.
+        // The launch button is the only action outside the panel, so bind it
+        // directly. For the floating (FAB) style it is portalled to <body> so
+        // it stays visible even when the block lives in a collapsed drawer; it
+        // carries its brand vars inline, so it stays themed once moved.
         const launch = this.root.querySelector('[data-action="launch"]');
         if (launch) {
+            if (this.config.launchfab && launch.parentNode !== document.body) {
+                document.body.appendChild(launch);
+            }
             launch.addEventListener('click', () => this.open());
         }
 

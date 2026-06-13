@@ -33,7 +33,8 @@
  */
 .elediaaitutor-root,
 .elediaaitutor-panel,
-.elediaaitutor-modal {
+.elediaaitutor-modal,
+.elediaaitutor-launch {
     /* Single accent (deep navy) carries primary actions and text. */
     --eat-accent: #1e3f59;
     --eat-accent-dark: #16314a;
@@ -65,6 +66,8 @@
     --eat-font: inherit;
     /* State + accent surfaces (tokenised so branding overrides reach them). */
     --eat-status-online: #22c55e;
+    /* Hover wash for the header icon buttons (settable + per-theme). */
+    --eat-icon-hover: rgba(16, 24, 40, 0.06);
     --eat-overlay: rgba(16, 24, 40, 0.06);
     --eat-overlay-strong: rgba(0, 0, 0, 0.04);
     --eat-code-bg: rgba(0, 0, 0, 0.06);
@@ -149,11 +152,14 @@
     color: var(--eat-accent-contrast);
 }
 
-/* Floating launcher (FAB): a themed circular button fixed in the bottom-right,
-   offset above the host theme's own corner controls via the --eat-fab-* tokens
-   (default tuned for Boost's "?" help button). Accent-filled and elevated so it
-   reads as an intentional product affordance, not a clashing overlay. */
-.elediaaitutor-root .elediaaitutor-launch--fab {
+/* Floating launcher (FAB): a themed, accent-filled circular button fixed in the
+   bottom-right corner, offset above the host theme's own corner controls via the
+   --eat-fab-* tokens (default tuned for Boost's "?" help button). The launch
+   button is portalled to <body> by the JS so it stays visible regardless of the
+   block drawer; it carries the brand vars inline (see launcher.mustache) and is
+   itself a token root, so it is fully theme-coloured wherever it lives. The logo
+   sits on a small light disc so any logo reads on the accent fill. */
+.elediaaitutor-launch--fab {
     position: fixed;
     right: var(--eat-fab-right, 2rem);
     bottom: var(--eat-fab-bottom, 5.5rem);
@@ -161,30 +167,35 @@
     width: 3.5rem;
     height: 3.5rem;
     padding: 0;
+    gap: 0;
     justify-content: center;
     border-radius: 50%;
     background: var(--eat-accent);
-    border: 1px solid var(--eat-accent);
+    border: 0;
     color: var(--eat-accent-contrast);
+    box-shadow: var(--eat-shadow-lg);
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.elediaaitutor-launch--fab:hover,
+.elediaaitutor-launch--fab:focus-visible {
+    background: var(--eat-accent-dark);
+    transform: translateY(-2px) scale(1.04);
     box-shadow: var(--eat-shadow-lg);
 }
 
-.elediaaitutor-root .elediaaitutor-launch--fab:hover,
-.elediaaitutor-root .elediaaitutor-launch--fab:focus-visible {
-    background: var(--eat-accent-dark);
-    border-color: var(--eat-accent-dark);
-    color: var(--eat-accent-contrast);
-    transform: translateY(-2px);
-}
-
 .elediaaitutor-launch--fab .elediaaitutor-launch-icon {
-    width: 2.1rem;
-    height: 2.1rem;
+    width: 2.3rem;
+    height: 2.3rem;
+    background: #fff;
+    border-radius: 50%;
+    padding: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 /* On phones, sit closer to the corner (host help buttons are smaller / hidden). */
 @media (max-width: 576px) {
-    .elediaaitutor-root .elediaaitutor-launch--fab {
+    .elediaaitutor-launch--fab {
         right: 1rem;
         bottom: 1rem;
     }
@@ -359,7 +370,7 @@ a.elediaaitutor-avatar:focus-visible {
 
 .elediaaitutor-iconbtn:hover,
 .elediaaitutor-iconbtn:focus-visible {
-    background: var(--eat-overlay);
+    background: var(--eat-icon-hover);
     color: var(--eat-header-fg);
     opacity: 1;
 }

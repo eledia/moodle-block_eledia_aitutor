@@ -150,6 +150,16 @@ final class branding_test extends \advanced_testcase {
     }
 
     /**
+     * The header icon-hover colour is settable and maps to its token.
+     */
+    public function test_icon_hover_colour(): void {
+        $this->resetAfterTest();
+        set_config('brandiconhover', '#334455', 'block_elediaaitutor');
+        $this->assertStringContainsString('--eat-icon-hover:#334455;',
+            branding::css_variables(branding::resolve([])));
+    }
+
+    /**
      * Launcher style resolves instance-over-site with a safe fallback to pill.
      */
     public function test_launcher_style(): void {

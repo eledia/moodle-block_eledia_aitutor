@@ -260,6 +260,15 @@ class security {
     }
 
     /**
+     * Hover wash colour for the header icon buttons (hex), or '' when unset.
+     *
+     * @return string
+     */
+    public static function brand_icon_hover(): string {
+        return trim((string) self::get_config('brandiconhover', ''));
+    }
+
+    /**
      * The configured launcher button style (pill|solid|fab).
      *
      * @return string

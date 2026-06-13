@@ -140,8 +140,8 @@ class themes {
             '--eat-ink', '--eat-header-fg', '--eat-surface', '--eat-body-bg',
             '--eat-bot-bg', '--eat-bot-fg', '--eat-user-bg', '--eat-user-fg',
             '--eat-muted', '--eat-muted-soft', '--eat-line', '--eat-tint',
-            '--eat-overlay', '--eat-grounded-bg', '--eat-grounded-line',
-            '--eat-status-online',
+            '--eat-overlay', '--eat-icon-hover', '--eat-grounded-bg',
+            '--eat-grounded-line', '--eat-status-online',
         ];
     }
 
@@ -206,6 +206,7 @@ class themes {
             '--eat-overlay' => 'rgba(16, 24, 40, 0.06)',
             '--eat-overlay-strong' => 'rgba(0, 0, 0, 0.04)',
             '--eat-code-bg' => 'rgba(0, 0, 0, 0.06)',
+            '--eat-icon-hover' => 'rgba(16, 24, 40, 0.08)',
             '--eat-grounded-bg' => '#eaf1f3',
             '--eat-grounded-line' => '#c9d8dd',
             '--eat-status-online' => '#22c55e',
@@ -244,6 +245,7 @@ class themes {
             '--eat-overlay' => 'rgba(255, 255, 255, 0.10)',
             '--eat-overlay-strong' => 'rgba(255, 255, 255, 0.06)',
             '--eat-code-bg' => 'rgba(255, 255, 255, 0.08)',
+            '--eat-icon-hover' => 'rgba(255, 255, 255, 0.14)',
             '--eat-status-online' => '#46d18a',
         ], $overrides);
     }

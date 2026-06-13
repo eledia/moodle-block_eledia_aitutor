@@ -239,6 +239,9 @@ class widget {
             'consented' => $consented,
             'privacyhtml' => $privacyhtml,
             'ragmode' => $mode,
+            // Floating launcher is portalled to <body> by the JS so the block
+            // drawer can't hide it.
+            'launchfab' => $brand['launcherstyle'] === 'fab',
             // Brand variables so JS-created modals (portalled to <body>) can be
             // themed too — see TutorChat.applyBrand().
             'brandvars' => $brandstyle,
