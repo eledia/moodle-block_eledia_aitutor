@@ -122,20 +122,8 @@ class widget {
             ]);
         }
 
-        // The site-wide navbar launcher (no block) renders its trigger in the
-        // navbar and opens the panel as an overlay following the site default
-        // display mode (an 'embedded' default makes no sense without a placed
-        // block, so coerce it to 'docked').
-        $navbar = !empty($options['navbar']);
-        if ($navbar) {
-            $displaymode = (string) (get_config('block_elediaaitutor', 'defaultdisplaymode') ?: 'docked');
-            if ($displaymode === 'embedded') {
-                $displaymode = 'docked';
-            }
-        } else {
-            $displaymode = (string) ($options['displaymode']
-                ?? (get_config('block_elediaaitutor', 'defaultdisplaymode') ?: 'embedded'));
-        }
+        $displaymode = (string) ($options['displaymode']
+            ?? (get_config('block_elediaaitutor', 'defaultdisplaymode') ?: 'embedded'));
         $historyenabled = (bool) ($options['historyenabled'] ?? true)
             && has_capability('block/elediaaitutor:viewhistory', $context);
         $welcome = (string) ($options['welcomemessage']
@@ -211,7 +199,7 @@ class widget {
             'historyenabled' => $historyenabled,
             'launchlabel' => $brand['launchlabel'],
             'launcherstyle' => $brand['launcherstyle'],
-            'navbar' => $navbar,
+            'launchfab' => $brand['launcherstyle'] === 'fab',
             'stylechoice' => $allowstylechange,
             'styles' => $styles,
             'stylelocked' => !$allowstylechange && $answerstyle !== 'explain',

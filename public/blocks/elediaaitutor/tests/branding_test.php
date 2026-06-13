@@ -150,28 +150,17 @@ final class branding_test extends \advanced_testcase {
     }
 
     /**
-     * Launcher style resolves instance-over-site with a safe fallback to pill;
-     * the removed 'fab' value is rejected.
+     * Launcher style resolves instance-over-site with a safe fallback to pill.
      */
     public function test_launcher_style(): void {
         $this->resetAfterTest();
         $this->assertSame('pill', branding::resolve([])['launcherstyle']);
 
-        set_config('launcherstyle', 'solid', 'block_elediaaitutor');
-        $this->assertSame('solid', branding::resolve([])['launcherstyle']);
-        // Instance override wins; a removed/bogus value falls back to the site setting.
-        $this->assertSame('pill', branding::resolve(['launcherstyle' => 'pill'])['launcherstyle']);
-        $this->assertSame('solid', branding::resolve(['launcherstyle' => 'fab'])['launcherstyle']);
-    }
-
-    /**
-     * The navbar launcher toggle is read from the site setting.
-     */
-    public function test_navbar_launcher_setting(): void {
-        $this->resetAfterTest();
-        $this->assertFalse(\block_elediaaitutor\local\security::navbar_launcher_enabled());
-        set_config('navbarlauncher', 1, 'block_elediaaitutor');
-        $this->assertTrue(\block_elediaaitutor\local\security::navbar_launcher_enabled());
+        set_config('launcherstyle', 'fab', 'block_elediaaitutor');
+        $this->assertSame('fab', branding::resolve([])['launcherstyle']);
+        // Instance override wins; a bogus value falls back to the site setting.
+        $this->assertSame('solid', branding::resolve(['launcherstyle' => 'solid'])['launcherstyle']);
+        $this->assertSame('fab', branding::resolve(['launcherstyle' => 'bogus'])['launcherstyle']);
     }
 
     /**

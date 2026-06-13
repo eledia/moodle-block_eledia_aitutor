@@ -82,6 +82,12 @@
     --eat-shadow-lg: 0 10px 40px rgba(16, 24, 40, 0.16);
     /* Avatar elevation/glow — themes (e.g. HAL) can turn this into a glow. */
     --eat-avatar-glow: 0 4px 12px rgba(16, 24, 40, 0.12);
+    /* Floating-launcher offsets. Defaults clear Boost's bottom-right "?" help
+       button (fixed at bottom:2rem; right:2rem). Override these (e.g. via the
+       admin Custom CSS) to fit other themes:
+         .elediaaitutor-root { --eat-fab-bottom: 1.25rem; --eat-fab-right: 1.25rem; } */
+    --eat-fab-bottom: 5.5rem;
+    --eat-fab-right: 2rem;
 }
 
 .elediaaitutor-root,
@@ -143,33 +149,45 @@
     color: var(--eat-accent-contrast);
 }
 
-/* Navbar launcher trigger — sits among the site navbar icons (next to the
-   notifications bell). Deliberately neutral: it adopts the navbar's own
-   sizing/colour rather than the tutor accent, so it never restyles the navbar.
-   The chat panel it opens still uses the tutor theme. */
-.elediaaitutor-navbtn {
-    display: inline-flex;
-    align-items: center;
+/* Floating launcher (FAB): a themed circular button fixed in the bottom-right,
+   offset above the host theme's own corner controls via the --eat-fab-* tokens
+   (default tuned for Boost's "?" help button). Accent-filled and elevated so it
+   reads as an intentional product affordance, not a clashing overlay. */
+.elediaaitutor-root .elediaaitutor-launch--fab {
+    position: fixed;
+    right: var(--eat-fab-right, 2rem);
+    bottom: var(--eat-fab-bottom, 5.5rem);
+    z-index: var(--eat-z);
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
     justify-content: center;
-    background: transparent;
-    border: 0;
-    padding: 0 0.5rem;
-    cursor: pointer;
-    line-height: 1;
-    color: inherit;
-}
-
-.elediaaitutor-navbtn .elediaaitutor-navbtn-img {
-    width: 1.6rem;
-    height: 1.6rem;
-    object-fit: contain;
     border-radius: 50%;
-    display: block;
+    background: var(--eat-accent);
+    border: 1px solid var(--eat-accent);
+    color: var(--eat-accent-contrast);
+    box-shadow: var(--eat-shadow-lg);
 }
 
-.elediaaitutor-navbtn:hover,
-.elediaaitutor-navbtn:focus-visible {
-    opacity: 0.85;
+.elediaaitutor-root .elediaaitutor-launch--fab:hover,
+.elediaaitutor-root .elediaaitutor-launch--fab:focus-visible {
+    background: var(--eat-accent-dark);
+    border-color: var(--eat-accent-dark);
+    color: var(--eat-accent-contrast);
+    transform: translateY(-2px);
+}
+
+.elediaaitutor-launch--fab .elediaaitutor-launch-icon {
+    width: 2.1rem;
+    height: 2.1rem;
+}
+
+/* On phones, sit closer to the corner (host help buttons are smaller / hidden). */
+@media (max-width: 576px) {
+    .elediaaitutor-root .elediaaitutor-launch--fab {
+        right: 1rem;
+        bottom: 1rem;
+    }
 }
 
 .elediaaitutor-launch-icon,
