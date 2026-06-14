@@ -274,9 +274,9 @@ die Möglichkeit, Anforderungen an Datenstandort und Beschaffung zu erfüllen.
 
 Von Tag eins nach Moodle- und Enterprise-Sicherheitsstandards gebaut:
 
-- **Geheimnisse bleiben serverseitig.** Moodle-Tokens und Modell-/Anbieter-
-  Zugangsdaten gelangen nie in den Browser; die App der lernenden Person spricht
-  ausschließlich mit Moodle.
+- **Geheimnisse bleiben serverseitig.** Moodle-Tokens und
+  Modell-/Anbieter-Zugangsdaten gelangen nie in den Browser; die App der
+  lernenden Person spricht ausschließlich mit Moodle.
 - **Nutzerbezogene, kurzlebige Tokens.** Jede KI-Interaktion nutzt ein an die
   einzelne lernende Person und den konfigurierten Dienst gebundenes Token —
   automatisch bereitgestellt, rotiert, widerrufen und auditierbar.
@@ -418,5 +418,6 @@ Vorlagen, damit die Bandbreite des Brandings sichtbar wird. Empfohlene Reihenfol
 ---
 
 *Erstellt zur Vertriebsunterstützung. Technische Referenzen — die Plugin-README,
-die Administrations-/Integrationsleitfäden und die Spezifikation des RAG-/Tutor-
-MCP-Servers — begleiten dieses Dokument für Interessenten mit Detailbedarf.*
+die Administrations-/Integrationsleitfäden und die Spezifikation des
+RAG-/Tutor-MCP-Servers — begleiten dieses Dokument für Interessenten mit
+Detailbedarf.*
