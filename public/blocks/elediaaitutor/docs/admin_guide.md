@@ -34,7 +34,7 @@ short-lived application cache (never the database) and reused until it expires.
 
 | Setting | Default |
 |---|---|
-| Default display mode | `embedded` |
+| Default display mode | `docked` (floating panel) |
 | Enable global chat | Yes |
 | Enable course chat | Yes |
 | Maximum message length | 4000 |
@@ -63,7 +63,36 @@ navigation ("More" menu) leading to `/blocks/elediaaitutor/report.php?courseid=N
 — aggregated, name-free views of asked questions (totals, hotspots, per-day,
 grounded share, paginated recent questions).
 
-## 4. Capabilities
+## 4. Tutor design, personas & profiles
+
+Beyond the connection and limits above, **every visual aspect of the tutor and
+its persona is a setting** — colours, surfaces, text, message bubbles, fonts,
+corner roundness, spacing, shadows, the launcher button, the footer, the logo
+and conversation avatar, plus a persona (name, role, tone, audience and
+free-text instructions). Each is edited with non-technical controls: a real
+colour picker (click a swatch *or* paste a hex code) and plain-language
+dropdowns ("Small / Medium / Large", "Subtle / Strong") — never raw CSS.
+
+- **Site-wide defaults.** The values set in the block settings are the
+  institution default for every tutor.
+- **Per-setting governance.** Each optical/persona setting carries an *"Allow
+  teachers to override this per course"* checkbox. By default all of them are
+  open to teachers; switch any off to lock it down for a consistent look.
+- **Manage tutors page** (*Site administration ▸ Plugins ▸ Blocks ▸ Tutors
+  (design & import/export)*): five built-in presets (eLeDia, Forest, Midnight,
+  High contrast, HAL 9000) plus your own saved **tutor profiles**. Apply a tutor
+  to the **whole site** or to **any individual block**, duplicate one as a
+  starting point, and **import / export** a tutor as a single file — settings
+  *and* images included. Imported tutors are snapshot-copied onto the target (no
+  hidden links to break later). Profiles created here are available site-wide;
+  a profile imported onto a single block stays scoped to that block.
+- **White-label.** Replace or hide the footer credit, and add institution
+  custom CSS where pixel-level control is needed.
+
+Teachers reach the same apply / import / export tools for their own course from
+the block's **Configure** form (scoped to that block) — see the teacher guide.
+
+## 5. Capabilities
 
 | Capability | Default roles |
 |---|---|
@@ -76,13 +105,13 @@ grounded share, paginated recent questions).
 
 Users without `block/elediaaitutor:use` see no chat.
 
-## 5. Caching (production)
+## 6. Caching (production)
 
 Map the `usertoken` and `ratelimit` application caches to a shared store
 (Redis/Memcached) under **Site administration ▸ Plugins ▸ Caching** so the
 token cache and rate limiter work correctly across a cluster.
 
-## 6. Moodle App
+## 7. Moodle App
 
 Third-party blocks are not rendered by the Moodle App, so the tutor ships a
 standalone page hosting the identical chat widget:
