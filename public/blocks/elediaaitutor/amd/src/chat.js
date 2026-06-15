@@ -530,7 +530,8 @@ class TutorChat {
      * @return {Promise}
      */
     appendAssistant(html, sources, iserror) {
-        const mappedSources = (sources || []).map((s) => ({
+        const mappedSources = (sources || []).map((s, i) => ({
+            num: i + 1,
             title: s.title,
             url: s.url,
             hasurl: !!s.url,
@@ -1010,7 +1011,8 @@ class TutorChat {
                 const isuser = m.role === 'user';
                 // Map sources exactly as appendAssistant() does, so resumed
                 // assistant turns render the same citation cards as live answers.
-                const mappedSources = (m.sources || []).map((s) => ({
+                const mappedSources = (m.sources || []).map((s, i) => ({
+                    num: i + 1,
                     title: s.title,
                     url: s.url,
                     hasurl: !!s.url,

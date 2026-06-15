@@ -74,6 +74,7 @@
                     <ul class="elediaaitutor-sources-list">
                         {{#sources}}
                             <li class="elediaaitutor-source">
+                                {{#num}}<span class="elediaaitutor-source-num">[S{{num}}]</span> {{/num}}
                                 {{#hasurl}}
                                     <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{title}}</a>
                                 {{/hasurl}}
