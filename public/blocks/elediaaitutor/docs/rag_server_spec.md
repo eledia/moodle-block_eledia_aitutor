@@ -140,7 +140,10 @@ text payload):
   "structuredContent": {
     "messages": [
       { "role": "user",      "content": "What is photosynthesis?" },
-      { "role": "assistant", "content": "Photosynthesis is …" }
+      { "role": "assistant", "content": "Photosynthesis is …",
+        "sources": [
+          { "title": "Photosynthesis", "url": "https://moodle.example.com/mod/page/view.php?id=42", "snippet": "…" }
+        ] }
     ]
   }
 }
@@ -149,6 +152,11 @@ text payload):
 - `role` is normalised to `user` / `assistant` (anything not `user` becomes
   `assistant`). `content` may also be supplied as `text`. Empty messages are dropped.
 - Assistant `content` is rendered as Markdown; user `content` is shown as plain text.
+- **`sources` (optional, per assistant message):** the citations for that turn,
+  identical in shape to the `tutor_chat` `sources` (A.1) — an array of
+  `{title, url, snippet}` (the same key aliases are accepted). Return them so a
+  reopened conversation shows the same source cards as the live answer did.
+  Absent ⇒ no citations for that message. User messages carry no sources.
 
 ### A.3 `tutor_delete_conversation` (optional)
 
@@ -606,6 +614,7 @@ unless marked otherwise).
 
 | Plugin version | Change |
 |---|---|
+| 0.14.0 | **Per-message `sources` in `tutor_get_history`** (A.2): assistant messages may include an optional `sources` array (same `{title, url, snippet}` shape and aliases as the `tutor_chat` sources). The block normalises and renders them as the same citation cards used for live answers, so reopened conversations keep their citations. Absent ⇒ no sources for that message. Additive and backwards-compatible. |
 | 0.13.0 | **`persona`** chat argument (A.1): an optional object (`name`/`role`/`tone`/`audience`/`instructions`, only populated sub-fields sent) carrying the tutor's configured persona. Use it as system-prompt guidance for the tutor's **voice** only — it must never override safety, `answer_style`, `rag_enabled` grounding, or `user_lang`. Absent ⇒ default voice. The tutor's design/branding (now fully configurable per site and per block, and packaged as importable "tutor profiles") is presentation-only and not part of this contract. |
 | 0.9.0 | **`rag_enabled`** chat argument (A.1): when `false` the agent must NOT call its retrieval tool and answers from the model alone (LLM-only / pass-through). Moodle sends it based on an admin gate, a per-block setting, and whether the course is ingested; absent ⇒ grounded. |
 | 0.8.2 (doc update) | **Tenant resolution defined** (B.4): the retrieval corpus is namespaced by a tenant id derived from the Moodle `wwwroot` (see local_ragingest API spec v1.2); resolve it at query time from the **verified** `site.url` of the token callback with the same canonicalisation, and filter all retrieval by it. Never trust a claimed tenant value. |

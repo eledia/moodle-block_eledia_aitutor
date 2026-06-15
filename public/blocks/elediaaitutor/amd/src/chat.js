@@ -1006,15 +1006,30 @@ class TutorChat {
             if (!response.available) {
                 this.setStatus(strings.nohistorytool);
             }
-            const renders = (response.messages || []).map((m) => this.appendMessage({
-                isuser: m.role === 'user',
-                isassistant: m.role !== 'user',
-                sendername: m.role === 'user' ? strings.you : this.config.persona,
-                text: m.role === 'user' ? m.html : '',
-                html: m.role === 'user' ? '' : m.html,
-                copylabel: strings.copy,
-                retrylabel: strings.retry
-            }));
+            const renders = (response.messages || []).map((m) => {
+                const isuser = m.role === 'user';
+                // Map sources exactly as appendAssistant() does, so resumed
+                // assistant turns render the same citation cards as live answers.
+                const mappedSources = (m.sources || []).map((s) => ({
+                    title: s.title,
+                    url: s.url,
+                    hasurl: !!s.url,
+                    snippet: s.snippet
+                }));
+                return this.appendMessage({
+                    isuser: isuser,
+                    isassistant: !isuser,
+                    sendername: isuser ? strings.you : this.config.persona,
+                    text: isuser ? m.html : '',
+                    html: isuser ? '' : m.html,
+                    sources: mappedSources,
+                    hassources: mappedSources.length > 0,
+                    showgrounding: !isuser,
+                    grounded: mappedSources.length > 0,
+                    copylabel: strings.copy,
+                    retrylabel: strings.retry
+                });
+            });
             return Promise.all(renders);
         });
     }

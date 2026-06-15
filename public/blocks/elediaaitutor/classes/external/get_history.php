@@ -99,12 +99,22 @@ class get_history extends external_api {
         $out = [];
         foreach ($messages as $message) {
             $isuser = ($message['role'] ?? 'assistant') === 'user';
+            $sources = [];
+            foreach (($message['sources'] ?? []) as $source) {
+                $sources[] = [
+                    'title' => (string) ($source['title'] ?? ''),
+                    'url' => (string) ($source['url'] ?? ''),
+                    'snippet' => (string) ($source['snippet'] ?? ''),
+                ];
+            }
             $out[] = [
                 'role' => $isuser ? 'user' : 'assistant',
                 // User turns are returned raw and escaped client-side by the message
                 // template ({{text}}); assistant turns are rendered through the same
                 // safe Markdown pipeline as live answers and inserted as HTML.
                 'html' => $isuser ? $message['content'] : markdown_renderer::render($message['content'], $context),
+                // Citations for an assistant turn, so resume renders the same cards as live.
+                'sources' => $sources,
             ];
         }
 
@@ -123,6 +133,16 @@ class get_history extends external_api {
                 new external_single_structure([
                     'role' => new external_value(PARAM_ALPHA, 'user or assistant'),
                     'html' => new external_value(PARAM_RAW, 'Rendered/escaped message HTML'),
+                    'sources' => new external_multiple_structure(
+                        new external_single_structure([
+                            'title' => new external_value(PARAM_TEXT, 'Source title'),
+                            'url' => new external_value(PARAM_URL, 'Source URL, or empty'),
+                            'snippet' => new external_value(PARAM_TEXT, 'Source snippet, or empty'),
+                        ]),
+                        'Citations for this message',
+                        VALUE_DEFAULT,
+                        []
+                    ),
                 ])
             ),
         ]);

@@ -184,7 +184,7 @@ class rag_client {
      * @param string $moodletoken User-scoped Moodle MCP token.
      * @param string $conversationid Conversation id to load.
      * @param string $toolname History tool name to invoke.
-     * @return array List of {role, content} message arrays.
+     * @return array List of {role, content, sources} message arrays.
      * @throws rag_exception On transport or protocol failure.
      */
     public function get_history(
@@ -221,7 +221,20 @@ class rag_client {
             if ($content === '') {
                 continue;
             }
-            $clean[] = ['role' => $role === 'user' ? 'user' : 'assistant', 'content' => $content];
+            // Per-message sources (same aliases/shape as live answers), so resumed
+            // conversations render the same citation cards. Absent ⇒ none.
+            $sources = [];
+            foreach (['sources', 'citations', 'documents', 'references'] as $key) {
+                if (isset($message[$key]) && is_array($message[$key])) {
+                    $sources = $this->normalise_sources($message[$key]);
+                    break;
+                }
+            }
+            $clean[] = [
+                'role' => $role === 'user' ? 'user' : 'assistant',
+                'content' => $content,
+                'sources' => $sources,
+            ];
         }
         return $clean;
     }
