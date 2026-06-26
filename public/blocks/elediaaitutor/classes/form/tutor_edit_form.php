@@ -82,7 +82,7 @@ class tutor_edit_form extends moodleform {
         // Every registry setting, grouped — a profile defines the full tutor.
         foreach (registry::groups() as $group) {
             $keys = array_filter(registry::group_keys($group),
-                static fn(string $k): bool => registry::get($k)['type'] !== 'file');
+                static fn(string $k): bool => registry::is_available($k) && registry::get($k)['type'] !== 'file');
             if (empty($keys)) {
                 continue;
             }

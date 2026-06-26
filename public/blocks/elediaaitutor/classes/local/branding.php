@@ -18,7 +18,6 @@ declare(strict_types=1);
 
 namespace block_elediaaitutor\local;
 
-use context_system;
 use moodle_url;
 
 /**
@@ -206,13 +205,13 @@ class branding {
      */
     private static function system_file_url(string $filearea): string {
         $fs = get_file_storage();
-        $files = $fs->get_area_files(context_system::instance()->id, 'block_elediaaitutor',
+        $files = $fs->get_area_files(\core\context\system::instance()->id, 'block_elediaaitutor',
             $filearea, 0, 'itemid, filepath, filename', false);
         if (empty($files)) {
             return '';
         }
         $file = reset($files);
-        return moodle_url::make_pluginfile_url(context_system::instance()->id,
+        return moodle_url::make_pluginfile_url(\core\context\system::instance()->id,
             'block_elediaaitutor', $filearea, 0, $file->get_filepath(),
             $file->get_filename())->out(false);
     }

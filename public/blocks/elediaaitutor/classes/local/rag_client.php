@@ -52,8 +52,8 @@ class rag_client {
     /** @var moodle_url Validated RAG endpoint. */
     private moodle_url $endpoint;
 
-    /** @var string|null Authorization header value, or null when none configured. */
-    private ?string $authheader;
+    /** @var string[] Additional HTTP headers, including authorization when configured. */
+    private array $authheaders;
 
     /** @var transport HTTP transport. */
     private transport $transport;
@@ -65,13 +65,13 @@ class rag_client {
      * Constructor.
      *
      * @param moodle_url $endpoint Validated RAG MCP endpoint.
-     * @param string|null $authheader Authorization header value to send, or null.
+     * @param string[]|null $authheaders Additional HTTP headers to send.
      * @param transport $transport HTTP transport.
      * @param int $timeout Request timeout in seconds.
      */
-    public function __construct(moodle_url $endpoint, ?string $authheader, transport $transport, int $timeout) {
+    public function __construct(moodle_url $endpoint, ?array $authheaders, transport $transport, int $timeout) {
         $this->endpoint = $endpoint;
-        $this->authheader = $authheader;
+        $this->authheaders = $authheaders ?? [];
         $this->transport = $transport;
         $this->timeout = $timeout;
     }
@@ -86,20 +86,33 @@ class rag_client {
     public static function create(?transport $transport = null): self {
         $endpoint = security::validated_rag_url();
 
-        $authheader = null;
+        global $CFG;
+
+        $authheaders = [];
         $method = (string) security::get_config('ragauthmethod', 'none');
         $tokenvalue = trim((string) security::get_config('ragauthtoken', ''));
         if ($tokenvalue !== '') {
-            $authheader = match ($method) {
-                'bearer' => 'Authorization: Bearer ' . $tokenvalue,
-                'header' => $tokenvalue, // Admin supplies a full "Name: value" header.
-                default => null,
-            };
+            if ($method === 'bearer') {
+                $authheaders[] = 'Authorization: Bearer ' . $tokenvalue;
+            } else if ($method === 'header') {
+                // Admin supplies one or more complete "Name: value" headers.
+                $authheaders = array_values(array_filter(array_map('trim', preg_split('/\R/', $tokenvalue) ?: [])));
+            }
+        }
+
+        $endpointparts = parse_url($endpoint->out(false));
+        $wwwrootparts = parse_url($CFG->wwwroot);
+        if (($endpointparts['host'] ?? '') === 'host.docker.internal' && !empty($wwwrootparts['host'])) {
+            $host = $wwwrootparts['host'];
+            if (!empty($wwwrootparts['port'])) {
+                $host .= ':' . $wwwrootparts['port'];
+            }
+            $authheaders[] = 'Host: ' . $host;
         }
 
         return new self(
             $endpoint,
-            $authheader,
+            $authheaders,
             $transport ?? new curl_transport(security::allow_private_network()),
             security::request_timeout()
         );
@@ -404,9 +417,7 @@ class rag_client {
             'Accept: application/json, text/event-stream',
             'MCP-Protocol-Version: ' . self::MCP_PROTOCOL_VERSION,
         ];
-        if ($this->authheader !== null) {
-            $headers[] = $this->authheader;
-        }
+        $headers = array_merge($headers, $this->authheaders);
 
         $body = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $response = $this->transport->post($this->endpoint->out(false), $headers, (string) $body, $this->timeout);
@@ -615,7 +626,7 @@ class rag_client {
                 continue;
             }
             $title = (string) ($item['title'] ?? ($item['name'] ?? ($item['source'] ?? '')));
-            $url = (string) ($item['url'] ?? ($item['link'] ?? ($item['uri'] ?? '')));
+            $url = clean_param((string) ($item['url'] ?? ($item['link'] ?? ($item['uri'] ?? ''))), PARAM_URL);
             $snippet = (string) ($item['snippet'] ?? ($item['text'] ?? ($item['excerpt'] ?? '')));
             if ($title === '' && $url === '' && $snippet === '') {
                 continue;

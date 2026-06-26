@@ -18,7 +18,9 @@ declare(strict_types=1);
 
 namespace block_elediaaitutor;
 
+use block_elediaaitutor\local\branding;
 use block_elediaaitutor\local\registry;
+use block_elediaaitutor\local\tutor_profile;
 
 /**
  * Unit tests for the setting registry.
@@ -78,8 +80,8 @@ final class registry_test extends \advanced_testcase {
     }
 
     /**
-     * Every optical/persona setting is exposed by default; footer is the opt-in
-     * exception. The admin checkbox overrides the default either way.
+     * Every optical/persona setting is exposed by default; footer is premium-only
+     * and unavailable in the free block.
      */
     public function test_is_exposed(): void {
         $this->resetAfterTest();
@@ -88,15 +90,16 @@ final class registry_test extends \advanced_testcase {
         $this->assertTrue(registry::is_exposed('brandaccent'));
         $this->assertTrue(registry::is_exposed('tok_surface'));
         $this->assertTrue(registry::is_exposed('tok_ink'));
-        // Footer is instanceable but off by default (admin opts in).
+        // Footer is instanceable in the registry but locked without premium.
         $this->assertTrue(registry::get('footermode')['instanceable']);
+        $this->assertFalse(registry::is_available('footermode'));
         $this->assertFalse(registry::is_exposed('footermode'));
 
-        // The admin checkbox overrides the default.
+        // Admin checkboxes still work for available keys, but cannot unlock premium keys.
         set_config('expose_tok_surface', 0, 'block_elediaaitutor');
         set_config('expose_footermode', 1, 'block_elediaaitutor');
         $this->assertFalse(registry::is_exposed('tok_surface'));
-        $this->assertTrue(registry::is_exposed('footermode'));
+        $this->assertFalse(registry::is_exposed('footermode'));
     }
 
     /**
@@ -153,5 +156,20 @@ final class registry_test extends \advanced_testcase {
         $this->assertSame(1, registry::sanitise('historyenabled', '1'));
         $this->assertSame(0, registry::sanitise('historyenabled', '0'));
         $this->assertNull(registry::sanitise('unknown_key', 'x'));
+    }
+
+    /**
+     * Tutor profile settings drop premium-only footer values in the free block.
+     */
+    public function test_clean_settings_drops_locked_footer_values(): void {
+        $settings = tutor_profile::clean_settings([
+            'brandaccent' => '#abcdef',
+            'footermode' => branding::FOOTER_NONE,
+            'footertext' => 'Hidden credit',
+        ]);
+
+        $this->assertSame('#abcdef', $settings['brandaccent']);
+        $this->assertArrayNotHasKey('footermode', $settings);
+        $this->assertArrayNotHasKey('footertext', $settings);
     }
 }

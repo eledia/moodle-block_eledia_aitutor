@@ -91,7 +91,7 @@ class conversation_repository {
         $record->id = $DB->insert_record(self::TABLE, $record);
 
         \block_elediaaitutor\event\conversation_created::create([
-            'context' => \context_system::instance(),
+            'context' => \core\context\system::instance(),
             'objectid' => $record->id,
             'relateduserid' => $userid,
             'other' => ['courseid' => (int) ($courseid ?: 0)],
@@ -177,7 +177,7 @@ class conversation_repository {
         $DB->delete_records(self::TABLE, ['id' => $record->id, 'userid' => $userid]);
 
         \block_elediaaitutor\event\conversation_cleared::create([
-            'context' => \context_system::instance(),
+            'context' => \core\context\system::instance(),
             'objectid' => $record->id,
             'relateduserid' => $userid,
         ])->trigger();

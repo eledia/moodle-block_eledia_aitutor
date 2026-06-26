@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_elediaaitutor;
 
+use block_elediaaitutor\local\consent;
 use block_elediaaitutor\local\ltm;
 
 /**
@@ -76,7 +77,7 @@ final class ltm_test extends \advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         ltm::set_enabled((int) $user->id, true);
 
-        $synced = ltm::sync_to_rag((int) $user->id, \context_system::instance());
+        $synced = ltm::sync_to_rag((int) $user->id, \core\context\system::instance());
 
         $this->assertFalse($synced);
         $this->assertTrue(ltm::is_enabled((int) $user->id));
@@ -108,6 +109,7 @@ final class ltm_test extends \advanced_testcase {
 
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
+        consent::give((int) $user->id, \core\context\system::instance());
         ltm::set_enabled((int) $user->id, true);
 
         $transport = \block_elediaaitutor\fake_transport::json_result(
@@ -115,7 +117,7 @@ final class ltm_test extends \advanced_testcase {
         $client = new \block_elediaaitutor\local\rag_client(
             new \moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
-        $synced = ltm::sync_to_rag((int) $user->id, \context_system::instance(), $client);
+        $synced = ltm::sync_to_rag((int) $user->id, \core\context\system::instance(), $client);
 
         $this->assertTrue($synced);
         $payload = $transport->last_payload();

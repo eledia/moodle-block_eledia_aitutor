@@ -65,7 +65,7 @@ class widget {
      */
     public static function course_has_tutor(int $courseid): bool {
         global $DB;
-        $coursecontext = \context_course::instance($courseid, IGNORE_MISSING);
+        $coursecontext = \core\context\course::instance($courseid, IGNORE_MISSING);
         if (!$coursecontext) {
             return false;
         }
@@ -117,9 +117,14 @@ class widget {
         $blockconfig = (object) ['ragmode' => (string) ($instance['ragmode'] ?? chat_mode::MODE_GROUNDED)];
         $mode = chat_mode::resolve($courseid, $blockconfig);
         if ($mode === chat_mode::MODE_UNAVAILABLE) {
+            $isadmin = has_capability('moodle/site:config', \core\context\system::instance());
+            $message = get_string('llmonly_unavailable', 'block_elediaaitutor');
+            if ($isadmin && chat_mode::course_is_released_not_indexed($courseid)) {
+                $message = get_string('course_not_indexed_admin', 'block_elediaaitutor');
+            }
             return $OUTPUT->render_from_template('block_elediaaitutor/unavailable', [
-                'isadmin' => false,
-                'message' => get_string('llmonly_unavailable', 'block_elediaaitutor'),
+                'isadmin' => $isadmin,
+                'message' => $message,
             ]);
         }
 

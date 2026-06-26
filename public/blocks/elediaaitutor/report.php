@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -37,7 +38,7 @@ $page = optional_param('page', 0, PARAM_INT);
 $course = get_course($courseid);
 
 require_login($course, false);
-$context = context_course::instance($course->id);
+$context = \core\context\course::instance($course->id);
 require_capability('block/elediaaitutor:viewreports', $context);
 
 $PAGE->set_url(new moodle_url('/blocks/elediaaitutor/report.php',

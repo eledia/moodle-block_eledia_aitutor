@@ -38,7 +38,7 @@ final class mobile_test extends \advanced_testcase {
         $this->resetAfterTest();
         $optedin = $this->getDataGenerator()->create_course();
         $this->getDataGenerator()->create_block('elediaaitutor', [
-            'parentcontextid' => \context_course::instance($optedin->id)->id,
+            'parentcontextid' => \core\context\course::instance($optedin->id)->id,
         ]);
         $other = $this->getDataGenerator()->create_course();
 

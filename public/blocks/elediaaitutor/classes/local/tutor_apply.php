@@ -19,8 +19,6 @@ declare(strict_types=1);
 namespace block_elediaaitutor\local;
 
 use context;
-use context_block;
-use context_system;
 use stored_file;
 
 /**
@@ -63,7 +61,7 @@ class tutor_apply {
             }
         }
 
-        $syscontext = context_system::instance();
+        $syscontext = \core\context\system::instance();
         self::replace_image($syscontext, branding::LOGO_FILEAREA, 0, $logo);
         self::replace_image($syscontext, branding::AVATAR_FILEAREA, 0, $avatar);
         // The site brand file config keys mirror the file presence.
@@ -86,13 +84,24 @@ class tutor_apply {
             ?stored_file $logo, ?stored_file $avatar): void {
         self::apply_settings_to_instance($blockinstanceid, $settings);
 
-        $blockcontext = context_block::instance($blockinstanceid);
+        $blockcontext = \core\context\block::instance($blockinstanceid);
         if (registry::is_exposed('logo')) {
             self::replace_image($blockcontext, branding::INSTANCE_LOGO_FILEAREA, 0, $logo);
         }
         if (registry::is_exposed('avatar')) {
             self::replace_image($blockcontext, branding::INSTANCE_AVATAR_FILEAREA, 0, $avatar);
         }
+    }
+
+    /**
+     * Return all eLeDia.ai Tutor block instances for display in admin screens.
+     *
+     * @return array<int, \stdClass> block_instances records keyed by id.
+     */
+    public static function instance_records(): array {
+        global $DB;
+
+        return $DB->get_records('block_instances', ['blockname' => 'elediaaitutor'], 'id ASC');
     }
 
     /**
@@ -109,7 +118,7 @@ class tutor_apply {
     public static function to_instance_from_bundle(int $blockinstanceid, array $bundle): void {
         self::apply_settings_to_instance($blockinstanceid, $bundle['settings'] ?? []);
 
-        $blockcontext = context_block::instance($blockinstanceid);
+        $blockcontext = \core\context\block::instance($blockinstanceid);
         $images = [
             'logo' => [branding::INSTANCE_LOGO_FILEAREA, $bundle['logo'] ?? null],
             'avatar' => [branding::INSTANCE_AVATAR_FILEAREA, $bundle['avatar'] ?? null],
@@ -148,7 +157,7 @@ class tutor_apply {
         $settings = tutor_profile::clean_settings($settings);
         $record = $DB->get_record('block_instances', ['id' => $blockinstanceid], '*', MUST_EXIST);
         $config = !empty($record->configdata)
-            ? unserialize(base64_decode($record->configdata)) : new \stdClass();
+            ? unserialize_object(base64_decode($record->configdata)) : new \stdClass();
         if (!is_object($config)) {
             $config = new \stdClass();
         }
@@ -211,7 +220,7 @@ class tutor_apply {
         global $DB;
         $record = $DB->get_record('block_instances', ['id' => $blockinstanceid], '*', MUST_EXIST);
         $config = !empty($record->configdata)
-            ? unserialize(base64_decode($record->configdata)) : new \stdClass();
+            ? unserialize_object(base64_decode($record->configdata)) : new \stdClass();
         $settings = [];
         if (is_object($config)) {
             foreach (registry::all() as $key => $entry) {
@@ -223,11 +232,11 @@ class tutor_apply {
         // Export the images actually shown on the instance: its own upload if
         // present, otherwise the site logo/avatar it inherits — so the bundle
         // is self-contained and reproduces the look elsewhere.
-        $blockcontext = context_block::instance($blockinstanceid);
+        $blockcontext = \core\context\block::instance($blockinstanceid);
         $logo = self::first_file($blockcontext->id, branding::INSTANCE_LOGO_FILEAREA, 0)
-            ?? self::first_file(context_system::instance()->id, branding::LOGO_FILEAREA, 0);
+            ?? self::first_file(\core\context\system::instance()->id, branding::LOGO_FILEAREA, 0);
         $avatar = self::first_file($blockcontext->id, branding::INSTANCE_AVATAR_FILEAREA, 0)
-            ?? self::first_file(context_system::instance()->id, branding::AVATAR_FILEAREA, 0);
+            ?? self::first_file(\core\context\system::instance()->id, branding::AVATAR_FILEAREA, 0);
         return [
             'settings' => tutor_profile::clean_settings($settings),
             'logo' => $logo,

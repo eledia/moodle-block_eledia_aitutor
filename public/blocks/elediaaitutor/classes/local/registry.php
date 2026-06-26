@@ -218,6 +218,7 @@ class registry {
         // opts in (off by default — white-label is usually institution-wide).
         $entries['footermode'] = self::entry('footer', 'select', [
             'default' => branding::FOOTER_DEFAULT,
+            'premiumfeature' => premium::FEATURE_FOOTER_BRANDING,
             'options' => [
                 branding::FOOTER_DEFAULT => 'footermode_default',
                 branding::FOOTER_CUSTOM => 'footermode_custom',
@@ -226,6 +227,7 @@ class registry {
             'exposedefault' => false,
         ]);
         $entries['footertext'] = self::entry('footer', 'text', [
+            'premiumfeature' => premium::FEATURE_FOOTER_BRANDING,
             'exposedefault' => false,
         ]);
 
@@ -260,6 +262,7 @@ class registry {
             'instanceable' => true,
             'sendtorag' => false,
             'sitekey' => null,
+            'premiumfeature' => null,
             // Every optical/persona/behaviour setting is overridable per instance
             // by default; the admin removes exposure where they want site-wide
             // control. Footer is the one opt-in exception (see below).
@@ -512,7 +515,7 @@ class registry {
      */
     public static function is_exposed(string $key): bool {
         $entry = self::get($key);
-        if (!$entry || empty($entry['instanceable'])) {
+        if (!$entry || !self::is_available($key) || empty($entry['instanceable'])) {
             return false;
         }
         $flag = get_config(security::CONFIG_COMPONENT, self::EXPOSE_PREFIX . $key);
@@ -534,6 +537,9 @@ class registry {
      * @return mixed
      */
     public static function effective(string $key, array $instance = []): mixed {
+        if (!self::is_available($key)) {
+            return self::default_for($key);
+        }
         if (self::is_exposed($key) && array_key_exists($key, $instance)) {
             $value = $instance[$key];
             if ($value !== null && $value !== '') {
@@ -541,6 +547,26 @@ class registry {
             }
         }
         return security::get_config(self::sitekey($key), self::default_for($key));
+    }
+
+    /**
+     * Whether a registry key is available in this installation.
+     *
+     * Premium-gated keys are unavailable unless the optional premium add-on
+     * explicitly unlocks their feature.
+     *
+     * @param string $key Registry key.
+     * @return bool
+     */
+    public static function is_available(string $key): bool {
+        $entry = self::get($key);
+        if (!$entry) {
+            return false;
+        }
+        if (empty($entry['premiumfeature'])) {
+            return true;
+        }
+        return premium::has_feature((string) $entry['premiumfeature']);
     }
 
     /**

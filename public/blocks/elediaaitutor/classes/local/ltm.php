@@ -91,6 +91,10 @@ class ltm {
     public static function sync_to_rag(int $userid, \context $context, ?rag_client $client = null): bool {
         global $CFG;
 
+        if (!consent::has_consented($userid)) {
+            return false;
+        }
+
         $toolname = security::memory_optin_tool_name();
         if ($toolname === '' || !token_provider::is_connector_available()) {
             // Memory not supported/configured: nothing to communicate.

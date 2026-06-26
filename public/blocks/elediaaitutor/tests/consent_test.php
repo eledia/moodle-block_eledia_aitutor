@@ -20,7 +20,6 @@ namespace block_elediaaitutor;
 
 use block_elediaaitutor\external\give_consent;
 use block_elediaaitutor\local\consent;
-use context_system;
 
 /**
  * Unit tests for the documented first-use privacy consent.
@@ -48,8 +47,8 @@ final class consent_test extends \advanced_testcase {
         $this->assertNull(consent::time_consented($uid));
 
         $sink = $this->redirectEvents();
-        consent::give($uid, context_system::instance());
-        consent::give($uid, context_system::instance());
+        consent::give($uid, \core\context\system::instance());
+        consent::give($uid, \core\context\system::instance());
 
         $this->assertTrue(consent::has_consented($uid));
         $this->assertIsInt(consent::time_consented($uid));
@@ -79,7 +78,7 @@ final class consent_test extends \advanced_testcase {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
         $uid = (int) $user->id;
-        consent::give($uid, context_system::instance());
+        consent::give($uid, \core\context\system::instance());
 
         $this->assertSame(1, consent::delete_for_user($uid));
         $this->assertFalse(consent::has_consented($uid));
@@ -95,8 +94,8 @@ final class consent_test extends \advanced_testcase {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
         $other = $this->getDataGenerator()->create_user();
-        consent::give((int) $user->id, context_system::instance());
-        consent::give((int) $other->id, context_system::instance());
+        consent::give((int) $user->id, \core\context\system::instance());
+        consent::give((int) $other->id, \core\context\system::instance());
         \block_elediaaitutor\local\usage::increment((int) $user->id);
         \block_elediaaitutor\local\usage::increment((int) $other->id);
 
@@ -118,14 +117,14 @@ final class consent_test extends \advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
 
-        $result = give_consent::execute(context_system::instance()->id);
+        $result = give_consent::execute(\core\context\system::instance()->id);
         $result = \core_external\external_api::clean_returnvalue(give_consent::execute_returns(), $result);
 
         $this->assertTrue($result['consented']);
         $this->assertTrue(consent::has_consented((int) $user->id));
 
         // Repeated calls stay idempotent.
-        $result = give_consent::execute(context_system::instance()->id);
+        $result = give_consent::execute(\core\context\system::instance()->id);
         $result = \core_external\external_api::clean_returnvalue(give_consent::execute_returns(), $result);
         $this->assertTrue($result['consented']);
     }

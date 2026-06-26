@@ -149,7 +149,7 @@ class token_provider {
         $cache->set($cachekey, ['token' => $token, 'expiry' => $expiry]);
 
         \block_elediaaitutor\event\token_provisioned::create([
-            'context' => \context_system::instance(),
+            'context' => \core\context\system::instance(),
             'relateduserid' => $userid,
             'other' => ['serviceid' => $serviceid],
         ])->trigger();

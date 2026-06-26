@@ -53,6 +53,7 @@ variables:
   # root, including the leading public/ (the repo wraps the plugin as
   # public/blocks/elediaaitutor). PLUGIN_NAME is the frankenstyle component.
   PLUGIN_PATH: "public/blocks/elediaaitutor"
+  PLUGIN_SCAN_PATHS: "public/blocks/elediaaitutor public/local/elediaaitutorpremium"
   PLUGIN_NAME: "block_elediaaitutor"
 
 # -----------------------------
@@ -87,7 +88,7 @@ phpcs_moodle:
       --report-full
       --report-checkstyle=phpcs.xml
       --ignore=*/vendor/*
-      "$PLUGIN_PATH" || echo "PHPCS failed" > phpcs_failed.txt
+      $PLUGIN_SCAN_PATHS || echo "PHPCS failed" > phpcs_failed.txt
 
   artifacts:
     when: always
@@ -104,8 +105,11 @@ semgrep_sast:
   stage: sast
   image: returntocorp/semgrep:latest
   script:
-    - semgrep --config=auto --severity=ERROR --error --json --output=semgrep-error.json "$PLUGIN_PATH" || echo "Semgrep failed" > semgrep_failed.txt
-    - semgrep --config=auto --severity=ERROR --text "$PLUGIN_PATH" || true
+    - >
+      semgrep --config=auto --severity=ERROR --error --json
+      --output=semgrep-error.json $PLUGIN_SCAN_PATHS
+      || echo "Semgrep failed" > semgrep_failed.txt
+    - semgrep --config=auto --severity=ERROR --text $PLUGIN_SCAN_PATHS || true
   artifacts:
     when: always
     paths:
@@ -886,7 +890,7 @@ phpdepend_metrics:
       --jdepend-chart=pdepend-report/jdepend.svg \
       --overview-pyramid=pdepend-report/pyramid.svg \
       --ignore="$PLUGIN_PATH/vendor" \
-      "$PLUGIN_PATH"
+      $PLUGIN_SCAN_PATHS
 
     # Output version
     echo ""

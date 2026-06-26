@@ -21,7 +21,6 @@ namespace block_elediaaitutor;
 use block_elediaaitutor\local\consent;
 use block_elediaaitutor\local\conversation_repository;
 use block_elediaaitutor\privacy\provider;
-use context_system;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\writer;
 
@@ -55,7 +54,7 @@ final class privacy_provider_test extends \core_privacy\tests\provider_testcase 
 
         $contextlist = provider::get_contexts_for_userid((int) $user->id);
         $this->assertCount(1, $contextlist);
-        $this->assertEquals(context_system::instance()->id, $contextlist->get_contextids()[0]);
+        $this->assertEquals(\core\context\system::instance()->id, $contextlist->get_contextids()[0]);
     }
 
     /**
@@ -66,10 +65,10 @@ final class privacy_provider_test extends \core_privacy\tests\provider_testcase 
         $user = $this->getDataGenerator()->create_user();
         conversation_repository::upsert((int) $user->id, 'c-1', 5, 'hello world');
 
-        $contextlist = new approved_contextlist($user, 'block_elediaaitutor', [context_system::instance()->id]);
+        $contextlist = new approved_contextlist($user, 'block_elediaaitutor', [\core\context\system::instance()->id]);
         provider::export_user_data($contextlist);
 
-        $writer = writer::with_context(context_system::instance());
+        $writer = writer::with_context(\core\context\system::instance());
         $this->assertTrue($writer->has_any_data());
     }
 
@@ -83,7 +82,7 @@ final class privacy_provider_test extends \core_privacy\tests\provider_testcase 
         conversation_repository::upsert((int) $alice->id, 'a-1', null, 'hi');
         conversation_repository::upsert((int) $bob->id, 'b-1', null, 'hi');
 
-        $contextlist = new approved_contextlist($alice, 'block_elediaaitutor', [context_system::instance()->id]);
+        $contextlist = new approved_contextlist($alice, 'block_elediaaitutor', [\core\context\system::instance()->id]);
         provider::delete_data_for_user($contextlist);
 
         $this->assertCount(0, conversation_repository::list_for_user((int) $alice->id));
@@ -98,7 +97,7 @@ final class privacy_provider_test extends \core_privacy\tests\provider_testcase 
         $user = $this->getDataGenerator()->create_user();
         conversation_repository::upsert((int) $user->id, 'c-1', null, 'hi');
 
-        provider::delete_data_for_all_users_in_context(context_system::instance());
+        provider::delete_data_for_all_users_in_context(\core\context\system::instance());
         $this->assertCount(0, conversation_repository::list_for_user((int) $user->id));
     }
 
@@ -109,16 +108,16 @@ final class privacy_provider_test extends \core_privacy\tests\provider_testcase 
     public function test_consent_record_covered(): void {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
-        consent::give((int) $user->id, context_system::instance());
+        consent::give((int) $user->id, \core\context\system::instance());
 
         // A consent-only user is reported at the system context.
         $contextlist = provider::get_contexts_for_userid((int) $user->id);
         $this->assertCount(1, $contextlist);
 
         // Export contains the consent timestamp.
-        $approved = new approved_contextlist($user, 'block_elediaaitutor', [context_system::instance()->id]);
+        $approved = new approved_contextlist($user, 'block_elediaaitutor', [\core\context\system::instance()->id]);
         provider::export_user_data($approved);
-        $writer = writer::with_context(context_system::instance());
+        $writer = writer::with_context(\core\context\system::instance());
         $exported = $writer->get_data([get_string('privacy:consent', 'block_elediaaitutor')]);
         $this->assertNotEmpty($exported->timeconsented);
 
@@ -137,7 +136,7 @@ final class privacy_provider_test extends \core_privacy\tests\provider_testcase 
 
         provider::export_user_preferences((int) $user->id);
 
-        $writer = writer::with_context(context_system::instance());
+        $writer = writer::with_context(\core\context\system::instance());
         $prefs = $writer->get_user_preferences('block_elediaaitutor');
         $prefname = \block_elediaaitutor\local\ltm::PREF;
         $this->assertNotEmpty($prefs->$prefname);
@@ -156,7 +155,7 @@ final class privacy_provider_test extends \core_privacy\tests\provider_testcase 
 
         provider::export_user_preferences((int) $user->id);
 
-        $writer = writer::with_context(context_system::instance());
+        $writer = writer::with_context(\core\context\system::instance());
         $prefs = $writer->get_user_preferences('block_elediaaitutor');
         $prefname = \block_elediaaitutor\local\ltm::PREF;
         $this->assertTrue(empty($prefs->$prefname));

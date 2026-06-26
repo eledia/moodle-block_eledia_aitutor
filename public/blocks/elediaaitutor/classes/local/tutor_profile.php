@@ -18,7 +18,6 @@ declare(strict_types=1);
 
 namespace block_elediaaitutor\local;
 
-use context_system;
 use stored_file;
 
 /**
@@ -127,7 +126,7 @@ class tutor_profile {
     public static function delete(int $id): void {
         global $DB;
         $fs = get_file_storage();
-        $syscontext = context_system::instance();
+        $syscontext = \core\context\system::instance();
         foreach ([branding::TUTOR_LOGO_FILEAREA, branding::TUTOR_AVATAR_FILEAREA] as $area) {
             $fs->delete_area_files($syscontext->id, 'block_elediaaitutor', $area, $id);
         }
@@ -143,7 +142,7 @@ class tutor_profile {
      */
     public static function image(int $id, string $filearea): ?stored_file {
         $fs = get_file_storage();
-        $files = $fs->get_area_files(context_system::instance()->id, 'block_elediaaitutor',
+        $files = $fs->get_area_files(\core\context\system::instance()->id, 'block_elediaaitutor',
             $filearea, $id, 'itemid, filepath, filename', false);
         return $files ? reset($files) : null;
     }
@@ -159,7 +158,7 @@ class tutor_profile {
      */
     public static function store_image(int $id, string $filearea, string $filename, string $content): void {
         $fs = get_file_storage();
-        $syscontext = context_system::instance();
+        $syscontext = \core\context\system::instance();
         $fs->delete_area_files($syscontext->id, 'block_elediaaitutor', $filearea, $id);
         $fs->create_file_from_string([
             'contextid' => $syscontext->id,
@@ -194,7 +193,7 @@ class tutor_profile {
         $out = [];
         foreach ($settings as $key => $value) {
             $entry = registry::get((string) $key);
-            if ($entry === null || $entry['type'] === 'file') {
+            if ($entry === null || !registry::is_available((string) $key) || $entry['type'] === 'file') {
                 continue;
             }
             $clean = registry::sanitise((string) $key, $value);

@@ -35,11 +35,11 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @param navigation_node $navigation The course navigation node to extend.
  * @param stdClass $course The course record.
- * @param context_course $context The course context.
+ * @param \core\context\course $context The course context.
  * @return void
  */
 function block_elediaaitutor_extend_navigation_course(navigation_node $navigation, stdClass $course,
-        context_course $context): void {
+        \core\context\course $context): void {
     if (!\block_elediaaitutor\local\question_log::is_enabled()
             || !has_capability('block/elediaaitutor:viewreports', $context)) {
         return;

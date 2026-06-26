@@ -58,6 +58,9 @@ class chat_mode {
     /** @var string local_ragingest gate class, present only when that plugin is installed. */
     private const RAGINGEST_GATE = '\\local_ragingest\\course_gate';
 
+    /** @var string local_ragingest state class, present only when that plugin is installed. */
+    private const RAGINGEST_STATE = '\\local_ragingest\\course_state';
+
     /**
      * Whether the site admin permits LLM-only mode at all.
      *
@@ -79,15 +82,31 @@ class chat_mode {
      * @return bool
      */
     public static function ingestion_available(int $courseid): bool {
-        if (!class_exists(self::RAGINGEST_GATE)) {
+        if (!class_exists(self::RAGINGEST_GATE) || !class_exists(self::RAGINGEST_STATE)) {
             return false;
         }
         if ($courseid > 0) {
-            return \local_ragingest\course_gate::should_ingest($courseid);
+            return \local_ragingest\course_gate::should_ingest($courseid)
+                && \local_ragingest\course_state::is_ingested($courseid);
         }
         // Global chat: no per-course signal — treat as available when the
         // ingestion endpoint is configured (site content may be indexed).
         return trim((string) get_config('local_ragingest', 'rag_endpoint_url')) !== '';
+    }
+
+    /**
+     * Whether a course is marked for ingestion but has no recorded index yet.
+     *
+     * @param int $courseid The course id.
+     * @return bool
+     */
+    public static function course_is_released_not_indexed(int $courseid): bool {
+        if ($courseid <= 0 || !class_exists(self::RAGINGEST_GATE) || !class_exists(self::RAGINGEST_STATE)) {
+            return false;
+        }
+
+        return \local_ragingest\course_gate::should_ingest($courseid)
+            && !\local_ragingest\course_state::is_ingested($courseid);
     }
 
     /**

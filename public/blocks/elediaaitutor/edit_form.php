@@ -51,10 +51,16 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         // Import / export this instance's tutor (settings + images), or apply a
         // site preset — available once the block exists.
         if (!empty($this->block->instance->id)) {
-            $link = new \moodle_url('/blocks/elediaaitutor/instance_tutor.php',
+            $shelllink = new \moodle_url('/blocks/elediaaitutor/edit_instance.php',
                 ['blockid' => (int) $this->block->instance->id]);
-            $mform->addElement('static', 'tutorio', '',
-                \html_writer::link($link, get_string('instancetutor_link', 'block_elediaaitutor')));
+            $toolslink = new \moodle_url('/blocks/elediaaitutor/instance_tutor.php',
+                ['blockid' => (int) $this->block->instance->id]);
+            $actions = \html_writer::link($shelllink,
+                    get_string('instance_shell_edit_link', 'block_elediaaitutor'),
+                    ['class' => 'btn btn-primary', 'target' => '_top']) . ' ' .
+                \html_writer::link($toolslink, get_string('instancetutor_link', 'block_elediaaitutor'),
+                    ['class' => 'btn btn-secondary', 'target' => '_top']);
+            $mform->addElement('static', 'tutorio', '', $actions);
         }
 
         // Title.

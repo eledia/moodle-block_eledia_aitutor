@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -29,12 +30,14 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/classes/output/shell.php');
 
 use block_elediaaitutor\form\tutor_import_form;
 use block_elediaaitutor\local\presets;
 use block_elediaaitutor\local\tutor_apply;
 use block_elediaaitutor\local\tutor_io;
 use block_elediaaitutor\local\tutor_profile;
+use block_elediaaitutor\output\shell;
 
 $blockid = required_param('blockid', PARAM_INT);
 $action = optional_param('action', 'view', PARAM_ALPHA);
@@ -43,7 +46,7 @@ require_login();
 
 global $DB;
 $DB->get_record('block_instances', ['id' => $blockid, 'blockname' => 'elediaaitutor'], '*', MUST_EXIST);
-$blockcontext = context_block::instance($blockid);
+$blockcontext = \core\context\block::instance($blockid);
 require_capability('block/elediaaitutor:manage', $blockcontext);
 $pageurl = new moodle_url('/blocks/elediaaitutor/instance_tutor.php', ['blockid' => $blockid]);
 
@@ -61,6 +64,7 @@ if ($parent && $parent->contextlevel == CONTEXT_COURSE) {
 $PAGE->set_title(get_string('instancetutor_title', 'block_elediaaitutor'));
 $PAGE->set_heading($parent ? $parent->get_context_name(false)
     : get_string('instancetutor_title', 'block_elediaaitutor'));
+shell::require_css();
 
 // Export streams a file and must run before any output.
 if ($action === 'export') {
@@ -100,6 +104,7 @@ if ($action === 'importdo') {
 }
 
 echo $OUTPUT->header();
+shell::open(shell::ACTIVE_TUTORS);
 echo $OUTPUT->heading(get_string('instancetutor_title', 'block_elediaaitutor'));
 
 echo html_writer::start_div('eat-admin');
@@ -159,4 +164,5 @@ $importform->display();
 echo html_writer::end_div();
 
 echo html_writer::end_div(); // .eat-admin
+shell::close();
 echo $OUTPUT->footer();

@@ -76,6 +76,7 @@
                             <li class="elediaaitutor-source">
                                 {{#num}}<span class="elediaaitutor-source-num">[S{{num}}]</span> {{/num}}
                                 {{#hasurl}}
+                                    {{! url is server-normalised with PARAM_URL before it reaches this template. }}
                                     <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{title}}</a>
                                 {{/hasurl}}
                                 {{^hasurl}}<span>{{title}}</span>{{/hasurl}}

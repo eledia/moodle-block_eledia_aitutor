@@ -150,7 +150,7 @@ function xmldb_block_elediaaitutor_upgrade(int $oldversion): bool {
             if (empty($bi->configdata)) {
                 continue;
             }
-            $config = unserialize(base64_decode($bi->configdata));
+            $config = unserialize_object(base64_decode($bi->configdata));
             if (!is_object($config) || empty($config->theme)) {
                 continue;
             }

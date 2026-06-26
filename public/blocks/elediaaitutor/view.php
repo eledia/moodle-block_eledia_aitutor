@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -37,6 +38,7 @@
 
 use block_elediaaitutor\local\security;
 use block_elediaaitutor\local\widget;
+use block_elediaaitutor\output\shell;
 
 require(__DIR__ . '/../../config.php');
 
@@ -46,13 +48,13 @@ $embedded = optional_param('embedded', 0, PARAM_BOOL);
 if ($courseid > 0 && $courseid != SITEID) {
     $course = get_course($courseid);
     require_login($course, false);
-    $context = context_course::instance($course->id);
+    $context = \core\context\course::instance($course->id);
     $enabled = security::course_chat_enabled();
     $disabledstring = 'error_course_chat_disabled';
 } else {
     require_login(null, false);
     $courseid = 0;
-    $context = context_system::instance();
+    $context = \core\context\system::instance();
     $enabled = security::global_chat_enabled();
     $disabledstring = 'error_global_chat_disabled';
 }
@@ -62,6 +64,11 @@ if (isguestuser()) {
 }
 require_capability('block/elediaaitutor:use', $context);
 
+$useshell = !$embedded
+    && $courseid === 0
+    && shell::is_available()
+    && has_capability('moodle/site:config', \core\context\system::instance());
+
 $PAGE->set_url(new moodle_url('/blocks/elediaaitutor/view.php',
     ['courseid' => $courseid, 'embedded' => $embedded]));
 $PAGE->set_context($context);
@@ -70,14 +77,23 @@ $PAGE->set_title(get_string('default_persona', 'block_elediaaitutor'));
 if ($courseid > 0) {
     $PAGE->set_heading(format_string($course->fullname));
 } else {
-    $PAGE->set_heading(get_string('default_persona', 'block_elediaaitutor'));
+    $PAGE->set_heading($useshell ? '' : get_string('default_persona', 'block_elediaaitutor'));
+}
+if ($useshell) {
+    shell::require_css();
 }
 $PAGE->add_body_class('elediaaitutor-pagebody');
 
 echo $OUTPUT->header();
+if ($useshell) {
+    shell::open(shell::ACTIVE_PREVIEW);
+}
 
 if (!$enabled) {
     echo $OUTPUT->notification(get_string($disabledstring, 'block_elediaaitutor'), 'info');
+    if ($useshell) {
+        shell::close();
+    }
     echo $OUTPUT->footer();
     die;
 }
@@ -86,6 +102,9 @@ if (!$enabled) {
 // tutor block. Without it, the page declines with a friendly notice.
 if ($courseid > 0 && !widget::course_has_tutor($courseid)) {
     echo $OUTPUT->notification(get_string('notenabledincourse', 'block_elediaaitutor'), 'info');
+    if ($useshell) {
+        shell::close();
+    }
     echo $OUTPUT->footer();
     die;
 }
@@ -97,6 +116,9 @@ if ($configerror !== null) {
         'isadmin' => $canmanage,
         'message' => $canmanage ? $configerror : get_string('unavailable_user', 'block_elediaaitutor'),
     ]);
+    if ($useshell) {
+        shell::close();
+    }
     echo $OUTPUT->footer();
     die;
 }
@@ -108,4 +130,7 @@ echo html_writer::div(
     'elediaaitutor-page'
 );
 
+if ($useshell) {
+    shell::close();
+}
 echo $OUTPUT->footer();

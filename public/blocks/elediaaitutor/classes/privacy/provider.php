@@ -19,7 +19,6 @@ declare(strict_types=1);
 namespace block_elediaaitutor\privacy;
 
 use context;
-use context_system;
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
@@ -149,7 +148,7 @@ class provider implements
      * @return void
      */
     public static function get_users_in_context(userlist $userlist): void {
-        if (!$userlist->get_context() instanceof context_system) {
+        if (!$userlist->get_context() instanceof \core\context\system) {
             return;
         }
         $userlist->add_from_sql('userid', 'SELECT userid FROM {block_elediaaitutor_conv}', []);
@@ -185,7 +184,7 @@ class provider implements
                     'timemodified' => transform::datetime($record->timemodified),
                 ];
             }
-            writer::with_context(context_system::instance())->export_data(
+            writer::with_context(\core\context\system::instance())->export_data(
                 [get_string('privacy:conversations', 'block_elediaaitutor')],
                 (object) ['conversations' => $data]
             );
@@ -205,7 +204,7 @@ class provider implements
                     'timecreated' => transform::datetime($record->timecreated),
                 ];
             }
-            writer::with_context(context_system::instance())->export_data(
+            writer::with_context(\core\context\system::instance())->export_data(
                 [get_string('privacy:questions', 'block_elediaaitutor')],
                 (object) ['questions' => $data]
             );
@@ -220,7 +219,7 @@ class provider implements
                     'messages' => (int) $record->messagecount,
                 ];
             }
-            writer::with_context(context_system::instance())->export_data(
+            writer::with_context(\core\context\system::instance())->export_data(
                 [get_string('privacy:usage', 'block_elediaaitutor')],
                 (object) ['days' => $data]
             );
@@ -228,7 +227,7 @@ class provider implements
 
         $consenttime = \block_elediaaitutor\local\consent::time_consented((int) $userid);
         if ($consenttime !== null) {
-            writer::with_context(context_system::instance())->export_data(
+            writer::with_context(\core\context\system::instance())->export_data(
                 [get_string('privacy:consent', 'block_elediaaitutor')],
                 (object) ['timeconsented' => transform::datetime($consenttime)]
             );
@@ -243,7 +242,7 @@ class provider implements
      */
     public static function delete_data_for_all_users_in_context(context $context): void {
         global $DB;
-        if (!$context instanceof context_system) {
+        if (!$context instanceof \core\context\system) {
             return;
         }
         $DB->delete_records('block_elediaaitutor_conv');
@@ -277,7 +276,7 @@ class provider implements
      */
     public static function delete_data_for_users(approved_userlist $userlist): void {
         global $DB;
-        if (!$userlist->get_context() instanceof context_system) {
+        if (!$userlist->get_context() instanceof \core\context\system) {
             return;
         }
         $userids = $userlist->get_userids();
@@ -313,7 +312,7 @@ class provider implements
      */
     protected static function contains_system_context(array $contexts): bool {
         foreach ($contexts as $context) {
-            if ($context instanceof context_system) {
+            if ($context instanceof \core\context\system) {
                 return true;
             }
         }

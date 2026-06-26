@@ -167,17 +167,18 @@ final class branding_test extends \advanced_testcase {
     }
 
     /**
-     * Footer modes: custom text, and white-label removal.
+     * Footer customisation is ignored in the free block.
      */
-    public function test_footer_modes(): void {
+    public function test_footer_modes_require_premium(): void {
         $this->resetAfterTest();
 
         set_config('footermode', branding::FOOTER_CUSTOM, 'block_elediaaitutor');
         set_config('footertext', 'A University', 'block_elediaaitutor');
-        $this->assertSame('A University', branding::resolve([])['footertext']);
+        $this->assertSame(branding::FOOTER_DEFAULT, branding::resolve([])['footermode']);
+        $this->assertSame(get_string('poweredby', 'block_elediaaitutor'), branding::resolve([])['footertext']);
 
         set_config('footermode', branding::FOOTER_NONE, 'block_elediaaitutor');
-        $this->assertSame('', branding::resolve([])['footertext']);
+        $this->assertSame(get_string('poweredby', 'block_elediaaitutor'), branding::resolve([])['footertext']);
     }
 
     /**
@@ -189,12 +190,12 @@ final class branding_test extends \advanced_testcase {
         set_config('footertext', 'Site footer', 'block_elediaaitutor');
 
         // Not exposed by default → instance value ignored.
-        $this->assertSame('Site footer',
+        $this->assertSame(get_string('poweredby', 'block_elediaaitutor'),
             branding::resolve(['footertext' => 'Course footer'])['footertext']);
 
-        // Admin opts in → instance value wins.
+        // Admin opt-in is still ignored without the premium add-on.
         set_config('expose_footertext', 1, 'block_elediaaitutor');
-        $this->assertSame('Course footer',
+        $this->assertSame(get_string('poweredby', 'block_elediaaitutor'),
             branding::resolve(['footertext' => 'Course footer'])['footertext']);
     }
 

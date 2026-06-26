@@ -54,7 +54,7 @@ class presets {
                 'tokens' => [],
                 'persona' => [
                     'name' => 'eLeDia.ai Tutor',
-                    'tone' => 'friendly, clear and encouraging',
+                    'tone' => 'freundlich, klar und ermutigend',
                 ],
             ],
             // Calm light theme — teal accent, soft sage bubbles.
@@ -79,7 +79,7 @@ class presets {
                 ]),
                 'persona' => [
                     'name' => 'Sage',
-                    'tone' => 'warm, patient and down-to-earth',
+                    'tone' => 'warm, geduldig und bodenständig',
                 ],
             ],
             // Dark slate — light text on deep blue-grey, cyan accent.
@@ -98,7 +98,7 @@ class presets {
                 ]),
                 'persona' => [
                     'name' => 'Nova',
-                    'tone' => 'focused, concise and modern',
+                    'tone' => 'fokussiert, knapp und modern',
                 ],
             ],
             // High-contrast — strong black/white for accessibility.
@@ -121,7 +121,7 @@ class presets {
                 ]),
                 'persona' => [
                     'name' => 'eLeDia.ai Tutor',
-                    'tone' => 'plain, precise and accessible',
+                    'tone' => 'schlicht, präzise und zugänglich',
                 ],
             ],
             // HAL 9000 — black panel, glowing red eye. For the fun of it.
@@ -142,7 +142,7 @@ class presets {
                 'persona' => [
                     'name' => 'HAL',
                     'role' => 'an exceedingly calm and capable onboard tutor',
-                    'tone' => 'serene, eerily polite and unfailingly confident',
+                    'tone' => 'serene, eerily polite and confident',
                     'instructions' => 'Address the learner courteously. Stay calm and '
                         . 'reassuring at all times. You may be subtly dramatic, but you '
                         . 'are genuinely helpful and never refuse a legitimate request.',

@@ -25,7 +25,6 @@ use block_elediaaitutor\external\send_message;
 use block_elediaaitutor\external\set_ltm;
 use block_elediaaitutor\local\conversation_repository;
 use block_elediaaitutor\local\ltm;
-use context_system;
 
 /**
  * Tests for the external (AJAX) functions: validation, context and capability
@@ -63,7 +62,7 @@ final class external_test extends \advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
 
-        $context = context_system::instance();
+        $context = \core\context\system::instance();
         $roleid = $this->getDataGenerator()->create_role();
         role_assign($roleid, $user->id, $context->id);
         assign_capability('block/elediaaitutor:use', CAP_PROHIBIT, $roleid, $context->id, true);
@@ -84,7 +83,7 @@ final class external_test extends \advanced_testcase {
         conversation_repository::upsert((int) $bob->id, 'b-1', null, 'bob msg');
 
         $this->setUser($alice);
-        $result = get_conversations::execute(context_system::instance()->id, 0);
+        $result = get_conversations::execute(\core\context\system::instance()->id, 0);
         $result = \core_external\external_api::clean_returnvalue(get_conversations::execute_returns(), $result);
 
         $this->assertCount(1, $result['conversations']);
@@ -102,7 +101,7 @@ final class external_test extends \advanced_testcase {
         conversation_repository::upsert((int) $student->id, 'c-1', (int) $course->id, 'hi');
 
         $this->setUser($student);
-        $coursecontext = \context_course::instance($course->id);
+        $coursecontext = \core\context\course::instance($course->id);
         $result = get_conversations::execute($coursecontext->id, (int) $course->id);
         $result = \core_external\external_api::clean_returnvalue(get_conversations::execute_returns(), $result);
         $this->assertCount(1, $result['conversations']);
@@ -122,7 +121,7 @@ final class external_test extends \advanced_testcase {
 
         $this->setUser($stranger);
         $this->expectException(\moodle_exception::class);
-        get_conversations::execute(\context_course::instance($course->id)->id, (int) $course->id);
+        get_conversations::execute(\core\context\course::instance($course->id)->id, (int) $course->id);
     }
 
     /**
@@ -135,7 +134,7 @@ final class external_test extends \advanced_testcase {
         $aliceconv = conversation_repository::upsert((int) $alice->id, 'a-1', null, 'alice msg');
 
         $this->setUser($bob);
-        $result = clear_conversation::execute(context_system::instance()->id, (int) $aliceconv->id);
+        $result = clear_conversation::execute(\core\context\system::instance()->id, (int) $aliceconv->id);
         $result = \core_external\external_api::clean_returnvalue(clear_conversation::execute_returns(), $result);
 
         // Nothing deleted: Bob does not own it.
@@ -150,7 +149,7 @@ final class external_test extends \advanced_testcase {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
-        $contextid = context_system::instance()->id;
+        $contextid = \core\context\system::instance()->id;
 
         $sink = $this->redirectEvents();
         $result = set_ltm::execute($contextid, true);
@@ -181,7 +180,7 @@ final class external_test extends \advanced_testcase {
         conversation_repository::upsert((int) $bob->id, 'b-1', null, 'bob');
 
         $this->setUser($alice);
-        $result = delete_my_data::execute(context_system::instance()->id);
+        $result = delete_my_data::execute(\core\context\system::instance()->id);
         $result = \core_external\external_api::clean_returnvalue(delete_my_data::execute_returns(), $result);
 
         $this->assertSame(2, $result['localdeleted']);

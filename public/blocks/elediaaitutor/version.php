@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->version = 2026061601;
 $plugin->requires = 2023041800;
+$plugin->supported = [402, 502];
 $plugin->component = 'block_elediaaitutor';
 $plugin->maturity = MATURITY_BETA;
 $plugin->release = '0.14.1';

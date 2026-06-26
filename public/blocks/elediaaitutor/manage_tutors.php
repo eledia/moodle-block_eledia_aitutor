@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -27,7 +28,7 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
-require_once($CFG->libdir . '/adminlib.php');
+require_once(__DIR__ . '/classes/output/shell.php');
 
 use block_elediaaitutor\form\tutor_edit_form;
 use block_elediaaitutor\form\tutor_import_form;
@@ -37,12 +38,20 @@ use block_elediaaitutor\local\registry;
 use block_elediaaitutor\local\tutor_apply;
 use block_elediaaitutor\local\tutor_io;
 use block_elediaaitutor\local\tutor_profile;
+use block_elediaaitutor\output\shell;
 
-admin_externalpage_setup('block_elediaaitutor_managetutors');
+$context = \core\context\system::instance();
+require_login();
+require_capability('moodle/site:config', $context);
 
 $action = optional_param('action', 'list', PARAM_ALPHA);
 $baseurl = new moodle_url('/blocks/elediaaitutor/manage_tutors.php');
+$PAGE->set_context($context);
 $PAGE->set_url($baseurl);
+$PAGE->set_pagelayout('standard');
+$PAGE->set_title(get_string('managetutors', 'block_elediaaitutor'));
+$PAGE->set_heading(shell::is_available() ? '' : get_string('managetutors', 'block_elediaaitutor'));
+shell::require_css();
 
 /**
  * Build the list of appliable/exportable sources: built-in presets then saved
@@ -118,7 +127,7 @@ if ($action === 'save') {
                 (string) $data->shortname);
         }
         // Save the uploaded logo/avatar into the profile's file areas.
-        $syscontext = context_system::instance();
+        $syscontext = \core\context\system::instance();
         foreach (['logo' => branding::TUTOR_LOGO_FILEAREA, 'avatar' => branding::TUTOR_AVATAR_FILEAREA]
                 as $field => $filearea) {
             if (!empty($data->$field)) {
@@ -140,11 +149,13 @@ if ($action === 'delete') {
     }
     $profile = tutor_profile::get($id);
     echo $OUTPUT->header();
+    shell::open(shell::ACTIVE_TUTORS);
     echo $OUTPUT->confirm(
         get_string('tutor_delete_confirm', 'block_elediaaitutor', format_string($profile->name ?? '')),
         new moodle_url($baseurl, ['action' => 'delete', 'id' => $id, 'confirm' => 1, 'sesskey' => sesskey()]),
         $baseurl
     );
+    shell::close();
     echo $OUTPUT->footer();
     die;
 }
@@ -182,12 +193,14 @@ if ($action === 'applysite') {
         redirect($baseurl, get_string('tutor_applied_site', 'block_elediaaitutor'));
     }
     echo $OUTPUT->header();
+    shell::open(shell::ACTIVE_TUTORS);
     echo $OUTPUT->confirm(
         get_string('tutor_applysite_confirm', 'block_elediaaitutor'),
         new moodle_url($baseurl, ['action' => 'applysite', 'source' => $source,
             'confirm' => 1, 'sesskey' => sesskey()]),
         $baseurl
     );
+    shell::close();
     echo $OUTPUT->footer();
     die;
 }
@@ -250,7 +263,11 @@ function block_elediaaitutor_stage_images(int $profileid, array $bundle): void {
 // Rendering.
 // ---------------------------------------------------------------------------
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('managetutors', 'block_elediaaitutor'));
+shell::open(shell::ACTIVE_TUTORS);
+
+if (!shell::is_available()) {
+    echo $OUTPUT->heading(get_string('managetutors', 'block_elediaaitutor'));
+}
 
 if ($action === 'new' || $action === 'edit') {
     $id = optional_param('id', 0, PARAM_INT);
@@ -265,7 +282,7 @@ if ($action === 'new' || $action === 'edit') {
         foreach ($existing as $key => $value) {
             $defaults->{'cfg_' . $key} = $value;
         }
-        $syscontext = context_system::instance();
+        $syscontext = \core\context\system::instance();
         foreach (['logo' => branding::TUTOR_LOGO_FILEAREA, 'avatar' => branding::TUTOR_AVATAR_FILEAREA]
                 as $field => $filearea) {
             $draftid = file_get_submitted_draft_itemid($field);
@@ -275,7 +292,26 @@ if ($action === 'new' || $action === 'edit') {
         }
     }
     $form->set_data($defaults);
+    echo html_writer::start_div('eat-admin eat-admin-form-page');
+    echo html_writer::div(
+        html_writer::link($baseurl,
+            html_writer::tag('i', '', ['class' => 'fa fa-arrow-left', 'aria-hidden' => 'true']) .
+            html_writer::span(get_string('tutor_back_to_library', 'block_elediaaitutor')),
+            ['class' => 'lh-btn--secondary eat-back-link']
+        ),
+        'eat-form-nav'
+    );
+    echo html_writer::tag('h3',
+        $profile
+            ? get_string('tutor_edit_title', 'block_elediaaitutor', format_string($profile->name))
+            : get_string('tutor_create_title', 'block_elediaaitutor'),
+        ['class' => 'eat-section-title eat-section-title--form']
+    );
+    echo html_writer::start_div('eat-form-card');
     $form->display();
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+    shell::close();
     echo $OUTPUT->footer();
     die;
 }
@@ -291,6 +327,7 @@ if ($action === 'import') {
         ['blockid' => $blockid]);
     $form->display();
     echo html_writer::end_div();
+    shell::close();
     echo $OUTPUT->footer();
     die;
 }
@@ -298,26 +335,28 @@ if ($action === 'import') {
 // Default: the library listing.
 echo html_writer::start_div('eat-admin');
 
+// Saved site tutors first: these are the editable working objects.
+$libraryaction = static function(moodle_url $url, string $label, string $fa): string {
+    return html_writer::link($url,
+        html_writer::tag('i', '', ['class' => 'fa ' . $fa, 'aria-hidden' => 'true']) .
+        html_writer::span($label, 'sr-only'),
+        [
+            'class' => 'lh-icon-action',
+            'aria-label' => $label,
+            'title' => $label,
+        ]);
+};
 echo html_writer::div(
-    html_writer::tag('i', '', ['class' => 'fa fa-paint-brush', 'aria-hidden' => 'true']) .
-    html_writer::span(get_string('managetutors_intro', 'block_elediaaitutor')),
-    'eat-admin-intro');
-
-echo html_writer::div(
-    $OUTPUT->single_button(new moodle_url($baseurl, ['action' => 'new']),
-        get_string('tutor_new', 'block_elediaaitutor'), 'get') .
-    $OUTPUT->single_button(new moodle_url($baseurl, ['action' => 'import']),
-        get_string('tutor_import', 'block_elediaaitutor'), 'get'),
-    'eat-toolbar');
-
-// Site tutors: built-in presets + saved profiles, as preview cards.
-echo html_writer::tag('h3', get_string('tutor_sitetutors', 'block_elediaaitutor'),
-    ['class' => 'eat-section-title']);
+    html_writer::tag('h3', get_string('nav_tutors', 'block_elediaaitutor'), ['class' => 'eat-section-title']) .
+    html_writer::div(
+        $libraryaction(new moodle_url($baseurl, ['action' => 'new']),
+            get_string('tutor_new', 'block_elediaaitutor'), 'fa-plus') .
+        $libraryaction(new moodle_url($baseurl, ['action' => 'import']),
+            get_string('tutor_import', 'block_elediaaitutor'), 'fa-upload'),
+        'lh-row-actions eat-section-actions'
+    ),
+    'eat-section-head');
 echo html_writer::start_div('eat-tutor-grid');
-foreach (presets::menu() as $pid => $plabel) {
-    echo block_elediaaitutor_tutor_card($baseurl, 'preset:' . $pid, $plabel,
-        get_string('tutor_preset', 'block_elediaaitutor'), 'preset', presets::settings($pid), false, 0);
-}
 foreach (tutor_profile::get_all() as $profile) {
     echo block_elediaaitutor_tutor_card($baseurl, 'profile:' . $profile->id, $profile->name,
         get_string('tutor_custom', 'block_elediaaitutor'), 'custom',
@@ -325,16 +364,35 @@ foreach (tutor_profile::get_all() as $profile) {
 }
 echo html_writer::end_div();
 
+// Built-in templates second: read-only starting points.
+echo html_writer::tag('h3', get_string('tutor_templates', 'block_elediaaitutor'),
+    ['class' => 'eat-section-title']);
+echo html_writer::start_div('eat-tutor-grid');
+foreach (presets::menu() as $pid => $plabel) {
+    echo block_elediaaitutor_tutor_card($baseurl, 'preset:' . $pid, $plabel,
+        get_string('tutor_preset', 'block_elediaaitutor'), 'preset', presets::settings($pid), false, 0);
+}
+echo html_writer::end_div();
+
 // Block instances: per-instance apply / export / import, as cards.
-global $DB;
-$instances = $DB->get_records('block_instances', ['blockname' => 'elediaaitutor'], 'id ASC');
+$instances = tutor_apply::instance_records();
 if ($instances) {
     $sources = block_elediaaitutor_source_menu();
+    $actionicon = static function(moodle_url $url, string $label, string $fa, string $extra = ''): string {
+        return html_writer::link($url,
+            html_writer::tag('i', '', ['class' => 'fa ' . $fa, 'aria-hidden' => 'true']) .
+            html_writer::span($label, 'sr-only'),
+            [
+                'class' => trim('lh-icon-action ' . $extra),
+                'aria-label' => $label,
+                'title' => $label,
+            ]);
+    };
     echo html_writer::tag('h3', get_string('tutor_instances', 'block_elediaaitutor'),
         ['class' => 'eat-section-title']);
     echo html_writer::start_div('eat-instance-grid');
     foreach ($instances as $bi) {
-        $parent = context_block::instance($bi->id)->get_parent_context();
+        $parent = \core\context\block::instance($bi->id)->get_parent_context();
         $location = $parent ? $parent->get_context_name(false) : get_string('system', 'admin');
         $src = tutor_apply::instance_source((int) $bi->id);
 
@@ -342,16 +400,26 @@ if ($instances) {
         $applyform = html_writer::tag('form',
             html_writer::input_hidden_params($applyurl) .
             html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]) .
-            html_writer::select($sources, 'source', '', ['' => get_string('choosedots')]) .
-            html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-sm btn-primary',
-                'value' => get_string('tutor_apply', 'block_elediaaitutor')]),
+            html_writer::div(
+                html_writer::select($sources, 'source', '', ['' => get_string('choosedots')],
+                    ['class' => 'lh-plugin-select']),
+                'lh-plugin-select-wrap') .
+            html_writer::tag('button',
+                html_writer::tag('i', '', ['class' => 'fa fa-check', 'aria-hidden' => 'true']) .
+                html_writer::span(get_string('tutor_apply', 'block_elediaaitutor'), 'sr-only'),
+                [
+                    'type' => 'submit',
+                    'class' => 'lh-icon-action eat-applyinstance-action',
+                    'aria-label' => get_string('tutor_apply', 'block_elediaaitutor'),
+                    'title' => get_string('tutor_apply', 'block_elediaaitutor'),
+                ]),
             ['method' => 'post', 'action' => $applyurl->out_omit_querystring(), 'class' => 'eat-instance-apply']);
 
-        $links = html_writer::link(
+        $links = $actionicon(
             new moodle_url($baseurl, ['action' => 'exportinstance', 'blockid' => $bi->id, 'sesskey' => sesskey()]),
-            get_string('tutor_export', 'block_elediaaitutor'), ['class' => 'btn btn-sm btn-outline-secondary']) .
-            html_writer::link(new moodle_url($baseurl, ['action' => 'import', 'blockid' => $bi->id]),
-            get_string('tutor_import', 'block_elediaaitutor'), ['class' => 'btn btn-sm btn-outline-secondary']);
+            get_string('tutor_export', 'block_elediaaitutor'), 'fa-download') .
+            $actionicon(new moodle_url($baseurl, ['action' => 'import', 'blockid' => $bi->id]),
+            get_string('tutor_import', 'block_elediaaitutor'), 'fa-upload');
 
         echo html_writer::div(
             html_writer::div(
@@ -361,13 +429,14 @@ if ($instances) {
                 'eat-instance-loc') .
             block_elediaaitutor_preview($src['settings'], get_string('pluginname', 'block_elediaaitutor')) .
             $applyform .
-            html_writer::div($links, 'eat-actions'),
+            html_writer::div($links, 'lh-row-actions eat-actions eat-instance-icons'),
             'eat-instance-card');
     }
     echo html_writer::end_div();
 }
 
 echo html_writer::end_div(); // .eat-admin
+shell::close();
 echo $OUTPUT->footer();
 
 /**
@@ -426,32 +495,52 @@ function block_elediaaitutor_preview(array $settings, string $name): string {
 function block_elediaaitutor_tutor_card(moodle_url $baseurl, string $source, string $name,
         string $typelabel, string $typeclass, array $settings, bool $custom, int $profileid): string {
     $sk = ['sesskey' => sesskey()];
-    $btn = static fn(moodle_url $url, string $label, string $cls): string =>
-        html_writer::link($url, $label, ['class' => 'btn btn-sm ' . $cls]);
+    $icon = static function(moodle_url $url, string $label, string $fa, string $extra = ''): string {
+        return html_writer::link($url,
+            html_writer::tag('i', '', ['class' => 'fa ' . $fa, 'aria-hidden' => 'true']) .
+            html_writer::span($label, 'sr-only'),
+            [
+                'class' => trim('lh-icon-action ' . $extra),
+                'aria-label' => $label,
+                'title' => $label,
+            ]);
+    };
 
-    $actions = $btn(new moodle_url($baseurl, ['action' => 'applysite', 'source' => $source] + $sk),
-            get_string('tutor_applysite', 'block_elediaaitutor'), 'btn-primary') .
-        $btn(new moodle_url($baseurl, ['action' => 'export', 'source' => $source] + $sk),
-            get_string('tutor_export', 'block_elediaaitutor'), 'btn-outline-secondary') .
-        $btn(new moodle_url($baseurl, ['action' => 'duplicate', 'source' => $source] + $sk),
-            get_string('tutor_duplicate', 'block_elediaaitutor'), 'btn-outline-secondary');
+    $actions = html_writer::link(
+        new moodle_url($baseurl, ['action' => 'applysite', 'source' => $source] + $sk),
+        html_writer::tag('i', '', ['class' => 'fa fa-check', 'aria-hidden' => 'true']) .
+            html_writer::span(get_string('tutor_applysite', 'block_elediaaitutor'), 'sr-only'),
+        [
+            'class' => 'lh-icon-action eat-applysite-action',
+            'aria-label' => get_string('tutor_applysite', 'block_elediaaitutor'),
+            'title' => get_string('tutor_applysite', 'block_elediaaitutor'),
+        ]
+    );
+    $actions .= html_writer::div(
+        $icon(new moodle_url($baseurl, ['action' => 'export', 'source' => $source] + $sk),
+            get_string('tutor_export', 'block_elediaaitutor'), 'fa-download') .
+        $icon(new moodle_url($baseurl, ['action' => 'duplicate', 'source' => $source] + $sk),
+            get_string('tutor_duplicate', 'block_elediaaitutor'), 'fa-clone'),
+        'lh-row-actions eat-card-icons');
     if ($custom) {
-        $actions .= $btn(new moodle_url($baseurl, ['action' => 'edit', 'id' => $profileid]),
-                get_string('edit'), 'btn-outline-secondary') .
-            $btn(new moodle_url($baseurl, ['action' => 'delete', 'id' => $profileid] + $sk),
-                get_string('delete'), 'btn-outline-danger');
+        $actions .= html_writer::div(
+            $icon(new moodle_url($baseurl, ['action' => 'edit', 'id' => $profileid]),
+                get_string('edit'), 'fa-pencil') .
+            $icon(new moodle_url($baseurl, ['action' => 'delete', 'id' => $profileid] + $sk),
+                get_string('delete'), 'fa-trash', 'lh-icon-action--danger'),
+            'lh-row-actions eat-card-icons');
     }
 
     $persona = (string) ($settings['persona'] ?? '');
     $tone = (string) ($settings['persona_tone'] ?? '');
-    $subtitle = trim($persona . ($tone !== '' ? ' · ' . $tone : ''));
+    $subtitle = trim($tone);
 
     $body = html_writer::div(
         html_writer::div(
             html_writer::span(s($name), 'eat-tutor-name') .
             html_writer::span($typelabel, 'eat-badge eat-badge-' . $typeclass),
             'eat-tutor-head') .
-        html_writer::div(s($subtitle), 'eat-tutor-persona') .
+        ($subtitle !== '' ? html_writer::div(s($subtitle), 'eat-tutor-persona') : '') .
         html_writer::div($actions, 'eat-actions'),
         'eat-tutor-body');
 

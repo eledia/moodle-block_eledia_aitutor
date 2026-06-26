@@ -18,7 +18,6 @@ declare(strict_types=1);
 
 namespace block_elediaaitutor;
 
-use context_course;
 use navigation_node;
 
 /**
@@ -47,7 +46,7 @@ final class lib_test extends \advanced_testcase {
     public function test_extend_navigation_course(): void {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
-        $context = context_course::instance($course->id);
+        $context = \core\context\course::instance($course->id);
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'editingteacher');
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
 

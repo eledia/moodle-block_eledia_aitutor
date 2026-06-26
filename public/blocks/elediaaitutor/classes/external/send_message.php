@@ -147,7 +147,7 @@ class send_message extends external_api {
             'iserror' => $result['iserror'],
             'sources' => array_map(static fn($s) => [
                 'title' => $s['title'],
-                'url' => $s['url'],
+                'url' => clean_param((string) $s['url'], PARAM_URL),
                 'snippet' => $s['snippet'],
             ], $result['sources']),
         ];

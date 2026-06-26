@@ -103,7 +103,7 @@ class get_history extends external_api {
             foreach (($message['sources'] ?? []) as $source) {
                 $sources[] = [
                     'title' => (string) ($source['title'] ?? ''),
-                    'url' => (string) ($source['url'] ?? ''),
+                    'url' => clean_param((string) ($source['url'] ?? ''), PARAM_URL),
                     'snippet' => (string) ($source['snippet'] ?? ''),
                 ];
             }

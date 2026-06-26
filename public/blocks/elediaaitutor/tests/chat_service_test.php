@@ -22,7 +22,6 @@ use block_elediaaitutor\local\chat_service;
 use block_elediaaitutor\local\consent;
 use block_elediaaitutor\local\conversation_repository;
 use block_elediaaitutor\local\rag_client;
-use context_system;
 use moodle_url;
 
 /**
@@ -87,7 +86,7 @@ final class chat_service_test extends \advanced_testcase {
     private function create_consented_user(): \stdClass {
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
-        consent::give((int) $user->id, context_system::instance());
+        consent::give((int) $user->id, \core\context\system::instance());
         return $user;
     }
 
@@ -103,7 +102,7 @@ final class chat_service_test extends \advanced_testcase {
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
         try {
-            chat_service::send((int) $user->id, 'Hi tutor', null, null, context_system::instance(), $client);
+            chat_service::send((int) $user->id, 'Hi tutor', null, null, \core\context\system::instance(), $client);
             $this->fail('Expected the consent gate to throw.');
         } catch (\moodle_exception $e) {
             $this->assertSame('error_consentrequired', $e->errorcode);
@@ -132,7 +131,7 @@ final class chat_service_test extends \advanced_testcase {
         ]);
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
-        $result = chat_service::send((int) $user->id, 'Q?', 5, null, context_system::instance(),
+        $result = chat_service::send((int) $user->id, 'Q?', 5, null, \core\context\system::instance(),
             $client, null, null, false);
 
         // The flag was sent, and the sources were dropped.
@@ -159,19 +158,19 @@ final class chat_service_test extends \advanced_testcase {
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
         // Limit 2: two turns pass and are counted, the third is refused.
-        chat_service::send($uid, 'one', null, null, context_system::instance(), $client, null, 2);
-        chat_service::send($uid, 'two', null, null, context_system::instance(), $client, null, 2);
+        chat_service::send($uid, 'one', null, null, \core\context\system::instance(), $client, null, 2);
+        chat_service::send($uid, 'two', null, null, \core\context\system::instance(), $client, null, 2);
         $this->assertSame(2, \block_elediaaitutor\local\usage::count_today($uid));
 
         try {
-            chat_service::send($uid, 'three', null, null, context_system::instance(), $client, null, 2);
+            chat_service::send($uid, 'three', null, null, \core\context\system::instance(), $client, null, 2);
             $this->fail('Expected the quota gate to throw.');
         } catch (\moodle_exception $e) {
             $this->assertSame('error_quota_exceeded', $e->errorcode);
         }
 
         // Limit 0 = unlimited.
-        chat_service::send($uid, 'four', null, null, context_system::instance(), $client, null, 0);
+        chat_service::send($uid, 'four', null, null, \core\context\system::instance(), $client, null, 0);
         $this->assertSame(3, \block_elediaaitutor\local\usage::count_today($uid));
     }
 
@@ -191,7 +190,7 @@ final class chat_service_test extends \advanced_testcase {
         ]);
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
-        $result = chat_service::send((int) $user->id, 'Hi tutor', null, null, context_system::instance(), $client);
+        $result = chat_service::send((int) $user->id, 'Hi tutor', null, null, \core\context\system::instance(), $client);
 
         // Answer is rendered to safe HTML.
         $this->assertStringContainsString('<strong>world</strong>', $result['answerhtml']);
@@ -237,7 +236,7 @@ final class chat_service_test extends \advanced_testcase {
         ]);
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
-        chat_service::send((int) $user->id, 'What is due?', 42, null, context_system::instance(),
+        chat_service::send((int) $user->id, 'What is due?', 42, null, \core\context\system::instance(),
             $client, 'hint');
 
         $args = $transport->last_payload()['params']['arguments'];
@@ -257,7 +256,7 @@ final class chat_service_test extends \advanced_testcase {
 
         // Disabled analytics logs nothing.
         set_config('enableanalytics', 0, 'block_elediaaitutor');
-        chat_service::send((int) $user->id, 'Another?', 42, null, context_system::instance(), $client);
+        chat_service::send((int) $user->id, 'Another?', 42, null, \core\context\system::instance(), $client);
         $this->assertSame(1, $DB->count_records('block_elediaaitutor_qlog'));
     }
 
@@ -273,7 +272,7 @@ final class chat_service_test extends \advanced_testcase {
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
         $sink = $this->redirectEvents();
-        chat_service::send((int) $user->id, 'Question?', null, null, context_system::instance(), $client);
+        chat_service::send((int) $user->id, 'Question?', null, null, \core\context\system::instance(), $client);
         $classes = array_map('get_class', $sink->get_events());
 
         $this->assertContains(\block_elediaaitutor\event\message_sent::class, $classes);
@@ -296,7 +295,7 @@ final class chat_service_test extends \advanced_testcase {
 
         $sink = $this->redirectEvents();
         try {
-            chat_service::send((int) $user->id, 'Question?', null, null, context_system::instance(), $client);
+            chat_service::send((int) $user->id, 'Question?', null, null, \core\context\system::instance(), $client);
             $this->fail('Expected a rag_exception.');
         } catch (\block_elediaaitutor\local\rag_exception $e) {
             $classes = array_map('get_class', $sink->get_events());

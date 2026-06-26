@@ -21,7 +21,6 @@ namespace block_elediaaitutor;
 use block_elediaaitutor\local\conversation_repository;
 use block_elediaaitutor\local\deletion_service;
 use block_elediaaitutor\local\rag_client;
-use context_system;
 use moodle_url;
 
 /**
@@ -56,7 +55,7 @@ final class deletion_service_test extends \advanced_testcase {
         conversation_repository::upsert((int) $bob->id, 'b-1', null, 'bob');
 
         $sink = $this->redirectEvents();
-        $result = deletion_service::delete_all_for_user((int) $alice->id, context_system::instance());
+        $result = deletion_service::delete_all_for_user((int) $alice->id, \core\context\system::instance());
 
         $this->assertSame(2, $result['localdeleted']);
         $this->assertFalse($result['externalsupported']);
@@ -79,7 +78,7 @@ final class deletion_service_test extends \advanced_testcase {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
 
-        $result = deletion_service::delete_all_for_user((int) $user->id, context_system::instance());
+        $result = deletion_service::delete_all_for_user((int) $user->id, \core\context\system::instance());
 
         $this->assertSame(0, $result['localdeleted']);
         $this->assertSame(0, $result['externaldeleted']);
@@ -118,7 +117,7 @@ final class deletion_service_test extends \advanced_testcase {
         $transport = fake_transport::json_result(['structuredContent' => ['deleted' => true]]);
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
-        $result = deletion_service::delete_all_for_user((int) $user->id, context_system::instance(), $client);
+        $result = deletion_service::delete_all_for_user((int) $user->id, \core\context\system::instance(), $client);
 
         $this->assertTrue($result['externalsupported']);
         $this->assertSame(2, $result['externaldeleted']);
@@ -161,7 +160,7 @@ final class deletion_service_test extends \advanced_testcase {
         $transport = fake_transport::json_result(['structuredContent' => ['deleted' => true]]);
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
-        $result = deletion_service::delete_all_for_user((int) $user->id, context_system::instance(), $client);
+        $result = deletion_service::delete_all_for_user((int) $user->id, \core\context\system::instance(), $client);
 
         $this->assertTrue($result['externalsupported']);
         $this->assertSame(1, $result['externaldeleted']);
@@ -173,7 +172,7 @@ final class deletion_service_test extends \advanced_testcase {
 
         // And with zero local records it is still attempted.
         $transport->lastbody = null;
-        $result = deletion_service::delete_all_for_user((int) $user->id, context_system::instance(), $client);
+        $result = deletion_service::delete_all_for_user((int) $user->id, \core\context\system::instance(), $client);
         $this->assertSame(0, $result['localdeleted']);
         $this->assertSame(1, $result['externaldeleted']);
         $this->assertSame('tutor_delete_user_data', $transport->last_payload()['params']['name']);
