@@ -108,6 +108,14 @@ class widget {
         return $css;
     }
 
+    /**
+     * Render the tutor widget for a given context.
+     *
+     * @param \context $context The context the widget is shown in.
+     * @param int $courseid Course id for course-scoped chat, or 0 for global.
+     * @param array $instance Optional per-instance config overrides.
+     * @return string The widget HTML.
+     */
     public static function render(\context $context, int $courseid, array $instance = []): string {
         global $OUTPUT, $PAGE, $USER;
 
@@ -254,8 +262,10 @@ class widget {
             'brandvars' => $brandstyle,
         ];
         // JSON_HEX_TAG keeps any HTML in privacyhtml from closing the <script>.
-        $templatecontext['configjson'] = json_encode($jsconfig,
-            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        $templatecontext['configjson'] = json_encode(
+            $jsconfig,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+        );
 
         $html = $OUTPUT->render_from_template('block_elediaaitutor/launcher', $templatecontext);
 

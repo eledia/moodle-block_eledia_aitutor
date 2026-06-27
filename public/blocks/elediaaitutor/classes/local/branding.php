@@ -205,15 +205,26 @@ class branding {
      */
     private static function system_file_url(string $filearea): string {
         $fs = get_file_storage();
-        $files = $fs->get_area_files(\core\context\system::instance()->id, 'block_elediaaitutor',
-            $filearea, 0, 'itemid, filepath, filename', false);
+        $files = $fs->get_area_files(
+            \core\context\system::instance()->id,
+            'block_elediaaitutor',
+            $filearea,
+            0,
+            'itemid, filepath, filename',
+            false
+        );
         if (empty($files)) {
             return '';
         }
         $file = reset($files);
-        return moodle_url::make_pluginfile_url(\core\context\system::instance()->id,
-            'block_elediaaitutor', $filearea, 0, $file->get_filepath(),
-            $file->get_filename())->out(false);
+        return moodle_url::make_pluginfile_url(
+            \core\context\system::instance()->id,
+            'block_elediaaitutor',
+            $filearea,
+            0,
+            $file->get_filepath(),
+            $file->get_filename()
+        )->out(false);
     }
 
     /**
@@ -231,14 +242,26 @@ class branding {
             return '';
         }
         $fs = get_file_storage();
-        $files = $fs->get_area_files($context->id, 'block_elediaaitutor', $filearea,
-            0, 'itemid, filepath, filename', false);
+        $files = $fs->get_area_files(
+            $context->id,
+            'block_elediaaitutor',
+            $filearea,
+            0,
+            'itemid, filepath, filename',
+            false
+        );
         if (empty($files)) {
             return '';
         }
         $file = reset($files);
-        return moodle_url::make_pluginfile_url($context->id, 'block_elediaaitutor', $filearea,
-            0, $file->get_filepath(), $file->get_filename())->out(false);
+        return moodle_url::make_pluginfile_url(
+            $context->id,
+            'block_elediaaitutor',
+            $filearea,
+            0,
+            $file->get_filepath(),
+            $file->get_filename()
+        )->out(false);
     }
 
     /**

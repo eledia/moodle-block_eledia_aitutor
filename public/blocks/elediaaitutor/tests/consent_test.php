@@ -54,8 +54,10 @@ final class consent_test extends \advanced_testcase {
         $this->assertIsInt(consent::time_consented($uid));
         $this->assertSame(1, $DB->count_records(consent::TABLE, ['userid' => $uid]));
 
-        $events = array_filter($sink->get_events(),
-            static fn($e) => $e instanceof \block_elediaaitutor\event\consent_given);
+        $events = array_filter(
+            $sink->get_events(),
+            static fn($e) => $e instanceof \block_elediaaitutor\event\consent_given
+        );
         $this->assertCount(1, $events);
     }
 
@@ -102,8 +104,10 @@ final class consent_test extends \advanced_testcase {
         delete_user($user);
 
         $this->assertFalse($DB->record_exists(consent::TABLE, ['userid' => $user->id]));
-        $this->assertSame(0, $DB->count_records(\block_elediaaitutor\local\usage::TABLE,
-            ['userid' => $user->id]));
+        $this->assertSame(0, $DB->count_records(
+            \block_elediaaitutor\local\usage::TABLE,
+            ['userid' => $user->id]
+        ));
         // Other users' records are untouched.
         $this->assertTrue(consent::has_consented((int) $other->id));
         $this->assertSame(1, \block_elediaaitutor\local\usage::count_today((int) $other->id));

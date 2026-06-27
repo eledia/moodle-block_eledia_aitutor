@@ -56,8 +56,11 @@ final class registry_test extends \advanced_testcase {
      */
     public function test_token_keys_distinct(): void {
         $tokens = array_values(registry::token_keys());
-        $this->assertSame(count($tokens), count(array_unique($tokens)),
-            'Two registry keys map to the same --eat-* token');
+        $this->assertSame(
+            count($tokens),
+            count(array_unique($tokens)),
+            'Two registry keys map to the same --eat-* token'
+        );
         $this->assertGreaterThan(30, count($tokens), 'Expected the full token set');
     }
 
@@ -132,15 +135,17 @@ final class registry_test extends \advanced_testcase {
                 $this->assertNull($entry['choices'], "Colour token {$key} should not have choices");
                 continue;
             }
-            // cssvalue / font tokens must have choices keyed by valid CSS values.
+            // Cssvalue / font tokens must have choices keyed by valid CSS values.
             $this->assertNotEmpty($entry['choices'], "Token {$key} is missing friendly choices");
             $this->assertArrayHasKey('', $entry['choices'], "Token {$key} needs a default option");
             foreach ($entry['choices'] as $value => $langkey) {
                 if ((string) $value === '') {
                     continue;
                 }
-                $this->assertNotNull(registry::sanitise($key, $value),
-                    "Choice '{$value}' for {$key} is rejected by its sanitiser");
+                $this->assertNotNull(
+                    registry::sanitise($key, $value),
+                    "Choice '{$value}' for {$key} is rejected by its sanitiser"
+                );
             }
         }
     }

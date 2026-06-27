@@ -81,8 +81,12 @@ class tutor_profile {
      * @param string $shortname Desired machine name ('' ⇒ derived from the name).
      * @return int The new profile id.
      */
-    public static function create(string $name, string $description, array $settings,
-            string $shortname = ''): int {
+    public static function create(
+        string $name,
+        string $description,
+        array $settings,
+        string $shortname = ''
+    ): int {
         global $DB;
         $now = time();
         $record = (object) [
@@ -142,8 +146,14 @@ class tutor_profile {
      */
     public static function image(int $id, string $filearea): ?stored_file {
         $fs = get_file_storage();
-        $files = $fs->get_area_files(\core\context\system::instance()->id, 'block_elediaaitutor',
-            $filearea, $id, 'itemid, filepath, filename', false);
+        $files = $fs->get_area_files(
+            \core\context\system::instance()->id,
+            'block_elediaaitutor',
+            $filearea,
+            $id,
+            'itemid, filepath, filename',
+            false
+        );
         return $files ? reset($files) : null;
     }
 

@@ -36,14 +36,14 @@ user-scoped MCP tokens.
 token and the RAG server URL all live server-side. The browser only ever talks
 to Moodle.
 
-See the dedicated guides:
+See the consolidated documentation:
 
-- [Admin configuration](docs/admin_guide.md)
-- [User guide](docs/user_guide.md)
-- [Teacher / block configuration](docs/teacher_guide.md)
-- [MCP / RAG integration](docs/integration_guide.md)
-- [**RAG/Tutor MCP server specification**](docs/rag_server_spec.md) — the contract for building the RAG server
-- [Troubleshooting](docs/troubleshooting.md)
+- [Master / project context](docs/00-master.md)
+- [Features](docs/01-features.md)
+- [User, teacher and admin documentation](docs/02-user-doc.md)
+- [Developer and RAG/MCP integration documentation](docs/03-dev-doc.md)
+- [Tasks and open questions](docs/04-tasks.md)
+- [Quality, bugs and verification](docs/05-quality.md)
 - [Privacy](docs/privacy.md)
 - [Security notes](docs/security.md)
 

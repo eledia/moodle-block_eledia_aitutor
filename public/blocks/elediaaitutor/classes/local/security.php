@@ -234,7 +234,22 @@ class security {
      * @return string
      */
     public static function custom_css(): string {
-        return trim((string) self::get_config('customcss', ''));
+        $css = trim((string) self::get_config('customcss', ''));
+        if ($css === '') {
+            return '';
+        }
+
+        // The value is rendered inside a <style> element. CSS itself does not
+        // need angle brackets, so remove them to prevent </style> breakouts.
+        $css = str_replace(["\0", '<', '>'], '', $css);
+
+        // Keep the setting intentionally small: no remote imports, no legacy
+        // expression() payloads, no javascript: URLs.
+        $css = preg_replace('/@import\b[^;]*(;|$)/i', '', $css) ?? '';
+        $css = preg_replace('/expression\s*\([^)]*\)/i', '', $css) ?? '';
+        $css = preg_replace('/javascript\s*:/i', '', $css) ?? '';
+
+        return trim($css);
     }
 
     /**
@@ -279,7 +294,7 @@ class security {
             throw new moodle_exception('error_rag_url_insecure', 'block_elediaaitutor');
         }
 
-        // moodle_url normalises and the downstream curl call runs through
+        // Moodle_url normalises and the downstream curl call runs through
         // Moodle's curl wrapper, which applies the site cURL security helper
         // (blocked hosts / ports) as defence in depth.
         return new moodle_url($raw);
@@ -298,8 +313,12 @@ class security {
             throw new moodle_exception('error_message_empty', 'block_elediaaitutor');
         }
         if (\core_text::strlen($message) > self::max_message_length()) {
-            throw new moodle_exception('error_message_too_long', 'block_elediaaitutor', '',
-                self::max_message_length());
+            throw new moodle_exception(
+                'error_message_too_long',
+                'block_elediaaitutor',
+                '',
+                self::max_message_length()
+            );
         }
         return $message;
     }
@@ -327,8 +346,12 @@ class security {
         $cache->set($key, $count);
 
         if ($count > $perminute) {
-            throw new moodle_exception('error_rate_limited', 'block_elediaaitutor', '',
-                60 - (time() % 60));
+            throw new moodle_exception(
+                'error_rate_limited',
+                'block_elediaaitutor',
+                '',
+                60 - (time() % 60)
+            );
         }
     }
 }

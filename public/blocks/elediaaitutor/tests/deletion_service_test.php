@@ -63,8 +63,10 @@ final class deletion_service_test extends \advanced_testcase {
         $this->assertCount(0, conversation_repository::list_for_user((int) $alice->id));
         $this->assertCount(1, conversation_repository::list_for_user((int) $bob->id));
 
-        $events = array_filter($sink->get_events(),
-            static fn($e) => $e instanceof \block_elediaaitutor\event\data_deletion_requested);
+        $events = array_filter(
+            $sink->get_events(),
+            static fn($e) => $e instanceof \block_elediaaitutor\event\data_deletion_requested
+        );
         $this->assertCount(1, $events);
         $event = reset($events);
         $this->assertEquals(2, $event->other['localdeleted']);

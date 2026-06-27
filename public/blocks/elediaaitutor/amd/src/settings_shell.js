@@ -398,6 +398,11 @@ define([], function() {
             document.body.classList.remove('eat-admin-settings-pending');
             return;
         }
+        if (!config || !config.headerHtml) {
+            document.body.classList.add('eat-admin-settings-ready');
+            document.body.classList.remove('eat-admin-settings-pending');
+            return;
+        }
         form.dataset.eatShellWrapped = '1';
         document.body.classList.add('path-block-elediaaitutor', 'eat-admin-settings-shell-page');
 

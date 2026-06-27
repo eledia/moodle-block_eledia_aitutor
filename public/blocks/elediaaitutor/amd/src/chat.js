@@ -562,7 +562,7 @@ class TutorChat {
         return this.appendMessage({
             isassistant: true,
             sendername: this.config.persona,
-            html: '<p>' + this.escape(message) + '</p>',
+            failuretext: message,
             failed: true,
             copylabel: strings.copy,
             retrylabel: strings.retry

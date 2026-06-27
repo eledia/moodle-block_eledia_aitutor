@@ -53,8 +53,12 @@ class send_message extends external_api {
             'message' => new external_value(PARAM_RAW, 'The user message'),
             'courseid' => new external_value(PARAM_INT, 'Course context id, or 0 for global', VALUE_DEFAULT, 0),
             'conversationid' => new external_value(PARAM_RAW, 'Existing conversation id, or empty', VALUE_DEFAULT, ''),
-            'answerstyle' => new external_value(PARAM_ALPHA, 'Requested answer style, or empty for the default',
-                VALUE_DEFAULT, ''),
+            'answerstyle' => new external_value(
+                PARAM_ALPHA,
+                'Requested answer style, or empty for the default',
+                VALUE_DEFAULT,
+                ''
+            ),
         ]);
     }
 
@@ -69,8 +73,13 @@ class send_message extends external_api {
      * @return array Response structure.
      * @throws moodle_exception
      */
-    public static function execute(int $contextid, string $message, int $courseid, string $conversationid,
-            string $answerstyle = ''): array {
+    public static function execute(
+        int $contextid,
+        string $message,
+        int $courseid,
+        string $conversationid,
+        string $answerstyle = ''
+    ): array {
         $params = self::validate_parameters(self::execute_parameters(), [
             'contextid' => $contextid,
             'message' => $message,
@@ -138,8 +147,18 @@ class send_message extends external_api {
         // tutor's voice; only populated sub-fields are sent to the RAG server.
         $persona = branding::persona((array) $blockconfig);
 
-        $result = chat_service::send((int) $USER->id, $params['message'], $courseid, $conv, $context, null,
-            $effectivestyle, $dailylimit, $ragenabled, $persona);
+        $result = chat_service::send(
+            (int) $USER->id,
+            $params['message'],
+            $courseid,
+            $conv,
+            $context,
+            null,
+            $effectivestyle,
+            $dailylimit,
+            $ragenabled,
+            $persona
+        );
 
         return [
             'answerhtml' => $result['answerhtml'],

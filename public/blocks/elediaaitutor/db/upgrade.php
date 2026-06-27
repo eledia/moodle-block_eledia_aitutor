@@ -133,8 +133,10 @@ function xmldb_block_elediaaitutor_upgrade(int $oldversion): bool {
         // snapshotting the old theme's palette into the individual token
         // settings (site + each instance), then dropping the obsolete 'theme'.
         $sitetheme = (string) get_config('block_elediaaitutor', 'theme');
-        if ($sitetheme !== '' && \block_elediaaitutor\local\presets::exists($sitetheme)
-                && $sitetheme !== \block_elediaaitutor\local\presets::DEFAULT) {
+        if (
+            $sitetheme !== '' && \block_elediaaitutor\local\presets::exists($sitetheme)
+                && $sitetheme !== \block_elediaaitutor\local\presets::DEFAULT
+        ) {
             foreach (\block_elediaaitutor\local\presets::settings($sitetheme) as $key => $value) {
                 $cfgkey = \block_elediaaitutor\local\registry::sitekey($key);
                 if ((string) get_config('block_elediaaitutor', $cfgkey) === '') {
@@ -155,8 +157,10 @@ function xmldb_block_elediaaitutor_upgrade(int $oldversion): bool {
                 continue;
             }
             $theme = (string) $config->theme;
-            if (\block_elediaaitutor\local\presets::exists($theme)
-                    && $theme !== \block_elediaaitutor\local\presets::DEFAULT) {
+            if (
+                \block_elediaaitutor\local\presets::exists($theme)
+                    && $theme !== \block_elediaaitutor\local\presets::DEFAULT
+            ) {
                 foreach (\block_elediaaitutor\local\presets::settings($theme) as $key => $value) {
                     if (!isset($config->$key) || $config->$key === '') {
                         $config->$key = $value;
@@ -164,8 +168,12 @@ function xmldb_block_elediaaitutor_upgrade(int $oldversion): bool {
                 }
             }
             unset($config->theme);
-            $DB->set_field('block_instances', 'configdata', base64_encode(serialize($config)),
-                ['id' => $bi->id]);
+            $DB->set_field(
+                'block_instances',
+                'configdata',
+                base64_encode(serialize($config)),
+                ['id' => $bi->id]
+            );
         }
 
         upgrade_block_savepoint(true, 2026061320, 'elediaaitutor');
@@ -181,8 +189,11 @@ function xmldb_block_elediaaitutor_upgrade(int $oldversion): bool {
             if (empty($entry['instanceable'])) {
                 continue;
             }
-            set_config(\block_elediaaitutor\local\registry::EXPOSE_PREFIX . $key,
-                !empty($entry['exposedefault']) ? 1 : 0, 'block_elediaaitutor');
+            set_config(
+                \block_elediaaitutor\local\registry::EXPOSE_PREFIX . $key,
+                !empty($entry['exposedefault']) ? 1 : 0,
+                'block_elediaaitutor'
+            );
         }
 
         upgrade_block_savepoint(true, 2026061321, 'elediaaitutor');

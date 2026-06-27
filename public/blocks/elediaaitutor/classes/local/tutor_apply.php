@@ -80,8 +80,12 @@ class tutor_apply {
      * @param stored_file|null $avatar Source avatar file, or null.
      * @return void
      */
-    public static function to_instance(int $blockinstanceid, array $settings,
-            ?stored_file $logo, ?stored_file $avatar): void {
+    public static function to_instance(
+        int $blockinstanceid,
+        array $settings,
+        ?stored_file $logo,
+        ?stored_file $avatar
+    ): void {
         self::apply_settings_to_instance($blockinstanceid, $settings);
 
         $blockcontext = \core\context\block::instance($blockinstanceid);
@@ -176,8 +180,12 @@ class tutor_apply {
             }
         }
 
-        $DB->set_field('block_instances', 'configdata', base64_encode(serialize($config)),
-            ['id' => $blockinstanceid]);
+        $DB->set_field(
+            'block_instances',
+            'configdata',
+            base64_encode(serialize($config)),
+            ['id' => $blockinstanceid]
+        );
     }
 
     /**
@@ -253,8 +261,14 @@ class tutor_apply {
      * @return stored_file|null
      */
     private static function first_file(int $contextid, string $filearea, int $itemid): ?stored_file {
-        $files = get_file_storage()->get_area_files($contextid, 'block_elediaaitutor',
-            $filearea, $itemid, 'itemid, filepath, filename', false);
+        $files = get_file_storage()->get_area_files(
+            $contextid,
+            'block_elediaaitutor',
+            $filearea,
+            $itemid,
+            'itemid, filepath, filename',
+            false
+        );
         return $files ? reset($files) : null;
     }
 
@@ -268,8 +282,12 @@ class tutor_apply {
      * @param stored_file|null $source Source file, or null to clear.
      * @return void
      */
-    private static function replace_image(context $context, string $filearea, int $itemid,
-            ?stored_file $source): void {
+    private static function replace_image(
+        context $context,
+        string $filearea,
+        int $itemid,
+        ?stored_file $source
+    ): void {
         $fs = get_file_storage();
         $fs->delete_area_files($context->id, 'block_elediaaitutor', $filearea, $itemid);
         if ($source === null) {

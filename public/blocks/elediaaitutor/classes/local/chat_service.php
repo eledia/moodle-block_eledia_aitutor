@@ -103,16 +103,38 @@ class chat_service {
 
         try {
             $token = token_provider::get_token($userid);
-            $result = $client->chat($systemurl, $token, $message, $courseparam, $conversationid, $toolname,
-                $ltmflag, $answerstyle, $userlang, $ragenabled, $persona);
+            $result = $client->chat(
+                $systemurl,
+                $token,
+                $message,
+                $courseparam,
+                $conversationid,
+                $toolname,
+                $ltmflag,
+                $answerstyle,
+                $userlang,
+                $ragenabled,
+                $persona
+            );
         } catch (rag_exception $e) {
             // The cached token may have been revoked/expired server-side: drop it,
             // mint a fresh one and retry exactly once before giving up.
             token_provider::forget_cached_token($userid);
             try {
                 $token = token_provider::get_token($userid);
-                $result = $client->chat($systemurl, $token, $message, $courseparam, $conversationid, $toolname,
-                    $ltmflag, $answerstyle, $userlang, $ragenabled, $persona);
+                $result = $client->chat(
+                    $systemurl,
+                    $token,
+                    $message,
+                    $courseparam,
+                    $conversationid,
+                    $toolname,
+                    $ltmflag,
+                    $answerstyle,
+                    $userlang,
+                    $ragenabled,
+                    $persona
+                );
             } catch (rag_exception $retry) {
                 self::log_failure($userid, $context, 'rag_error');
                 throw $retry;
@@ -155,11 +177,21 @@ class chat_service {
             $primary = $result['sources'][0] ?? null;
             $sourcetitle = is_array($primary) && !empty($primary['title']) ? (string) $primary['title'] : null;
             $cmid = is_array($primary) ? self::extract_cmid((string) ($primary['url'] ?? '')) : null;
-            question_log::log($userid, $courseid, $message, !empty($result['sources']), $answerstyle,
-                $result['topic'] ?? null, $sourcetitle, $cmid);
+            question_log::log(
+                $userid,
+                $courseid,
+                $message,
+                !empty($result['sources']),
+                $answerstyle,
+                $result['topic'] ?? null,
+                $sourcetitle,
+                $cmid
+            );
         } catch (\moodle_exception $e) {
-            debugging('block_elediaaitutor: question analytics logging failed: ' . $e->getMessage(),
-                DEBUG_DEVELOPER);
+            debugging(
+                'block_elediaaitutor: question analytics logging failed: ' . $e->getMessage(),
+                DEBUG_DEVELOPER
+            );
         }
 
         return [

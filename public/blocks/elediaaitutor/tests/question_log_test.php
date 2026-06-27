@@ -189,8 +189,8 @@ final class question_log_test extends \advanced_testcase {
 
         $updated = question_log::apply_topics([
             (int) $a->id => 'Topic A',
-            (int) $other->id => 'Should not apply',   // Not in the sent batch.
-            999999 => 'Ghost',                          // Unknown id.
+            (int) $other->id => 'Should not apply', // Not in the sent batch.
+            999999 => 'Ghost', // Unknown id.
         ], 7, [(int) $a->id, (int) $b->id]);
 
         $this->assertSame(1, $updated);

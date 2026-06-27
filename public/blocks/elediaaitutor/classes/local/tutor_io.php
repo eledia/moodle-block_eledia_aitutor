@@ -54,8 +54,13 @@ class tutor_io {
      * @return string Absolute path to the generated ZIP (in a temp dir).
      * @throws moodle_exception When the archive cannot be written.
      */
-    public static function export(string $name, string $shortname, array $settings,
-            ?stored_file $logo, ?stored_file $avatar): string {
+    public static function export(
+        string $name,
+        string $shortname,
+        array $settings,
+        ?stored_file $logo,
+        ?stored_file $avatar
+    ): string {
         $manifest = [
             'format' => self::FORMAT,
             'version' => self::VERSION,
@@ -129,7 +134,8 @@ class tutor_io {
         }
 
         $settings = tutor_profile::clean_settings(
-            is_array($manifest['settings'] ?? null) ? $manifest['settings'] : []);
+            is_array($manifest['settings'] ?? null) ? $manifest['settings'] : []
+        );
 
         $images = ['logo' => null, 'avatar' => null];
         foreach (['logo', 'avatar'] as $role) {
@@ -185,9 +191,26 @@ class tutor_io {
         if ($info !== false) {
             return true;
         }
-        // SVG is text, not raster: accept when it parses as an <svg> document.
-        $head = (string) file_get_contents($path, false, null, 0, 512);
-        return stripos($head, '<svg') !== false;
+        // SVG is text, not raster. Accept only an <svg> document that carries no
+        // common script-execution or XXE vector: these files are user-supplied
+        // branding shown to every learner, so a crafted SVG must not be able to
+        // run JavaScript. The serving layer additionally forces download as
+        // defence in depth (see block_elediaaitutor_pluginfile()).
+        $svg = (string) file_get_contents($path);
+        if (stripos($svg, '<svg') === false) {
+            return false;
+        }
+        $blocked = ['<script', '<foreignobject', 'javascript:', '<!entity'];
+        foreach ($blocked as $needle) {
+            if (stripos($svg, $needle) !== false) {
+                return false;
+            }
+        }
+        // Inline event handlers such as onload= / onclick=.
+        if (preg_match('/\son[a-z]+\s*=/i', $svg)) {
+            return false;
+        }
+        return true;
     }
 
     /**

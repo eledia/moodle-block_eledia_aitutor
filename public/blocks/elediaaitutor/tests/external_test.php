@@ -157,8 +157,10 @@ final class external_test extends \advanced_testcase {
         $this->assertTrue($result['enabled']);
         $this->assertTrue(ltm::is_enabled((int) $user->id));
 
-        $events = array_filter($sink->get_events(),
-            static fn($e) => $e instanceof \block_elediaaitutor\event\ltm_preference_changed);
+        $events = array_filter(
+            $sink->get_events(),
+            static fn($e) => $e instanceof \block_elediaaitutor\event\ltm_preference_changed
+        );
         $this->assertCount(1, $events);
 
         $result = set_ltm::execute($contextid, false);

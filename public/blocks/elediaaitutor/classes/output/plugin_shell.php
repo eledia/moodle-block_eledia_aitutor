@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 declare(strict_types=1);
 
@@ -13,8 +21,6 @@ namespace block_elediaaitutor\output;
 use coding_exception;
 use html_writer;
 use moodle_url;
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Shared Plugin Shell helpers owned by the eLeDia.ai Tutor block.
@@ -53,11 +59,19 @@ final class plugin_shell {
             }
         }
 
-        $helpurl = new moodle_url('/local/lernhive/support.php', ['component' => $component]);
+        // The help target lives in local_lernhive. Only offer it when that plugin
+        // is actually installed; otherwise leave helpurl empty so the template
+        // omits the help action rather than linking to a dead page.
+        $helpurl = '';
+        if (\core_component::get_plugin_directory('local', 'lernhive') !== null) {
+            $helpurl = self::url_to_string(
+                new moodle_url('/local/lernhive/support.php', ['component' => $component])
+            );
+        }
 
         return [
             'hasactions' => $resolvedsettingsurl !== '',
-            'helpurl' => self::url_to_string($helpurl),
+            'helpurl' => $helpurl,
             'helplabel' => $helplabel ?? get_string('help', 'core'),
             'settingsurl' => $resolvedsettingsurl,
             'settingslabel' => $settingslabel ?? get_string('settings', 'core'),

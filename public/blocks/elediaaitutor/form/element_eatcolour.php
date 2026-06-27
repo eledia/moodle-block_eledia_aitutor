@@ -40,7 +40,7 @@ require_once('HTML/QuickForm/text.php');
  */
 class MoodleQuickForm_eatcolour extends HTML_QuickForm_text {
     /** @var string Help button HTML, if any. */
-    public $_helpbutton = '';
+    public $_helpbutton = ''; // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
 
     /**
      * Constructor.
@@ -59,7 +59,7 @@ class MoodleQuickForm_eatcolour extends HTML_QuickForm_text {
      *
      * @return string
      */
-    public function toHtml() {
+    public function toHtml() { // phpcs:ignore moodle.NamingConventions.ValidFunctionName.LowercaseMethod
         global $PAGE, $OUTPUT;
 
         $id = $this->getAttribute('id');
@@ -76,7 +76,8 @@ class MoodleQuickForm_eatcolour extends HTML_QuickForm_text {
         $loading = $OUTPUT->pix_icon('i/loading', '', 'moodle', ['class' => 'loadingicon']);
         return html_writer::div(
             html_writer::div($loading, 'admin_colourpicker clearfix') . parent::toHtml(),
-            'form-colourpicker');
+            'form-colourpicker'
+        );
     }
 
     /**
@@ -84,7 +85,7 @@ class MoodleQuickForm_eatcolour extends HTML_QuickForm_text {
      *
      * @return string
      */
-    public function getElementTemplateType() {
+    public function getElementTemplateType() { // phpcs:ignore moodle.NamingConventions.ValidFunctionName.LowercaseMethod
         return $this->_flagFrozen ? 'static' : 'default';
     }
 
@@ -93,17 +94,17 @@ class MoodleQuickForm_eatcolour extends HTML_QuickForm_text {
      *
      * @return string
      */
-    public function getHelpButton() {
+    public function getHelpButton() { // phpcs:ignore moodle.NamingConventions.ValidFunctionName.LowercaseMethod
         return $this->_helpbutton;
     }
 
     /**
      * Accept (and ignore) the legacy help-button setter for compatibility.
      *
-     * @param mixed $helpbuttonargs Ignored.
+     * @param mixed $args Ignored.
      * @param string $function Ignored.
      * @return void
      */
-    public function setHelpButton($helpbuttonargs, $function = 'helpbutton') {
+    public function setHelpButton($args, $function = 'helpbutton') { // phpcs:ignore moodle.NamingConventions.ValidFunctionName
     }
 }

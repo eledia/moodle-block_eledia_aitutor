@@ -89,8 +89,10 @@ class recluster_service {
                 $moodletoken = token_provider::get_token((int) service_user::get_or_create()->id);
             }
         } catch (\moodle_exception $e) {
-            debugging('block_elediaaitutor: recluster aborted (client/token): ' . $e->getMessage(),
-                DEBUG_DEVELOPER);
+            debugging(
+                'block_elediaaitutor: recluster aborted (client/token): ' . $e->getMessage(),
+                DEBUG_DEVELOPER
+            );
             $stats['failed']++;
             return $stats;
         }
@@ -101,8 +103,12 @@ class recluster_service {
             $offset = 0;
 
             while ($offset < self::MAX_PER_COURSE) {
-                $rows = question_log::fetch_for_recluster($courseid, self::WINDOW_DAYS,
-                    self::BATCH_SIZE, $offset);
+                $rows = question_log::fetch_for_recluster(
+                    $courseid,
+                    self::WINDOW_DAYS,
+                    self::BATCH_SIZE,
+                    $offset
+                );
                 if (empty($rows)) {
                     break;
                 }
@@ -116,8 +122,14 @@ class recluster_service {
                 }
 
                 try {
-                    $map = $client->recluster_questions($CFG->wwwroot, (string) $courseid,
-                        $labels, $questions, $toolname, $moodletoken);
+                    $map = $client->recluster_questions(
+                        $CFG->wwwroot,
+                        (string) $courseid,
+                        $labels,
+                        $questions,
+                        $toolname,
+                        $moodletoken
+                    );
                 } catch (rag_exception $e) {
                     $stats['failed']++;
                     debugging("block_elediaaitutor: recluster batch failed (course $courseid): "
@@ -129,8 +141,10 @@ class recluster_service {
                 $stats['updated'] += question_log::apply_topics($map, $courseid, $sentids);
 
                 // Newly minted labels join the registry for the next batch.
-                $labels = array_slice(array_values(array_unique(array_merge($labels,
-                    array_values($map)))), 0, 100);
+                $labels = array_slice(array_values(array_unique(array_merge(
+                    $labels,
+                    array_values($map)
+                ))), 0, 100);
 
                 if (count($rows) < self::BATCH_SIZE) {
                     break;

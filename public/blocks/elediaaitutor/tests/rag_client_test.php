@@ -61,8 +61,14 @@ final class rag_client_test extends \advanced_testcase {
         ]);
         $client = $this->client($transport);
 
-        $client->chat('https://moodle.example.com', 'SECRET-TOKEN', 'Hi there',
-            '42', null, 'tutor_chat');
+        $client->chat(
+            'https://moodle.example.com',
+            'SECRET-TOKEN',
+            'Hi there',
+            '42',
+            null,
+            'tutor_chat'
+        );
 
         $payload = $transport->last_payload();
         $this->assertSame('2.0', $payload['jsonrpc']);
@@ -150,13 +156,33 @@ final class rag_client_test extends \advanced_testcase {
         $this->assertArrayNotHasKey('rag_enabled', $transport->last_payload()['params']['arguments']);
 
         // LLM-only: false transmitted verbatim.
-        $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat',
-            null, null, null, false);
+        $this->client($transport)->chat(
+            'https://m',
+            't',
+            'Q',
+            null,
+            null,
+            'tutor_chat',
+            null,
+            null,
+            null,
+            false
+        );
         $this->assertFalse($transport->last_payload()['params']['arguments']['rag_enabled']);
 
         // Grounded: true.
-        $this->client($transport)->chat('https://m', 't', 'Q', null, null, 'tutor_chat',
-            null, null, null, true);
+        $this->client($transport)->chat(
+            'https://m',
+            't',
+            'Q',
+            null,
+            null,
+            'tutor_chat',
+            null,
+            null,
+            null,
+            true
+        );
         $this->assertTrue($transport->last_payload()['params']['arguments']['rag_enabled']);
     }
 
@@ -218,15 +244,20 @@ final class rag_client_test extends \advanced_testcase {
             'structuredContent' => ['topics' => [
                 ['id' => 17, 'topic' => '  Assignment 2  '],
                 ['id' => 18, 'topic' => 'Photosynthesis'],
-                ['id' => 19, 'topic' => ''],          // Empty: dropped.
-                ['broken' => true],                    // Malformed: dropped.
+                ['id' => 19, 'topic' => ''], // Empty: dropped.
+                ['broken' => true], // Malformed: dropped.
             ]],
         ]);
         $client = $this->client($transport);
 
-        $map = $client->recluster_questions('https://m', '7', ['Photosynthesis'],
+        $map = $client->recluster_questions(
+            'https://m',
+            '7',
+            ['Photosynthesis'],
             [['id' => 17, 'text' => 'essay due?'], ['id' => 18, 'text' => 'how do plants eat light']],
-            'tutor_recluster_questions', 'MAINT-TOKEN');
+            'tutor_recluster_questions',
+            'MAINT-TOKEN'
+        );
 
         $payload = $transport->last_payload();
         $this->assertSame('tutor_recluster_questions', $payload['params']['name']);
@@ -240,8 +271,13 @@ final class rag_client_test extends \advanced_testcase {
         $this->assertSame([17 => 'Assignment 2', 18 => 'Photosynthesis'], $map);
 
         // Without a token (transport-auth-only setups) none is sent.
-        $client->recluster_questions('https://m', '7', [], [['id' => 1, 'text' => 'q']],
-            'tutor_recluster_questions');
+        $client->recluster_questions(
+            'https://m',
+            '7',
+            [],
+            [['id' => 1, 'text' => 'q']],
+            'tutor_recluster_questions'
+        );
         $this->assertArrayNotHasKey('moodle_token', $transport->last_payload()['params']['arguments']);
     }
 
@@ -332,7 +368,7 @@ final class rag_client_test extends \advanced_testcase {
                 'messages' => [
                     ['role' => 'user', 'content' => 'Hello'],
                     ['role' => 'assistant', 'content' => 'Hi!'],
-                    ['role' => 'system', 'content' => ''], // Dropped (empty).
+                    ['role' => 'system', 'content' => ''], // Dropped because it is empty.
                 ],
             ],
         ]);

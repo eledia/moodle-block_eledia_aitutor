@@ -111,7 +111,7 @@ final class branding_test extends \advanced_testcase {
         $css = branding::css_variables(branding::resolve([]));
         $this->assertStringContainsString('--eat-accent:#ff1a1a;', $css);
         $this->assertStringContainsString('--eat-body-bg:#0c0c0e;', $css);
-        $this->assertStringContainsString('--eat-avatar-glow:', $css);   // the glowing eye.
+        $this->assertStringContainsString('--eat-avatar-glow:', $css);   // The glowing eye.
     }
 
     /**
@@ -130,8 +130,11 @@ final class branding_test extends \advanced_testcase {
             foreach ($required as $token) {
                 $key = $tokentokey[$token] ?? null;
                 $this->assertNotNull($key, "No registry key for {$token}");
-                $this->assertArrayHasKey($key, $settings,
-                    "Preset '{$id}' is missing {$token}");
+                $this->assertArrayHasKey(
+                    $key,
+                    $settings,
+                    "Preset '{$id}' is missing {$token}"
+                );
             }
         }
     }
@@ -142,10 +145,14 @@ final class branding_test extends \advanced_testcase {
     public function test_bot_bubble_colour(): void {
         $this->resetAfterTest();
         set_config('brandbotbubble', '#101820', 'block_elediaaitutor');
-        $this->assertStringContainsString('--eat-bot-bg:#101820;',
-            branding::css_variables(branding::resolve([])));
-        $this->assertStringContainsString('--eat-bot-bg:#abcdef;',
-            branding::css_variables(branding::resolve(['brandbotbubble' => '#abcdef'])));
+        $this->assertStringContainsString(
+            '--eat-bot-bg:#101820;',
+            branding::css_variables(branding::resolve([]))
+        );
+        $this->assertStringContainsString(
+            '--eat-bot-bg:#abcdef;',
+            branding::css_variables(branding::resolve(['brandbotbubble' => '#abcdef']))
+        );
     }
 
     /**
@@ -190,13 +197,17 @@ final class branding_test extends \advanced_testcase {
         set_config('footertext', 'Site footer', 'block_elediaaitutor');
 
         // Not exposed by default → instance value ignored.
-        $this->assertSame(get_string('poweredby', 'block_elediaaitutor'),
-            branding::resolve(['footertext' => 'Course footer'])['footertext']);
+        $this->assertSame(
+            get_string('poweredby', 'block_elediaaitutor'),
+            branding::resolve(['footertext' => 'Course footer'])['footertext']
+        );
 
         // Admin opt-in is still ignored without the premium add-on.
         set_config('expose_footertext', 1, 'block_elediaaitutor');
-        $this->assertSame(get_string('poweredby', 'block_elediaaitutor'),
-            branding::resolve(['footertext' => 'Course footer'])['footertext']);
+        $this->assertSame(
+            get_string('poweredby', 'block_elediaaitutor'),
+            branding::resolve(['footertext' => 'Course footer'])['footertext']
+        );
     }
 
     /**

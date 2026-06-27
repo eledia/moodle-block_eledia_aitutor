@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -36,6 +35,8 @@ declare(strict_types=1);
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+declare(strict_types=1);
+
 use block_elediaaitutor\local\security;
 use block_elediaaitutor\local\widget;
 use block_elediaaitutor\output\shell;
@@ -69,8 +70,10 @@ $useshell = !$embedded
     && shell::is_available()
     && has_capability('moodle/site:config', \core\context\system::instance());
 
-$PAGE->set_url(new moodle_url('/blocks/elediaaitutor/view.php',
-    ['courseid' => $courseid, 'embedded' => $embedded]));
+$PAGE->set_url(new moodle_url(
+    '/blocks/elediaaitutor/view.php',
+    ['courseid' => $courseid, 'embedded' => $embedded]
+));
 $PAGE->set_context($context);
 $PAGE->set_pagelayout($embedded ? 'embedded' : 'standard');
 $PAGE->set_title(get_string('default_persona', 'block_elediaaitutor'));

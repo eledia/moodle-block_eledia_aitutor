@@ -102,8 +102,10 @@ class deletion_service {
                 // as failed, and the local erase below still proceeds.
                 $remaining = $deleteusertool !== '' ? 1 : count($records);
                 $externalfailed = $remaining - $externaldeleted;
-                debugging('block_elediaaitutor: external deletion failed: ' . $e->getMessage(),
-                    DEBUG_DEVELOPER);
+                debugging(
+                    'block_elediaaitutor: external deletion failed: ' . $e->getMessage(),
+                    DEBUG_DEVELOPER
+                );
             }
         }
 

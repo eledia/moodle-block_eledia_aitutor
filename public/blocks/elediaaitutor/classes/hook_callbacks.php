@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Global output hook callbacks for the eLeDia.ai Tutor block.
@@ -15,8 +23,6 @@
  */
 
 namespace block_elediaaitutor;
-
-defined('MOODLE_INTERNAL') || die();
 
 use core\hook\output\before_standard_top_of_body_html_generation;
 use moodle_url;
@@ -52,13 +58,13 @@ final class hook_callbacks {
                     'aria-label="' . s($label) . '">' .
                     '<span class="eat-admin-launcher-host__icon" aria-hidden="true">' .
                         '<svg viewBox="0 0 24 24" focusable="false">' .
-                            '<path d="M12 4v2"/>' .
-                            '<path d="M8.5 4h7"/>' .
-                            '<path d="M5 9.5c0-1.4 1.1-2.5 2.5-2.5h9c1.4 0 2.5 1.1 2.5 2.5v4.7' .
-                                'c0 1.4-1.1 2.5-2.5 2.5H11l-4 3v-3H7.5c-1.4 0-2.5-1.1-2.5-2.5V9.5z"/>' .
-                            '<path d="M9 12h.01"/>' .
-                            '<path d="M15 12h.01"/>' .
-                            '<path d="M10 14.5c1.2.7 2.8.7 4 0"/>' .
+                            '<path d="M12 3.4v2.1"/>' .
+                            '<path d="M9.2 3.4h5.6"/>' .
+                            '<path d="M5.4 10.2c0-2.1 1.7-3.8 3.8-3.8h5.6c2.1 0 3.8 1.7 3.8 3.8v3.2' .
+                                'c0 2.1-1.7 3.8-3.8 3.8h-3.1l-3.8 2.8v-3.1c-1.5-.5-2.5-1.9-2.5-3.5v-3.2z"/>' .
+                            '<path d="M9.4 11.7h.01"/>' .
+                            '<path d="M14.6 11.7h.01"/>' .
+                            '<path d="M9.7 14.2h4.6"/>' .
                         '</svg>' .
                     '</span>' .
                     '<span class="sr-only">' . s($label) . '</span>' .

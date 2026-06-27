@@ -55,39 +55,66 @@ class tutor_edit_form extends moodleform {
         $mform->addElement('hidden', 'action', 'save');
         $mform->setType('action', PARAM_ALPHA);
 
-        $mform->addElement('text', 'name', get_string('tutor_name', 'block_elediaaitutor'),
-            ['size' => 48]);
+        $mform->addElement(
+            'text',
+            'name',
+            get_string('tutor_name', 'block_elediaaitutor'),
+            ['size' => 48]
+        );
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
-        $mform->addElement('text', 'shortname', get_string('tutor_shortname', 'block_elediaaitutor'),
-            ['size' => 32]);
+        $mform->addElement(
+            'text',
+            'shortname',
+            get_string('tutor_shortname', 'block_elediaaitutor'),
+            ['size' => 32]
+        );
         $mform->setType('shortname', PARAM_ALPHANUMEXT);
         $mform->addHelpButton('shortname', 'tutor_shortname', 'block_elediaaitutor');
         if (!$isnew) {
             $mform->freeze('shortname');
         }
 
-        $mform->addElement('textarea', 'description',
-            get_string('tutor_description', 'block_elediaaitutor'), ['rows' => 2, 'cols' => 60]);
+        $mform->addElement(
+            'textarea',
+            'description',
+            get_string('tutor_description', 'block_elediaaitutor'),
+            ['rows' => 2, 'cols' => 60]
+        );
         $mform->setType('description', PARAM_TEXT);
 
         $imageopts = ['maxfiles' => 1, 'subdirs' => 0,
             'accepted_types' => ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif']];
-        $mform->addElement('filemanager', 'logo', get_string('reg_logo', 'block_elediaaitutor'),
-            null, $imageopts);
-        $mform->addElement('filemanager', 'avatar', get_string('reg_avatar', 'block_elediaaitutor'),
-            null, $imageopts);
+        $mform->addElement(
+            'filemanager',
+            'logo',
+            get_string('reg_logo', 'block_elediaaitutor'),
+            null,
+            $imageopts
+        );
+        $mform->addElement(
+            'filemanager',
+            'avatar',
+            get_string('reg_avatar', 'block_elediaaitutor'),
+            null,
+            $imageopts
+        );
 
         // Every registry setting, grouped — a profile defines the full tutor.
         foreach (registry::groups() as $group) {
-            $keys = array_filter(registry::group_keys($group),
-                static fn(string $k): bool => registry::is_available($k) && registry::get($k)['type'] !== 'file');
+            $keys = array_filter(
+                registry::group_keys($group),
+                static fn(string $k): bool => registry::is_available($k) && registry::get($k)['type'] !== 'file'
+            );
             if (empty($keys)) {
                 continue;
             }
-            $mform->addElement('header', 'grp_' . $group,
-                get_string('reggroup_' . $group, 'block_elediaaitutor'));
+            $mform->addElement(
+                'header',
+                'grp_' . $group,
+                get_string('reggroup_' . $group, 'block_elediaaitutor')
+            );
             $mform->setExpanded('grp_' . $group, $group === 'persona');
             foreach ($keys as $key) {
                 $this->add_registry_field($key, registry::get($key));
@@ -137,12 +164,15 @@ class tutor_edit_form extends moodleform {
                 ]);
                 break;
             default:
-                // cssvalue / font / text. Named-options tokens become a dropdown;
+                // Cssvalue / font / text. Named-options tokens become a dropdown;
                 // plain text stays a text box.
                 if (!empty($entry['choices'])) {
                     $current = isset($settings[$key]) ? (string) $settings[$key] : null;
-                    $options = registry::choice_select_options($key,
-                        get_string('tutor_notset', 'block_elediaaitutor'), $current);
+                    $options = registry::choice_select_options(
+                        $key,
+                        get_string('tutor_notset', 'block_elediaaitutor'),
+                        $current
+                    );
                     $mform->addElement('select', $name, $label, $options);
                 } else {
                     $mform->addElement('text', $name, $label, ['size' => 40]);

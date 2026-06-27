@@ -8,7 +8,9 @@ Dies ist das operative Zentrum fuer die Arbeit am aiTutor.
 
 Unstrukturierter Input landet hier und wird in `taskXX` oder `qXX` triagiert.
 
-Keine untriagierten Eintraege.
+- Uncommittete Aenderung in `classes/hook_callbacks.php`: Feinjustierung der
+  SVG-Pfaddaten des Admin-Launcher-Icons (rein optisch, kein Verhalten). Bei
+  naechstem Commit mitnehmen.
 
 ---
 
@@ -41,8 +43,8 @@ Prioritaet: P1
 Projektbezogenen DevFlow auf Branch `review_johannes` anlegen.
 
 **Ergebnis**
-`DevFlow/` enthaelt Master, Feature-, User-, Dev-, Task- und Quality-Dateien
-sowie relevante Skills aus `jmoskaliuk/eLeDia.OS_DevFlow`.
+`public/blocks/elediaaitutor/docs/` enthaelt die sechs DevFlow-Hauptdokumente
+sowie die Zusatzdokumente `privacy.md` und `security.md`.
 
 ### task02 Lokalen Tutor-End-to-End-Smoke pruefen
 Status:    open
@@ -113,7 +115,7 @@ Sicherheitsbefunde vor weiterer UX-Arbeit schliessen.
   Konfiguration nicht initialisiert ist (`@root@` in `phpunit.xml.dist`).
 
 ### task05 UX/UI-Review `review_johannes` abarbeiten
-Status:    in-progress
+Status:    done
 Feature:   feat01 / feat03 / feat04
 Prioritaet: P1
 Linked:    bug09, bug10, bug11, bug12, test03
@@ -138,7 +140,85 @@ Bedienbarkeit zu ueberstylen.
 - Override-Checkboxen in der Settings-Shell wieder Moodle-schlicht gestaltet:
   kein Spezial-Pill fuer `Standard: Ja/Nein`, keine fette
   `Ueberschreiben erlauben`-Beschriftung.
+- `bug09` (2026-06-27): Help-Link der Plugin-Shell mit
+  `core_component::get_plugin_directory('local', 'lernhive')` abgesichert. Ohne
+  `local_lernhive` wird kein toter Help-Link mehr gerendert. Das Plugin ist
+  damit frei von harten Laufzeit-Abhaengigkeiten auf `local_lernhive`.
 
 **Offen**
-- Code-seitige Umsetzung der UX-Review-Findings aus `bug09` bis `bug12`
-  abschliessen und lokal verifizieren.
+- Keine offenen Code-Findings aus task05.
+
+**Ergebnis 2026-06-27**
+- `bug10` gefixt: `settings_shell.js` bricht robust ab, wenn `headerHtml`
+  fehlt; Fallback-CSS fuer `lh-plugin-infobar`, Tags, Header-Buttons und
+  Row-Actions ergaenzt.
+- `bug11` gefixt: Fokus-Ringe fuer Send-Button, History-Open-Button,
+  Settings-Karten und Backnav ergaenzt; History-Liste und Composer gelabelt;
+  statischer Privacy-Callout nutzt `role="note"`.
+
+### task06 Folge-Code-Review `review_johannes` abarbeiten
+Status:    done
+Feature:   feat01 / feat03 / feat04
+Prioritaet: P0
+Linked:    bug13, bug14, bug15, bug16, bug17, test04
+
+**Ziel**
+Die neuen Befunde aus dem Folge-Review vom 2026-06-26 schliessen. Prioritaet
+liegt auf der Stored-XSS-Flaeche `bug13` (SVG-Upload), gefolgt von `bug14`
+(`customcss`-Breakout).
+
+**Schwerpunkte**
+- SVG-Uploads sanieren oder als Download ausliefern (`bug13`, S2).
+- `customcss` gegen `</style>`-Breakout absichern (`bug14`, S3).
+- Fokusring fuer den History-Open-Button ergaenzen (`bug15`, S3).
+- Heading-Reihenfolge im Privacy-Modal korrigieren (`bug16`, S4).
+- `appendFailure`-HTML-Muster entschaerfen oder dokumentieren (`bug17`, S4).
+
+**Stand 2026-06-27**
+- `bug13` (S2) gefixt: Force-Download in `lib.php` plus gehaertetes
+  `tutor_io::is_safe_image()`.
+- `bug14` (S3) gefixt: `customcss` wird serverseitig gegen `</style>`-
+  Breakout, `@import`, `expression()` und `javascript:` gehaertet.
+- `bug15` (S3) gefixt: History-Open-Button hat sichtbaren `:focus-visible`.
+- `bug16` (S4) gefixt: Privacy-Modal nutzt geordnete Abschnittsueberschriften.
+- `bug17` (S4) gefixt: Fehlertexte laufen ueber escapeten Template-Slot statt
+  ueber den `{{{html}}}`-Slot.
+
+### task07 Moodle CodeChecker (moodle-cs) gruen bekommen
+Status:    done
+Feature:   -
+Prioritaet: P1
+Linked:    bug02, bug18, test05
+
+**Ziel**
+Das Plugin gegen den offiziellen `moodlehq/moodle-cs`-Standard sauber bekommen
+(Vorbereitung Plugins-Directory-Submission).
+
+**Ausgangslage**
+920 Errors + 660 Warnings ueber 50 Dateien (rein Coding-Style, keine
+Security-/Korrektheitsbefunde).
+
+**Umgesetzt 2026-06-27**
+- PHPCBF-Autofix: 892 Layout-Verstoesse in 47 Dateien automatisch behoben.
+- `manage_tutors.php`: phpcbf-Oszillation manuell aufgeloest (Header-Reihenfolge
+  `boilerplate -> Docblock -> declare`, isolierter `FunctionCallSignature`-Lauf,
+  Rest-Konstrukte von Hand kanonisiert).
+- Entry-Dateien `view.php`, `report.php`, `instance_tutor.php`,
+  `edit_instance.php`: gleiche `declare`-Reihenfolge korrigiert.
+- Docblocks fuer `plugin_page`-Konstanten und `widget::render()` ergaenzt;
+  `provider`-Implements-Liste umgebrochen; lange Privacy-Zeile entschaerft;
+  `lib.php`-Callback-Variable umbenannt (`$birecord_or_cm` -> `$birecordorcm`).
+- `form/element_eatcolour.php`: QuickForm-API-Overrides (camelCase-Methoden,
+  `$_helpbutton`) mit gezielten `phpcs:ignore`-Annotationen versehen.
+- Inline-Kommentare bereinigt (Grossschreibung, Separatoren, `.eat-*`-Marker).
+- Schritt 3: `MOODLE_INTERNAL`-Guard aus den 6 markierten Dateien entfernt
+  (siehe `bug02`-Reconciliation).
+- Schritt 2: Lang-Strings (EN + DE, je 658) alphabetisch sortiert und
+  eingestreute Abschnitts-Kommentare entfernt.
+
+**Ergebnis**
+`Codechecker: 0 errors, 0 warnings` (siehe `test05`). Beifang: `bug18`
+(`MODIFIER_COMPACT == 'full'`) zur Klaerung erfasst.
+
+**Hinweis**
+Die `amd/build/*.min.js` wurden nicht neu gebaut; CodeChecker betrifft nur PHP.

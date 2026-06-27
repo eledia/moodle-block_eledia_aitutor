@@ -23,9 +23,8 @@ namespace block_elediaaitutor\local;
  *
  * The free block must stay functional without the add-on, so every premium
  * feature defaults to unavailable. A companion plugin can unlock features by
- * being installed as local_elediaaitutorpremium and optionally exposing either
- * local_elediaaitutorpremium\feature::has_feature($feature) or
- * block_elediaaitutorpremium_has_feature($feature).
+ * being installed as local_elediaai_tutor_premium and exposing
+ * local_elediaai_tutor_premium\feature::has_feature($feature).
  *
  * @package     block_elediaaitutor
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
@@ -38,7 +37,7 @@ class premium {
     public const FEATURE_FOOTER_BRANDING = 'footerbranding';
 
     /** @var string Expected component name of the optional premium add-on. */
-    private const PREMIUM_COMPONENT = 'local_elediaaitutorpremium';
+    private const PREMIUM_COMPONENT = 'local_elediaai_tutor_premium';
 
     /**
      * Whether a premium feature is available in this installation.
@@ -51,13 +50,9 @@ class premium {
             return false;
         }
 
-        $provider = '\\local_elediaaitutorpremium\\feature';
+        $provider = '\\local_elediaai_tutor_premium\\feature';
         if (class_exists($provider) && method_exists($provider, 'has_feature')) {
             return (bool) $provider::has_feature($feature);
-        }
-
-        if (function_exists('block_elediaaitutorpremium_has_feature')) {
-            return (bool) block_elediaaitutorpremium_has_feature($feature);
         }
 
         return true;

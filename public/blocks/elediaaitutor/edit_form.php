@@ -32,8 +32,6 @@
 use block_elediaaitutor\local\branding;
 use block_elediaaitutor\local\registry;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Block instance settings form.
  */
@@ -51,15 +49,24 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         // Import / export this instance's tutor (settings + images), or apply a
         // site preset — available once the block exists.
         if (!empty($this->block->instance->id)) {
-            $shelllink = new \moodle_url('/blocks/elediaaitutor/edit_instance.php',
-                ['blockid' => (int) $this->block->instance->id]);
-            $toolslink = new \moodle_url('/blocks/elediaaitutor/instance_tutor.php',
-                ['blockid' => (int) $this->block->instance->id]);
-            $actions = \html_writer::link($shelllink,
-                    get_string('instance_shell_edit_link', 'block_elediaaitutor'),
-                    ['class' => 'btn btn-primary', 'target' => '_top']) . ' ' .
-                \html_writer::link($toolslink, get_string('instancetutor_link', 'block_elediaaitutor'),
-                    ['class' => 'btn btn-secondary', 'target' => '_top']);
+            $shelllink = new \moodle_url(
+                '/blocks/elediaaitutor/edit_instance.php',
+                ['blockid' => (int) $this->block->instance->id]
+            );
+            $toolslink = new \moodle_url(
+                '/blocks/elediaaitutor/instance_tutor.php',
+                ['blockid' => (int) $this->block->instance->id]
+            );
+            $actions = \html_writer::link(
+                $shelllink,
+                get_string('instance_shell_edit_link', 'block_elediaaitutor'),
+                ['class' => 'btn btn-primary', 'target' => '_top']
+            ) . ' ' .
+                \html_writer::link(
+                    $toolslink,
+                    get_string('instancetutor_link', 'block_elediaaitutor'),
+                    ['class' => 'btn btn-secondary', 'target' => '_top']
+                );
             $mform->addElement('static', 'tutorio', '', $actions);
         }
 
@@ -69,8 +76,11 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         $mform->setDefault('config_title', get_string('pluginname', 'block_elediaaitutor'));
 
         // Course context wiring.
-        $mform->addElement('selectyesno', 'config_passcoursecontext',
-            get_string('config_passcoursecontext', 'block_elediaaitutor'));
+        $mform->addElement(
+            'selectyesno',
+            'config_passcoursecontext',
+            get_string('config_passcoursecontext', 'block_elediaaitutor')
+        );
         $mform->setDefault('config_passcoursecontext', 1);
         $mform->addHelpButton('config_passcoursecontext', 'config_passcoursecontext', 'block_elediaaitutor');
 
@@ -91,34 +101,46 @@ class block_elediaaitutor_edit_form extends block_edit_form {
         $grounding = \block_elediaaitutor\local\chat_mode::ingestion_available($this->effective_courseid());
         $llmallowed = \block_elediaaitutor\local\chat_mode::is_llm_allowed();
         if ($llmallowed && $grounding) {
-            $mform->addElement('select', 'config_ragmode',
-                get_string('config_ragmode', 'block_elediaaitutor'), [
+            $mform->addElement(
+                'select',
+                'config_ragmode',
+                get_string('config_ragmode', 'block_elediaaitutor'),
+                [
                     \block_elediaaitutor\local\chat_mode::MODE_GROUNDED =>
                         get_string('ragmode_grounded', 'block_elediaaitutor'),
                     \block_elediaaitutor\local\chat_mode::MODE_LLMONLY =>
                         get_string('ragmode_llmonly', 'block_elediaaitutor'),
-                ]);
+                ]
+            );
             $mform->setDefault('config_ragmode', \block_elediaaitutor\local\chat_mode::MODE_GROUNDED);
             $mform->addHelpButton('config_ragmode', 'config_ragmode', 'block_elediaaitutor');
         } else if (!$grounding) {
-            $mform->addElement('static', 'ragmode_note',
+            $mform->addElement(
+                'static',
+                'ragmode_note',
                 get_string('config_ragmode', 'block_elediaaitutor'),
                 $llmallowed
                     ? get_string('config_ragmode_nokb', 'block_elediaaitutor')
-                    : get_string('llmonly_unavailable', 'block_elediaaitutor'));
+                : get_string('llmonly_unavailable', 'block_elediaaitutor')
+            );
         }
 
         // Registry-driven tutor fields: persona, design tokens, behaviour,
         // launcher, footer and images — grouped, and only the keys the admin
         // has exposed for per-instance override. Empty = follow the site.
         foreach (registry::groups() as $group) {
-            $exposed = array_filter(registry::group_keys($group),
-                static fn(string $k): bool => registry::is_exposed($k));
+            $exposed = array_filter(
+                registry::group_keys($group),
+                static fn(string $k): bool => registry::is_exposed($k)
+            );
             if (empty($exposed)) {
                 continue;
             }
-            $mform->addElement('header', 'insgroup_' . $group,
-                get_string('reggroup_' . $group, 'block_elediaaitutor'));
+            $mform->addElement(
+                'header',
+                'insgroup_' . $group,
+                get_string('reggroup_' . $group, 'block_elediaaitutor')
+            );
             $mform->setExpanded('insgroup_' . $group, false);
             foreach ($exposed as $key) {
                 $this->add_instance_field($mform, $key, registry::get($key));
@@ -177,12 +199,15 @@ class block_elediaaitutor_edit_form extends block_edit_form {
                 break;
 
             default:
-                // cssvalue / font / text. Tokens with friendly named options
+                // Cssvalue / font / text. Tokens with friendly named options
                 // become a dropdown (no raw CSS); plain text stays a text box.
                 if (!empty($entry['choices'])) {
                     $current = isset($this->block->config->$key) ? (string) $this->block->config->$key : null;
-                    $options = registry::choice_select_options($key,
-                        get_string('config_usesite', 'block_elediaaitutor'), $current);
+                    $options = registry::choice_select_options(
+                        $key,
+                        get_string('config_usesite', 'block_elediaaitutor'),
+                        $current
+                    );
                     $mform->addElement('select', $field, $label, $options);
                     $mform->setDefault($field, '');
                 } else {
@@ -230,8 +255,14 @@ class block_elediaaitutor_edit_form extends block_edit_form {
                     continue;
                 }
                 $draftid = file_get_submitted_draft_itemid($field);
-                file_prepare_draft_area($draftid, $context->id, 'block_elediaaitutor',
-                    $filearea, 0, ['maxfiles' => 1, 'subdirs' => 0]);
+                file_prepare_draft_area(
+                    $draftid,
+                    $context->id,
+                    'block_elediaaitutor',
+                    $filearea,
+                    0,
+                    ['maxfiles' => 1, 'subdirs' => 0]
+                );
                 $defaults->{$field} = $draftid;
             }
         }
@@ -255,8 +286,10 @@ class block_elediaaitutor_edit_form extends block_edit_form {
 
         $passcontext = !isset($config->passcoursecontext) || (int) $config->passcoursecontext === 1;
         $pagecourseid = (int) ($this->block->page->course->id ?? 0);
-        if ($passcontext && \block_elediaaitutor\local\security::course_chat_enabled()
-                && $pagecourseid > 0 && $pagecourseid !== SITEID) {
+        if (
+            $passcontext && \block_elediaaitutor\local\security::course_chat_enabled()
+                && $pagecourseid > 0 && $pagecourseid !== SITEID
+        ) {
             return $pagecourseid;
         }
         return 0;

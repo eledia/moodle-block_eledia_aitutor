@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
-
 use block_elediaaitutor\local\security;
 use block_elediaaitutor\local\widget;
 
@@ -157,13 +155,21 @@ class block_elediaaitutor extends block_base {
      */
     public function instance_config_save($data, $nolongerused = false): void {
         if ($this->context) {
-            foreach ([
+            foreach (
+                [
                 'logo' => \block_elediaaitutor\local\branding::INSTANCE_LOGO_FILEAREA,
                 'avatar' => \block_elediaaitutor\local\branding::INSTANCE_AVATAR_FILEAREA,
-            ] as $field => $filearea) {
+                ] as $field => $filearea
+            ) {
                 if (!empty($data->$field)) {
-                    file_save_draft_area_files((int) $data->$field, $this->context->id,
-                        'block_elediaaitutor', $filearea, 0, ['maxfiles' => 1, 'subdirs' => 0]);
+                    file_save_draft_area_files(
+                        (int) $data->$field,
+                        $this->context->id,
+                        'block_elediaaitutor',
+                        $filearea,
+                        0,
+                        ['maxfiles' => 1, 'subdirs' => 0]
+                    );
                 }
                 // The draft id is not stored in config (the files live in the area).
                 unset($data->$field);
@@ -188,8 +194,10 @@ class block_elediaaitutor extends block_base {
         }
 
         $passcontext = (int) $this->get_instance_config('passcoursecontext', 1) === 1;
-        if ($passcontext && security::course_chat_enabled()
-                && !empty($this->page->course->id) && (int) $this->page->course->id !== SITEID) {
+        if (
+            $passcontext && security::course_chat_enabled()
+                && !empty($this->page->course->id) && (int) $this->page->course->id !== SITEID
+        ) {
             return (int) $this->page->course->id;
         }
         return 0;

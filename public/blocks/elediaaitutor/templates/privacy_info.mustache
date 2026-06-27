@@ -43,19 +43,19 @@
     {{^hascustom}}
     <p>{{#str}}privacy_intro, block_elediaaitutor{{/str}}</p>
 
-    <div class="elediaaitutor-callout" role="alert">
+    <div class="elediaaitutor-callout" role="note">
         <strong>{{#str}}privacy_accuracy_title, block_elediaaitutor{{/str}}</strong><br>
         {{#str}}privacy_accuracy_body, block_elediaaitutor{{/str}}
     </div>
 
-    <h5>{{#str}}privacy_sent_title, block_elediaaitutor{{/str}}</h5>
+    <h3 class="elediaaitutor-privacy-heading">{{#str}}privacy_sent_title, block_elediaaitutor{{/str}}</h3>
     <p>{{#str}}privacy_sent_body, block_elediaaitutor{{/str}}</p>
 
-    <h5>{{#str}}privacy_storage_title, block_elediaaitutor{{/str}}</h5>
+    <h3 class="elediaaitutor-privacy-heading">{{#str}}privacy_storage_title, block_elediaaitutor{{/str}}</h3>
     <p>{{#str}}privacy_storage_body, block_elediaaitutor{{/str}}</p>
     {{/hascustom}}
 
-    <h5>{{#str}}privacy_ltm_title, block_elediaaitutor{{/str}}</h5>
+    <h3 class="elediaaitutor-privacy-heading">{{#str}}privacy_ltm_title, block_elediaaitutor{{/str}}</h3>
     <p>{{#str}}privacy_ltm_body, block_elediaaitutor{{/str}}</p>
     <div class="form-check">
         <input type="checkbox" class="form-check-input" id="{{uniqid}}_ltm"
@@ -66,7 +66,7 @@
     </div>
     <div class="small text-muted mb-3" data-region="ltm-status" role="status" aria-live="polite"></div>
 
-    <h5>{{#str}}privacy_deletion_title, block_elediaaitutor{{/str}}</h5>
+    <h3 class="elediaaitutor-privacy-heading">{{#str}}privacy_deletion_title, block_elediaaitutor{{/str}}</h3>
     <p>{{#str}}privacy_deletion_body, block_elediaaitutor{{/str}}</p>
     {{#candelete}}
         <button type="button" class="btn btn-outline-danger" data-action="delete-all">

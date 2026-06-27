@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -28,6 +27,8 @@ declare(strict_types=1);
  * @link        https://eledia.de
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+declare(strict_types=1);
 
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/classes/output/shell.php');
@@ -70,8 +71,13 @@ shell::require_css();
 if ($action === 'export') {
     require_sesskey();
     $src = tutor_apply::instance_source($blockid);
-    $path = tutor_io::export('instance-' . $blockid, 'instance_' . $blockid,
-        $src['settings'], $src['logo'], $src['avatar']);
+    $path = tutor_io::export(
+        'instance-' . $blockid,
+        'instance_' . $blockid,
+        $src['settings'],
+        $src['logo'],
+        $src['avatar']
+    );
     send_temp_file($path, basename($path));
 }
 
@@ -87,8 +93,10 @@ if ($action === 'apply') {
     redirect($pageurl);
 }
 
-$importform = new tutor_import_form(new moodle_url($pageurl, ['action' => 'importdo']),
-    ['blockid' => $blockid]);
+$importform = new tutor_import_form(
+    new moodle_url($pageurl, ['action' => 'importdo']),
+    ['blockid' => $blockid]
+);
 if ($action === 'importdo') {
     if ($importform->is_cancelled()) {
         redirect($pageurl);
@@ -111,19 +119,26 @@ echo html_writer::start_div('eat-admin');
 echo html_writer::div(
     html_writer::tag('i', '', ['class' => 'fa fa-paint-brush', 'aria-hidden' => 'true']) .
     html_writer::span(get_string('instancetutor_intro', 'block_elediaaitutor')),
-    'eat-admin-intro');
+    'eat-admin-intro'
+);
 
 echo html_writer::start_div('eat-cards');
 
 // Export this instance's tutor.
 echo html_writer::div(
-    html_writer::tag('h3',
+    html_writer::tag(
+        'h3',
         html_writer::tag('i', '', ['class' => 'fa fa-download', 'aria-hidden' => 'true']) . ' ' .
-        get_string('tutor_export', 'block_elediaaitutor')) .
+        get_string('tutor_export', 'block_elediaaitutor')
+    ) .
     html_writer::tag('p', get_string('instancetutor_exporthelp', 'block_elediaaitutor')) .
-    $OUTPUT->single_button(new moodle_url($pageurl, ['action' => 'export', 'sesskey' => sesskey()]),
-        get_string('instancetutor_exportbtn', 'block_elediaaitutor'), 'get'),
-    'eat-card');
+    $OUTPUT->single_button(
+        new moodle_url($pageurl, ['action' => 'export', 'sesskey' => sesskey()]),
+        get_string('instancetutor_exportbtn', 'block_elediaaitutor'),
+        'get'
+    ),
+    'eat-card'
+);
 
 // Apply a site preset / saved tutor.
 $sources = ['' => get_string('choosedots')];
@@ -134,7 +149,8 @@ foreach (tutor_profile::get_all() as $profile) {
     $sources['profile:' . $profile->id] = format_string($profile->name);
 }
 $applyurl = new moodle_url($pageurl, ['action' => 'apply']);
-$applyform = html_writer::tag('form',
+$applyform = html_writer::tag(
+    'form',
     html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'blockid', 'value' => $blockid]) .
     html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'apply']) .
     html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]) .
@@ -142,27 +158,34 @@ $applyform = html_writer::tag('form',
         html_writer::select($sources, 'source', '', false) .
         html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-primary',
             'value' => get_string('tutor_apply', 'block_elediaaitutor')]),
-        'eat-instance-apply'),
-    ['method' => 'post', 'action' => $applyurl->out_omit_querystring()]);
+        'eat-instance-apply'
+    ),
+    ['method' => 'post', 'action' => $applyurl->out_omit_querystring()]
+);
 echo html_writer::div(
-    html_writer::tag('h3',
+    html_writer::tag(
+        'h3',
         html_writer::tag('i', '', ['class' => 'fa fa-magic', 'aria-hidden' => 'true']) . ' ' .
-        get_string('instancetutor_applyheading', 'block_elediaaitutor')) .
+        get_string('instancetutor_applyheading', 'block_elediaaitutor')
+    ) .
     html_writer::tag('p', get_string('instancetutor_applyhelp', 'block_elediaaitutor')) .
     $applyform,
-    'eat-card');
+    'eat-card'
+);
 
-echo html_writer::end_div(); // .eat-cards
+echo html_writer::end_div(); // End of .eat-cards.
 
 // Import a bundle into this instance (full-width card with the upload form).
 echo html_writer::start_div('eat-card');
-echo html_writer::tag('h3',
+echo html_writer::tag(
+    'h3',
     html_writer::tag('i', '', ['class' => 'fa fa-upload', 'aria-hidden' => 'true']) . ' ' .
-    get_string('tutor_import', 'block_elediaaitutor'));
+    get_string('tutor_import', 'block_elediaaitutor')
+);
 echo html_writer::tag('p', get_string('tutor_import_help', 'block_elediaaitutor'));
 $importform->display();
 echo html_writer::end_div();
 
-echo html_writer::end_div(); // .eat-admin
+echo html_writer::end_div(); // End of .eat-admin.
 shell::close();
 echo $OUTPUT->footer();

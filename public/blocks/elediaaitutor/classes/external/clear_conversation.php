@@ -84,8 +84,10 @@ class clear_conversation extends external_api {
         // configured. Best-effort: a server failure is logged but never blocks
         // the local deletion, so the user can always remove their own data.
         $deletetool = security::delete_tool_name();
-        if ($deletetool !== '' && !empty($record->conversationid)
-                && token_provider::is_connector_available()) {
+        if (
+            $deletetool !== '' && !empty($record->conversationid)
+                && token_provider::is_connector_available()
+        ) {
             try {
                 $token = token_provider::get_token($userid);
                 rag_client::create()->delete_conversation(

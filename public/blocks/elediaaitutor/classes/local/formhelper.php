@@ -43,8 +43,10 @@ class formhelper {
      */
     public static function register_colour_element(): void {
         global $CFG;
-        \MoodleQuickForm::registerElementType('eatcolour',
+        \MoodleQuickForm::registerElementType(
+            'eatcolour',
             $CFG->dirroot . '/blocks/elediaaitutor/form/element_eatcolour.php',
-            'MoodleQuickForm_eatcolour');
+            'MoodleQuickForm_eatcolour'
+        );
     }
 }

@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -22,6 +21,8 @@ declare(strict_types=1);
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+declare(strict_types=1);
 
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->libdir . '/formslib.php');
@@ -73,16 +74,22 @@ class block_elediaaitutor_instance_shell_form extends moodleform {
         formhelper::register_colour_element();
         $mform = $this->_form;
 
-        $mform->addElement('header', 'quicksettings',
-            get_string('instance_shell_quicksettings', 'block_elediaaitutor'));
+        $mform->addElement(
+            'header',
+            'quicksettings',
+            get_string('instance_shell_quicksettings', 'block_elediaaitutor')
+        );
         $mform->setExpanded('quicksettings', true);
 
         $mform->addElement('text', 'config_title', get_string('config_title', 'block_elediaaitutor'));
         $mform->setType('config_title', PARAM_TEXT);
         $mform->setDefault('config_title', get_string('pluginname', 'block_elediaaitutor'));
 
-        $mform->addElement('selectyesno', 'config_passcoursecontext',
-            get_string('config_passcoursecontext', 'block_elediaaitutor'));
+        $mform->addElement(
+            'selectyesno',
+            'config_passcoursecontext',
+            get_string('config_passcoursecontext', 'block_elediaaitutor')
+        );
         $mform->setDefault('config_passcoursecontext', 1);
         $mform->addHelpButton('config_passcoursecontext', 'config_passcoursecontext', 'block_elediaaitutor');
 
@@ -100,34 +107,55 @@ class block_elediaaitutor_instance_shell_form extends moodleform {
         $grounding = chat_mode::ingestion_available($this->effective_courseid());
         $llmallowed = chat_mode::is_llm_allowed();
         if ($llmallowed && $grounding) {
-            $mform->addElement('select', 'config_ragmode',
-                get_string('config_ragmode', 'block_elediaaitutor'), [
+            $mform->addElement(
+                'select',
+                'config_ragmode',
+                get_string('config_ragmode', 'block_elediaaitutor'),
+                [
                     chat_mode::MODE_GROUNDED => get_string('ragmode_grounded', 'block_elediaaitutor'),
                     chat_mode::MODE_LLMONLY => get_string('ragmode_llmonly', 'block_elediaaitutor'),
-                ]);
+                ]
+            );
             $mform->setDefault('config_ragmode', chat_mode::MODE_GROUNDED);
             $mform->addHelpButton('config_ragmode', 'config_ragmode', 'block_elediaaitutor');
         } else if (!$grounding) {
-            $mform->addElement('static', 'ragmode_note',
+            $mform->addElement(
+                'static',
+                'ragmode_note',
                 get_string('config_ragmode', 'block_elediaaitutor'),
                 $llmallowed
                     ? get_string('config_ragmode_nokb', 'block_elediaaitutor')
-                    : get_string('llmonly_unavailable', 'block_elediaaitutor'));
+                : get_string('llmonly_unavailable', 'block_elediaaitutor')
+            );
         }
 
-        $mform->addElement('static', 'instance_tools', '',
-            html_writer::link(new moodle_url('/blocks/elediaaitutor/instance_tutor.php',
-                ['blockid' => $this->blockid]), get_string('instancetutor_link', 'block_elediaaitutor'),
-                ['class' => 'btn btn-secondary']));
+        $mform->addElement(
+            'static',
+            'instance_tools',
+            '',
+            html_writer::link(
+                new moodle_url(
+                    '/blocks/elediaaitutor/instance_tutor.php',
+                    ['blockid' => $this->blockid]
+                ),
+                get_string('instancetutor_link', 'block_elediaaitutor'),
+                ['class' => 'btn btn-secondary']
+            )
+        );
 
         foreach (registry::groups() as $group) {
-            $exposed = array_filter(registry::group_keys($group),
-                static fn(string $key): bool => registry::is_exposed($key));
+            $exposed = array_filter(
+                registry::group_keys($group),
+                static fn(string $key): bool => registry::is_exposed($key)
+            );
             if (empty($exposed)) {
                 continue;
             }
-            $mform->addElement('header', 'insgroup_' . $group,
-                get_string('reggroup_' . $group, 'block_elediaaitutor'));
+            $mform->addElement(
+                'header',
+                'insgroup_' . $group,
+                get_string('reggroup_' . $group, 'block_elediaaitutor')
+            );
             $mform->setExpanded('insgroup_' . $group, $group === 'persona');
             foreach ($exposed as $key) {
                 $this->add_instance_field($mform, $key, registry::get($key));
@@ -184,9 +212,16 @@ class block_elediaaitutor_instance_shell_form extends moodleform {
             default:
                 if (!empty($entry['choices'])) {
                     $current = isset($this->config->$key) ? (string) $this->config->$key : null;
-                    $mform->addElement('select', $field, $label,
-                        registry::choice_select_options($key,
-                            get_string('config_usesite', 'block_elediaaitutor'), $current));
+                    $mform->addElement(
+                        'select',
+                        $field,
+                        $label,
+                        registry::choice_select_options(
+                            $key,
+                            get_string('config_usesite', 'block_elediaaitutor'),
+                            $current
+                        )
+                    );
                     $mform->setDefault($field, '');
                 } else {
                     $mform->addElement('text', $field, $label);
@@ -230,8 +265,14 @@ class block_elediaaitutor_instance_shell_form extends moodleform {
                 continue;
             }
             $draftid = file_get_submitted_draft_itemid($field);
-            file_prepare_draft_area($draftid, $this->blockcontext->id, 'block_elediaaitutor',
-                $filearea, 0, ['maxfiles' => 1, 'subdirs' => 0]);
+            file_prepare_draft_area(
+                $draftid,
+                $this->blockcontext->id,
+                'block_elediaaitutor',
+                $filearea,
+                0,
+                ['maxfiles' => 1, 'subdirs' => 0]
+            );
             $defaults->$field = $draftid;
         }
 
@@ -349,13 +390,21 @@ if ($data = $form->get_data()) {
         }
     }
 
-    foreach ([
+    foreach (
+        [
         'config_logo' => branding::INSTANCE_LOGO_FILEAREA,
         'config_avatar' => branding::INSTANCE_AVATAR_FILEAREA,
-    ] as $field => $filearea) {
+        ] as $field => $filearea
+    ) {
         if (property_exists($data, $field)) {
-            file_save_draft_area_files((int) $data->$field, $blockcontext->id, 'block_elediaaitutor',
-                $filearea, 0, ['maxfiles' => 1, 'subdirs' => 0]);
+            file_save_draft_area_files(
+                (int) $data->$field,
+                $blockcontext->id,
+                'block_elediaaitutor',
+                $filearea,
+                0,
+                ['maxfiles' => 1, 'subdirs' => 0]
+            );
         }
     }
 
@@ -374,10 +423,16 @@ if (!shell::is_available()) {
 }
 
 echo html_writer::start_div('path-block-elediaaitutor eat-instance-shell');
-echo html_writer::tag('h2', get_string('instance_shell_title', 'block_elediaaitutor'),
-    ['class' => 'eat-section-heading']);
-echo html_writer::tag('p', get_string('instance_shell_intro', 'block_elediaaitutor'),
-    ['class' => 'text-muted']);
+echo html_writer::tag(
+    'h2',
+    get_string('instance_shell_title', 'block_elediaaitutor'),
+    ['class' => 'eat-section-heading']
+);
+echo html_writer::tag(
+    'p',
+    get_string('instance_shell_intro', 'block_elediaaitutor'),
+    ['class' => 'text-muted']
+);
 $form->display();
 echo html_writer::end_div();
 

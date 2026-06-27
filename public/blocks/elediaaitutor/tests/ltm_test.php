@@ -113,9 +113,14 @@ final class ltm_test extends \advanced_testcase {
         ltm::set_enabled((int) $user->id, true);
 
         $transport = \block_elediaaitutor\fake_transport::json_result(
-            ['structuredContent' => ['accepted' => true]]);
+            ['structuredContent' => ['accepted' => true]]
+        );
         $client = new \block_elediaaitutor\local\rag_client(
-            new \moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
+            new \moodle_url('https://rag.example.com/mcp'),
+            null,
+            $transport,
+            30
+        );
 
         $synced = ltm::sync_to_rag((int) $user->id, \core\context\system::instance(), $client);
 

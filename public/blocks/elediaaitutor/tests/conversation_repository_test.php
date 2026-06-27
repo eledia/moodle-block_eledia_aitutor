@@ -89,8 +89,10 @@ final class conversation_repository_test extends \advanced_testcase {
         $sink = $this->redirectEvents();
         conversation_repository::upsert((int) $user->id, 'conv-x', null, 'hi');
         conversation_repository::upsert((int) $user->id, 'conv-x', null, 'again');
-        $events = array_filter($sink->get_events(),
-            static fn($e) => $e instanceof \block_elediaaitutor\event\conversation_created);
+        $events = array_filter(
+            $sink->get_events(),
+            static fn($e) => $e instanceof \block_elediaaitutor\event\conversation_created
+        );
         $this->assertCount(1, $events);
     }
 }

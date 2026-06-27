@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -29,6 +28,8 @@ declare(strict_types=1);
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+declare(strict_types=1);
+
 use block_elediaaitutor\local\question_log;
 
 require(__DIR__ . '/../../config.php');
@@ -41,8 +42,10 @@ require_login($course, false);
 $context = \core\context\course::instance($course->id);
 require_capability('block/elediaaitutor:viewreports', $context);
 
-$PAGE->set_url(new moodle_url('/blocks/elediaaitutor/report.php',
-    ['courseid' => $course->id, 'page' => $page]));
+$PAGE->set_url(new moodle_url(
+    '/blocks/elediaaitutor/report.php',
+    ['courseid' => $course->id, 'page' => $page]
+));
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('report');
 $PAGE->set_title(get_string('report_title', 'block_elediaaitutor'));
@@ -57,29 +60,31 @@ if (!question_log::is_enabled()) {
     die;
 }
 
-/**
- * Render one labelled progress bar row for the report.
- *
- * @param string $labelhtml Already-escaped label HTML.
- * @param int $count The value.
- * @param int $max The maximum across the set (for scaling).
- * @return string
- */
+// Render one labelled progress bar row for the report. Takes the already-escaped
+// label HTML, the value, and the maximum across the set (for scaling), and
+// returns the row HTML.
 $barrow = function (string $labelhtml, int $count, int $max): string {
     $pct = $max > 0 && $count > 0 ? max(6, (int) round($count * 100 / $max)) : 0;
-    $fill = html_writer::div((string) $count, 'eat-bar-fill' . ($count === 0 ? ' eat-bar-zero' : ''),
+    $fill = html_writer::div(
+        (string) $count,
+        'eat-bar-fill' . ($count === 0 ? ' eat-bar-zero' : ''),
         ['style' => 'width: ' . $pct . '%', 'role' => 'progressbar',
-            'aria-valuenow' => $count, 'aria-valuemin' => 0, 'aria-valuemax' => $max]);
+        'aria-valuenow' => $count,
+        'aria-valuemin' => 0,
+        'aria-valuemax' => $max]
+    );
     return html_writer::div(
         html_writer::div($labelhtml, 'eat-bar-label') . html_writer::div($fill, 'eat-bar-track'),
-        'eat-bar-row');
+        'eat-bar-row'
+    );
 };
 
 echo html_writer::start_div('eat-admin eat-report');
 echo html_writer::div(
     html_writer::tag('i', '', ['class' => 'fa fa-chart-bar', 'aria-hidden' => 'true']) .
     html_writer::span(get_string('report_intro', 'block_elediaaitutor')),
-    'eat-admin-intro');
+    'eat-admin-intro'
+);
 
 $summary = question_log::summary($course->id);
 
@@ -93,11 +98,15 @@ $stats = [
 echo html_writer::start_div('eat-stat-grid');
 foreach ($stats as [$icon, $value, $label]) {
     echo html_writer::div(
-        html_writer::div(html_writer::tag('i', '', ['class' => 'fa ' . $icon, 'aria-hidden' => 'true']),
-            'eat-stat-icon') .
         html_writer::div(
-            html_writer::div($value, 'eat-stat-num') . html_writer::div($label, 'eat-stat-label')),
-        'eat-stat');
+            html_writer::tag('i', '', ['class' => 'fa ' . $icon, 'aria-hidden' => 'true']),
+            'eat-stat-icon'
+        ) .
+        html_writer::div(
+            html_writer::div($value, 'eat-stat-num') . html_writer::div($label, 'eat-stat-label')
+        ),
+        'eat-stat'
+    );
 }
 echo html_writer::end_div();
 
@@ -129,8 +138,11 @@ if (!empty($hotspots)) {
         $bars .= $barrow($label, (int) $hotspot->count, (int) $maxcount);
     }
     echo html_writer::start_div('eat-report-card');
-    echo html_writer::tag('h3', get_string('report_hotspots', 'block_elediaaitutor'),
-        ['class' => 'eat-report-title']);
+    echo html_writer::tag(
+        'h3',
+        get_string('report_hotspots', 'block_elediaaitutor'),
+        ['class' => 'eat-report-title']
+    );
     echo html_writer::div($bars, 'eat-bars');
     echo html_writer::end_div();
 }
@@ -178,7 +190,7 @@ foreach (question_log::recent($course->id, $perpage, $page * $perpage) as $row) 
 }
 echo html_writer::table($table);
 echo $OUTPUT->paging_bar($summary->total, $page, $perpage, $PAGE->url);
-echo html_writer::end_div(); // .eat-report-card
+echo html_writer::end_div(); // End of .eat-report-card.
 
-echo html_writer::end_div(); // .eat-admin.eat-report
+echo html_writer::end_div(); // End of .eat-admin.eat-report.
 echo $OUTPUT->footer();

@@ -70,9 +70,16 @@ class question_log {
      * @param int|null $cmid Course module id of the primary source, if resolvable.
      * @return void
      */
-    public static function log(int $userid, ?int $courseid, string $question, bool $grounded,
-            ?string $answerstyle = null, ?string $topic = null, ?string $sourcetitle = null,
-            ?int $cmid = null): void {
+    public static function log(
+        int $userid,
+        ?int $courseid,
+        string $question,
+        bool $grounded,
+        ?string $answerstyle = null,
+        ?string $topic = null,
+        ?string $sourcetitle = null,
+        ?int $cmid = null
+    ): void {
         global $DB;
 
         if (!self::is_enabled()) {
@@ -111,10 +118,13 @@ class question_log {
     public static function hotspots(int $courseid, int $days = 30, int $limit = 10): array {
         global $DB;
 
-        $rows = $DB->get_records_select(self::TABLE,
+        $rows = $DB->get_records_select(
+            self::TABLE,
             'courseid = :courseid AND timecreated >= :since',
             ['courseid' => $courseid, 'since' => time() - $days * DAYSECS],
-            '', 'id, topic, sourcetitle, cmid');
+            '',
+            'id, topic, sourcetitle, cmid'
+        );
 
         $buckets = [];
         foreach ($rows as $row) {
@@ -145,9 +155,11 @@ class question_log {
         global $DB;
 
         $total = $DB->count_records(self::TABLE, ['courseid' => $courseid]);
-        $last7 = $DB->count_records_select(self::TABLE,
+        $last7 = $DB->count_records_select(
+            self::TABLE,
             'courseid = :courseid AND timecreated >= :since',
-            ['courseid' => $courseid, 'since' => time() - 7 * DAYSECS]);
+            ['courseid' => $courseid, 'since' => time() - 7 * DAYSECS]
+        );
         $grounded = $DB->count_records(self::TABLE, ['courseid' => $courseid, 'grounded' => 1]);
 
         return (object) ['total' => $total, 'last7' => $last7, 'grounded' => $grounded];
@@ -164,9 +176,13 @@ class question_log {
         global $DB;
 
         $since = time() - $days * DAYSECS;
-        $rows = $DB->get_records_select(self::TABLE,
+        $rows = $DB->get_records_select(
+            self::TABLE,
             'courseid = :courseid AND timecreated >= :since',
-            ['courseid' => $courseid, 'since' => $since], 'timecreated ASC', 'id, timecreated');
+            ['courseid' => $courseid, 'since' => $since],
+            'timecreated ASC',
+            'id, timecreated'
+        );
 
         $counts = [];
         for ($i = $days - 1; $i >= 0; $i--) {
@@ -191,8 +207,14 @@ class question_log {
      */
     public static function recent(int $courseid, int $limit = 50, int $offset = 0): array {
         global $DB;
-        return array_values($DB->get_records(self::TABLE, ['courseid' => $courseid],
-            'timecreated DESC, id DESC', 'id, question, grounded, answerstyle, timecreated', $offset, $limit));
+        return array_values($DB->get_records(
+            self::TABLE,
+            ['courseid' => $courseid],
+            'timecreated DESC, id DESC',
+            'id, question, grounded, answerstyle, timecreated',
+            $offset,
+            $limit
+        ));
     }
 
     /**
@@ -206,7 +228,8 @@ class question_log {
         $rows = $DB->get_records_sql(
             'SELECT DISTINCT courseid FROM {' . self::TABLE . '}
               WHERE timecreated >= :since AND courseid > 0',
-            ['since' => time() - $days * DAYSECS]);
+            ['since' => time() - $days * DAYSECS]
+        );
         return array_map('intval', array_keys($rows));
     }
 
@@ -223,7 +246,10 @@ class question_log {
         $rows = $DB->get_records_sql(
             'SELECT DISTINCT topic FROM {' . self::TABLE . '}
               WHERE courseid = :courseid AND topic IS NOT NULL',
-            ['courseid' => $courseid], 0, $limit);
+            ['courseid' => $courseid],
+            0,
+            $limit
+        );
         return array_values(array_map('strval', array_keys($rows)));
     }
 
@@ -238,10 +264,15 @@ class question_log {
      */
     public static function fetch_for_recluster(int $courseid, int $days, int $limit, int $offset): array {
         global $DB;
-        return array_values($DB->get_records_select(self::TABLE,
+        return array_values($DB->get_records_select(
+            self::TABLE,
             'courseid = :courseid AND timecreated >= :since',
             ['courseid' => $courseid, 'since' => time() - $days * DAYSECS],
-            'id ASC', 'id, question', $offset, $limit));
+            'id ASC',
+            'id, question',
+            $offset,
+            $limit
+        ));
     }
 
     /**

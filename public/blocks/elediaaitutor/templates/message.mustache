@@ -30,6 +30,7 @@
         "sendername": "eLeDia.ai Tutor",
         "avatarurl": "https://moodle.example.com/blocks/elediaaitutor/pix/logo.png",
         "html": "<p>Here is your answer.</p>",
+        "failuretext": "",
         "text": "",
         "failed": false,
         "sources": [
@@ -67,7 +68,10 @@
     <div class="elediaaitutor-bubble">
         {{#isuser}}{{text}}{{/isuser}}
         {{#isassistant}}
-            <div class="elediaaitutor-markdown">{{{html}}}</div>
+            <div class="elediaaitutor-markdown">
+                {{#failuretext}}<p>{{failuretext}}</p>{{/failuretext}}
+                {{^failuretext}}{{{html}}}{{/failuretext}}
+            </div>
             {{#hassources}}
                 <div class="elediaaitutor-sources">
                     <div class="elediaaitutor-sources-title">{{#str}}sources, block_elediaaitutor{{/str}}</div>

@@ -48,9 +48,13 @@ class tutor_import_form extends moodleform {
         $mform->addElement('hidden', 'blockid', (int) ($this->_customdata['blockid'] ?? 0));
         $mform->setType('blockid', PARAM_INT);
 
-        $mform->addElement('filepicker', 'bundle',
-            get_string('tutor_bundle', 'block_elediaaitutor'), null,
-            ['maxbytes' => 10 * 1024 * 1024, 'accepted_types' => ['.zip']]);
+        $mform->addElement(
+            'filepicker',
+            'bundle',
+            get_string('tutor_bundle', 'block_elediaaitutor'),
+            null,
+            ['maxbytes' => 10 * 1024 * 1024, 'accepted_types' => ['.zip']]
+        );
         $mform->addRule('bundle', null, 'required', null, 'client');
 
         $this->add_action_buttons(true, get_string('tutor_import', 'block_elediaaitutor'));

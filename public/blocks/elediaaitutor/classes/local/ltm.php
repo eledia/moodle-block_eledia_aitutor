@@ -112,8 +112,10 @@ class ltm {
                 'userid' => $userid,
                 'other' => ['reason' => 'memory_optin'],
             ])->trigger();
-            debugging('block_elediaaitutor: memory opt-in sync failed: ' . $e->getMessage(),
-                DEBUG_DEVELOPER);
+            debugging(
+                'block_elediaaitutor: memory opt-in sync failed: ' . $e->getMessage(),
+                DEBUG_DEVELOPER
+            );
             return false;
         }
     }

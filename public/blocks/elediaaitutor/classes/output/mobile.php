@@ -82,7 +82,7 @@ class mobile {
         }
         $url = new \moodle_url('/blocks/elediaaitutor/view.php', $params);
 
-        // core-iframe auto-logins same-site URLs inside the app.
+        // Core-iframe auto-logins same-site URLs inside the app.
         $html = '<core-iframe src="' . s($url->out(false)) . '"></core-iframe>';
 
         return [

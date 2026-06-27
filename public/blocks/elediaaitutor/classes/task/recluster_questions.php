@@ -57,7 +57,10 @@ class recluster_questions extends scheduled_task {
         $stats = recluster_service::run();
         mtrace(sprintf(
             'block_elediaaitutor: reclustered %d course(s), %d batch(es), %d topic(s) updated, %d failure(s).',
-            $stats['courses'], $stats['batches'], $stats['updated'], $stats['failed']
+            $stats['courses'],
+            $stats['batches'],
+            $stats['updated'],
+            $stats['failed']
         ));
     }
 }

@@ -58,8 +58,11 @@ class usage {
      */
     public static function count_today(int $userid): int {
         global $DB;
-        return (int) $DB->get_field(self::TABLE, 'messagecount',
-            ['userid' => $userid, 'daykey' => self::today_key()]);
+        return (int) $DB->get_field(
+            self::TABLE,
+            'messagecount',
+            ['userid' => $userid, 'daykey' => self::today_key()]
+        );
     }
 
     /**
@@ -89,7 +92,8 @@ class usage {
         $DB->execute(
             'UPDATE {' . self::TABLE . '} SET messagecount = messagecount + 1
               WHERE userid = :userid AND daykey = :daykey',
-            ['userid' => $userid, 'daykey' => $daykey]);
+            ['userid' => $userid, 'daykey' => $daykey]
+        );
         if ($DB->record_exists(self::TABLE, ['userid' => $userid, 'daykey' => $daykey])) {
             return;
         }
@@ -105,7 +109,8 @@ class usage {
             $DB->execute(
                 'UPDATE {' . self::TABLE . '} SET messagecount = messagecount + 1
                   WHERE userid = :userid AND daykey = :daykey',
-                ['userid' => $userid, 'daykey' => $daykey]);
+                ['userid' => $userid, 'daykey' => $daykey]
+            );
         }
     }
 

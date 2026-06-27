@@ -866,9 +866,19 @@ a.elediaaitutor-avatar:focus-visible {
 }
 
 .elediaaitutor-send:hover,
+.elediaaitutor-send:focus,
 .elediaaitutor-send:focus-visible {
     background: var(--eat-accent-dark);
     box-shadow: 0 3px 12px rgba(30, 63, 89, 0.35);
+}
+
+.elediaaitutor-send:focus {
+    outline: none;
+}
+
+.elediaaitutor-send:focus-visible {
+    outline: 2px solid var(--eat-focus-ring);
+    outline-offset: 2px;
 }
 
 .elediaaitutor-send:active {
@@ -1114,6 +1124,15 @@ a.elediaaitutor-avatar:focus-visible {
     color: var(--eat-ink);
 }
 
+.elediaaitutor-history-open:focus {
+    outline: none;
+}
+
+.elediaaitutor-history-open:focus-visible {
+    box-shadow: 0 0 0 2px var(--eat-focus-ring);
+    outline: none;
+}
+
 .elediaaitutor-history-title {
     display: block;
     font-weight: 600;
@@ -1121,6 +1140,12 @@ a.elediaaitutor-avatar:focus-visible {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.elediaaitutor-privacy-heading {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 1rem 0 0.35rem;
 }
 
 .elediaaitutor-history-preview {
@@ -1859,6 +1884,10 @@ body#page-admin-setting-blocksettingelediaaitutor.eat-admin-settings-shell-page 
     outline: none;
     transform: translateY(-1px);
 }
+.eat-settings-hub-card:focus-visible {
+    outline: 2px solid var(--eat-settings-primary);
+    outline-offset: 2px;
+}
 .eat-settings-hub-card--active {
     background: #fff;
     border-color: var(--eat-settings-primary);
@@ -1917,6 +1946,10 @@ body#page-admin-setting-blocksettingelediaaitutor.eat-admin-settings-shell-page 
     background: var(--eat-settings-primary-light);
     border-color: var(--eat-settings-primary);
     outline: none;
+}
+.eat-settings-backnav__button:focus-visible {
+    outline: 2px solid var(--eat-settings-primary);
+    outline-offset: 2px;
 }
 .eat-settings-hub-card__body {
     display: none;
@@ -2280,7 +2313,7 @@ body:not(.theme-lernhive) .lh-plugin-shell--full {
     background: transparent;
     border: 0;
     border-radius: 999px;
-    color: #194866;
+    color: var(--lh-primary, #194866);
     cursor: pointer;
     display: inline-flex;
     height: 2.25rem;
@@ -2294,8 +2327,8 @@ body:not(.theme-lernhive) .lh-plugin-shell--full {
 
 .eat-admin-launcher-host__link:hover,
 .eat-admin-launcher-host__link:focus-visible {
-    background: #f3f5f8;
-    color: #0f344b;
+    background: var(--lh-primary-light, #f3f5f8);
+    color: var(--lh-primary-dark, #0f344b);
     outline: none;
 }
 
@@ -2330,6 +2363,26 @@ body:not(.theme-lernhive) .lh-plugin-header__row {
 }
 body:not(.theme-lernhive) .lh-plugin-header__title-block {
     min-width: 0;
+}
+body:not(.theme-lernhive) .lh-plugin-header__tags {
+    align-items: center;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-left: 0.5rem;
+}
+body:not(.theme-lernhive) .lh-plugin-tag {
+    align-items: center;
+    background: var(--lh-bg-soft);
+    border: 1px solid var(--lh-border);
+    border-radius: 999px;
+    color: var(--lh-text-secondary);
+    display: inline-flex;
+    font-size: 0.78rem;
+    font-weight: 700;
+    gap: 0.3rem;
+    line-height: 1.2;
+    padding: 0.18rem 0.55rem;
 }
 body:not(.theme-lernhive) .lh-plugin-header__home {
     color: inherit;
@@ -2376,6 +2429,43 @@ body:not(.theme-lernhive) .lh-plugin-header__action--current {
     border-color: var(--lh-primary);
     color: var(--lh-primary);
     cursor: default;
+}
+body:not(.theme-lernhive) .lh-btn-primary,
+body:not(.theme-lernhive) .lh-btn-secondary,
+body:not(.theme-lernhive) .lh-btn-default {
+    align-items: center;
+    border: 1px solid var(--lh-border);
+    border-radius: var(--lh-radius-btn);
+    display: inline-flex;
+    font-size: 0.88rem;
+    font-weight: 700;
+    gap: 0.35rem;
+    line-height: 1.2;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.8rem;
+    text-decoration: none;
+}
+body:not(.theme-lernhive) .lh-btn-primary {
+    background: var(--lh-primary);
+    border-color: var(--lh-primary);
+    color: #fff;
+}
+body:not(.theme-lernhive) .lh-btn-secondary,
+body:not(.theme-lernhive) .lh-btn-default {
+    background: #fff;
+    color: var(--lh-primary);
+}
+body:not(.theme-lernhive) .lh-btn-primary:hover,
+body:not(.theme-lernhive) .lh-btn-primary:focus-visible,
+body:not(.theme-lernhive) .lh-btn-secondary:hover,
+body:not(.theme-lernhive) .lh-btn-secondary:focus-visible,
+body:not(.theme-lernhive) .lh-btn-default:hover,
+body:not(.theme-lernhive) .lh-btn-default:focus-visible {
+    background: var(--lh-primary-light);
+    border-color: var(--lh-primary);
+    color: var(--lh-primary);
+    outline: none;
+    text-decoration: none;
 }
 body:not(.theme-lernhive) .lh-plugin-header__name {
     align-items: center;
@@ -2440,6 +2530,64 @@ body:not(.theme-lernhive) .lh-plugin-section-nav__item[aria-current="page"] {
 }
 body:not(.theme-lernhive) .lh-plugin-content-area {
     min-width: 0;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar {
+    background: #fff;
+    border: 1px solid var(--lh-border);
+    border-radius: var(--lh-radius-sm);
+    margin: 0 0 0.75rem;
+    padding: 0.75rem 1rem;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar--actions {
+    padding: 0.6rem 1rem;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__actions,
+body:not(.theme-lernhive) .lh-row-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress {
+    align-items: center;
+    display: grid;
+    gap: 0.55rem;
+    grid-template-columns: auto minmax(8rem, 1fr) auto auto;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress-label,
+body:not(.theme-lernhive) .lh-plugin-infobar__stat {
+    color: var(--lh-text-secondary);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress-track {
+    background: var(--lh-bg-soft);
+    border-radius: 999px;
+    height: 0.45rem;
+    overflow: hidden;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress-fill {
+    background: var(--lh-primary);
+    height: 100%;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress-count {
+    color: var(--lh-primary);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress-count--muted {
+    color: var(--lh-text-secondary);
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__stats {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__stat {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.35rem;
 }
 @media (max-width: 720px) {
     body:not(.theme-lernhive) .lh-plugin-header__row {

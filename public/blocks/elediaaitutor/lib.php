@@ -24,8 +24,6 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Add the tutor question-analytics report to the course navigation.
  *
@@ -38,10 +36,15 @@ defined('MOODLE_INTERNAL') || die();
  * @param \core\context\course $context The course context.
  * @return void
  */
-function block_elediaaitutor_extend_navigation_course(navigation_node $navigation, stdClass $course,
-        \core\context\course $context): void {
-    if (!\block_elediaaitutor\local\question_log::is_enabled()
-            || !has_capability('block/elediaaitutor:viewreports', $context)) {
+function block_elediaaitutor_extend_navigation_course(
+    navigation_node $navigation,
+    stdClass $course,
+    \core\context\course $context
+): void {
+    if (
+        !\block_elediaaitutor\local\question_log::is_enabled()
+            || !has_capability('block/elediaaitutor:viewreports', $context)
+    ) {
         return;
     }
 
@@ -64,7 +67,7 @@ function block_elediaaitutor_extend_navigation_course(navigation_node $navigatio
  * may fetch them.
  *
  * @param stdClass $course Course (or site) record.
- * @param stdClass $birecord_or_cm The block instance record (null for site files).
+ * @param stdClass $birecordorcm The block instance record (null for site files).
  * @param context $context The system or block context.
  * @param string $filearea The requested file area.
  * @param array $args The file path/name args.
@@ -72,8 +75,15 @@ function block_elediaaitutor_extend_navigation_course(navigation_node $navigatio
  * @param array $options Serving options.
  * @return void Sends the file and exits, or returns false on failure.
  */
-function block_elediaaitutor_pluginfile($course, $birecord_or_cm, $context, $filearea, $args,
-        $forcedownload, array $options = []) {
+function block_elediaaitutor_pluginfile(
+    $course,
+    $birecordorcm,
+    $context,
+    $filearea,
+    $args,
+    $forcedownload,
+    array $options = []
+) {
     $sitefileareas = [
         \block_elediaaitutor\local\branding::LOGO_FILEAREA,
         \block_elediaaitutor\local\branding::AVATAR_FILEAREA,
@@ -110,5 +120,9 @@ function block_elediaaitutor_pluginfile($course, $birecord_or_cm, $context, $fil
         send_file_not_found();
     }
 
-    send_stored_file($file, null, 0, $forcedownload, $options);
+    // Every area served here is a branding image embedded via <img src>. Force
+    // download unconditionally so a crafted SVG fetched as a top-level document
+    // cannot execute script in the Moodle origin; <img> embedding is unaffected
+    // by the attachment disposition, so the visible UI does not change.
+    send_stored_file($file, null, 0, true, $options);
 }

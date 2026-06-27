@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 declare(strict_types=1);
 
@@ -12,8 +20,6 @@ namespace block_elediaaitutor\output;
 
 use coding_exception;
 use html_writer;
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Plugin Shell page wrapper for eLeDia.ai Tutor pages.
@@ -23,11 +29,17 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class plugin_page {
+    /** @var string Default shell width. */
     public const MODIFIER_DEFAULT = 'default';
+    /** @var string Narrow, reading-optimised shell width. */
     public const MODIFIER_READING = 'reading';
+    /** @var string Editing shell width. */
     public const MODIFIER_EDITING = 'editing';
+    /** @var string Wide shell width. */
     public const MODIFIER_WIDE = 'wide';
+    /** @var string Full-bleed shell width. */
     public const MODIFIER_FULL = 'full';
+    /** @var string Compact shell width. */
     public const MODIFIER_COMPACT = 'full';
 
     /** @var bool Tracks the open shell wrapper. */
@@ -46,13 +58,15 @@ final class plugin_page {
             throw new coding_exception('plugin_page::open() called twice without close().');
         }
 
-        if (!in_array($modifier, [
+        if (
+            !in_array($modifier, [
             self::MODIFIER_DEFAULT,
             self::MODIFIER_READING,
             self::MODIFIER_EDITING,
             self::MODIFIER_WIDE,
             self::MODIFIER_FULL,
-        ], true)) {
+            ], true)
+        ) {
             throw new coding_exception("Unknown plugin_page modifier '{$modifier}'.");
         }
 

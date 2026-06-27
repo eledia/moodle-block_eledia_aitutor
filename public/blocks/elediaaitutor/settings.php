@@ -142,7 +142,7 @@ if ($hassiteconfig) {
     ];
     $imageopts = ['maxfiles' => 1, 'accepted_types' => ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif']];
 
-    $infocards = static function(array $cards): string {
+    $infocards = static function (array $cards): string {
         $html = html_writer::start_div('eat-settings-infocards');
         foreach ($cards as $card) {
             $html .= html_writer::div(
@@ -161,9 +161,11 @@ if ($hassiteconfig) {
         return $html . html_writer::end_div();
     };
 
-    $addregistrygroup = function(string $group) use ($settings, $reglabel, $regdesc, $filemap, $imageopts): void {
-        $keys = array_values(array_filter(registry::group_keys($group),
-            static fn(string $key): bool => registry::is_available($key)));
+    $addregistrygroup = function (string $group) use ($settings, $reglabel, $regdesc, $filemap, $imageopts): void {
+        $keys = array_values(array_filter(
+            registry::group_keys($group),
+            static fn(string $key): bool => registry::is_available($key)
+        ));
         if (empty($keys)) {
             return;
         }
@@ -182,40 +184,75 @@ if ($hassiteconfig) {
             if ($entry['type'] === 'file') {
                 [$cfgname, $filearea] = $filemap[$key];
                 $settings->add(new admin_setting_configstoredfile(
-                    'block_elediaaitutor/' . $cfgname, $label, $desc, $filearea, 0, $imageopts));
+                    'block_elediaaitutor/' . $cfgname,
+                    $label,
+                    $desc,
+                    $filearea,
+                    0,
+                    $imageopts
+                ));
             } else if ($entry['type'] === 'colour') {
                 $settings->add(new admin_setting_configcolourpicker(
-                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default));
+                    'block_elediaaitutor/' . registry::sitekey($key),
+                    $label,
+                    $desc,
+                    (string) $default
+                ));
             } else if ($entry['type'] === 'checkbox') {
                 $settings->add(new admin_setting_configcheckbox(
-                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (int) $default));
+                    'block_elediaaitutor/' . registry::sitekey($key),
+                    $label,
+                    $desc,
+                    (int) $default
+                ));
             } else if ($entry['type'] === 'select') {
                 $options = [];
                 foreach ($entry['options'] as $value => $optkey) {
                     $options[$value] = get_string($optkey, 'block_elediaaitutor');
                 }
                 $settings->add(new admin_setting_configselect(
-                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default, $options));
+                    'block_elediaaitutor/' . registry::sitekey($key),
+                    $label,
+                    $desc,
+                    (string) $default,
+                    $options
+                ));
             } else if ($entry['type'] === 'textarea') {
                 $settings->add(new admin_setting_configtextarea(
-                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default));
+                    'block_elediaaitutor/' . registry::sitekey($key),
+                    $label,
+                    $desc,
+                    (string) $default
+                ));
             } else if (!empty($entry['choices'])) {
-                // cssvalue / font with friendly named options → a dropdown so no
+                // Cssvalue / font with friendly named options → a dropdown so no
                 // one has to type raw CSS. The empty value is the built-in default.
                 $cfgname = registry::sitekey($key);
                 $current = get_config('block_elediaaitutor', $cfgname);
-                $options = registry::choice_select_options($key,
+                $options = registry::choice_select_options(
+                    $key,
                     get_string('reg_opt_default', 'block_elediaaitutor'),
-                    $current === false ? null : (string) $current);
+                    $current === false ? null : (string) $current
+                );
                 $settings->add(new admin_setting_configselect(
-                    'block_elediaaitutor/' . $cfgname, $label, $desc, (string) $default, $options));
+                    'block_elediaaitutor/' . $cfgname,
+                    $label,
+                    $desc,
+                    (string) $default,
+                    $options
+                ));
             } else {
                 // Free text (persona fields, labels, footer text).
                 $settings->add(new admin_setting_configtext(
-                    'block_elediaaitutor/' . registry::sitekey($key), $label, $desc, (string) $default, PARAM_TEXT));
+                    'block_elediaaitutor/' . registry::sitekey($key),
+                    $label,
+                    $desc,
+                    (string) $default,
+                    PARAM_TEXT
+                ));
             }
 
-            // "Allow per-instance override" companion checkbox.
+            // The "Allow per-instance override" companion checkbox.
             if (!empty($entry['instanceable'])) {
                 $settings->add(new admin_setting_configcheckbox(
                     'block_elediaaitutor/' . registry::EXPOSE_PREFIX . $key,
@@ -227,7 +264,7 @@ if ($hassiteconfig) {
         }
     };
 
-    // --- Design. -----------------------------------------------------------.
+    // Design.
     $settings->add(new admin_setting_heading(
         'block_elediaaitutor/sectiondesign',
         get_string('setting_section_design', 'block_elediaaitutor'),
@@ -247,7 +284,7 @@ if ($hassiteconfig) {
         PARAM_RAW
     ));
 
-    // --- Conversation & display. ------------------------------------------.
+    // Conversation & display.
     $settings->add(new admin_setting_heading(
         'block_elediaaitutor/sectionconversation',
         get_string('setting_section_conversation', 'block_elediaaitutor'),
@@ -298,7 +335,7 @@ if ($hassiteconfig) {
         ''
     ));
 
-    // --- Technical settings. ----------------------------------------------.
+    // Technical settings.
     $settings->add(new admin_setting_heading(
         'block_elediaaitutor/sectiontechnical',
         get_string('setting_section_technical', 'block_elediaaitutor'),

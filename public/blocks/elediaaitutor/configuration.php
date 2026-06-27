@@ -80,7 +80,7 @@ if ($ragingestavailable) {
     }
 }
 
-$checkllmhealth = static function(bool $literagavailable): array {
+$checkllmhealth = static function (bool $literagavailable): array {
     $fallback = [
         'healthy' => false,
         'state' => $literagavailable ? 'error' : 'todo',
@@ -103,8 +103,10 @@ $checkllmhealth = static function(bool $literagavailable): array {
         $configclass::llm_api_key() === '' ? '' : sha1($configclass::llm_api_key()),
     ]));
     $cached = json_decode((string) get_config('block_elediaaitutor', 'llmhealthcache'), true);
-    if (is_array($cached) && !empty($cached['checked']) && ($cached['fingerprint'] ?? '') === $configfingerprint &&
-            (time() - (int) $cached['checked']) < 60) {
+    if (
+        is_array($cached) && !empty($cached['checked']) && ($cached['fingerprint'] ?? '') === $configfingerprint &&
+            (time() - (int) $cached['checked']) < 60
+    ) {
         return [
             'healthy' => !empty($cached['healthy']),
             'state' => !empty($cached['healthy']) ? 'ready' : 'error',
@@ -118,9 +120,11 @@ $checkllmhealth = static function(bool $literagavailable): array {
         }
 
         $transport = null;
-        if (interface_exists('\\local_literag\\local\\http\\transport') &&
-                class_exists('\\local_literag\\local\\http\\curl_transport')) {
-            $transport = new class($configclass::llm_allow_private()) implements \local_literag\local\http\transport {
+        if (
+            interface_exists('\\local_literag\\local\\http\\transport') &&
+                class_exists('\\local_literag\\local\\http\\curl_transport')
+        ) {
+            $transport = new class ($configclass::llm_allow_private()) implements \local_literag\local\http\transport {
                 /** @var bool Whether to allow private HTTP targets. */
                 private bool $allowprivate;
 
@@ -183,13 +187,13 @@ $checkllmhealth = static function(bool $literagavailable): array {
 
 $llmhealth = $checkllmhealth($literagavailable);
 
-$settingurl = static function(string $section, string $anchor): moodle_url {
+$settingurl = static function (string $section, string $anchor): moodle_url {
     return new moodle_url('/admin/settings.php', ['section' => $section], 'admin-' . $anchor);
 };
-$settingshellurl = static function(string $section, string $hash): moodle_url {
+$settingshellurl = static function (string $section, string $hash): moodle_url {
     return new moodle_url('/admin/settings.php', ['section' => $section], $hash);
 };
-$mcpconfigurl = static function(string $anchor): moodle_url {
+$mcpconfigurl = static function (string $anchor): moodle_url {
     return new moodle_url('/webservice/elediamcp/configuration.php', [], $anchor);
 };
 
@@ -236,27 +240,39 @@ $statusrows = [
     ],
 ];
 
-$card = static function(string $icon, string $title, string $description, moodle_url $link, string $label,
-        string $actionicon): string {
-    return html_writer::tag('section',
-        html_writer::tag('div',
+$card = static function (
+    string $icon,
+    string $title,
+    string $description,
+    moodle_url $link,
+    string $label,
+    string $actionicon
+): string {
+    return html_writer::tag(
+        'section',
+        html_writer::tag(
+            'div',
             html_writer::span(
                 html_writer::tag('i', '', ['class' => 'fa fa-' . $icon, 'aria-hidden' => 'true']),
                 'lh-plugin-card__icon lh-plugin-card__icon--generic'
             ) .
-            html_writer::tag('div',
+            html_writer::tag(
+                'div',
                 html_writer::tag('div', $title, ['class' => 'lh-plugin-card__title']),
                 ['class' => 'lh-plugin-card__meta']
             ) .
-            html_writer::tag('div',
-                html_writer::link($link,
+            html_writer::tag(
+                'div',
+                html_writer::link(
+                    $link,
                     html_writer::tag('i', '', ['class' => 'fa fa-' . $actionicon, 'aria-hidden' => 'true']) .
                     html_writer::span($label, 'sr-only'),
                     [
                         'class' => 'lh-icon-action',
                         'aria-label' => $label,
                         'title' => $label,
-                    ]),
+                    ]
+                ),
                 ['class' => 'lh-plugin-card__actions']
             ),
             ['class' => 'lh-plugin-card__top']
@@ -266,8 +282,16 @@ $card = static function(string $icon, string $title, string $description, moodle
     );
 };
 
-$wizardstep = static function(int $number, string $icon, string $title, string $body, moodle_url $url,
-        string $linklabel, bool $ready, array $tasks = []): string {
+$wizardstep = static function (
+    int $number,
+    string $icon,
+    string $title,
+    string $body,
+    moodle_url $url,
+    string $linklabel,
+    bool $ready,
+    array $tasks = []
+): string {
     if ($tasks) {
         $ready = array_reduce($tasks, static fn(bool $carry, array $task): bool => $carry && !empty($task['ready']), true);
     }
@@ -287,7 +311,8 @@ $wizardstep = static function(int $number, string $icon, string $title, string $
                 : ($taskready
                     ? get_string('configuration_wizard_status_ready', 'block_elediaaitutor')
                     : get_string('configuration_wizard_status_todo', 'block_elediaaitutor'));
-            $taskhtml .= html_writer::tag('li',
+            $taskhtml .= html_writer::tag(
+                'li',
                 html_writer::span('', 'eat-setup-task__dot ' . $taskstatusclass) .
                 html_writer::span(
                     html_writer::span($task['title'], 'eat-setup-task__title') .
@@ -295,24 +320,29 @@ $wizardstep = static function(int $number, string $icon, string $title, string $
                     html_writer::span($taskstatuslabel, 'sr-only'),
                     'eat-setup-task__text'
                 ) .
-                html_writer::link($task['url'],
+                html_writer::link(
+                    $task['url'],
                     html_writer::tag('i', '', ['class' => 'fa fa-arrow-right', 'aria-hidden' => 'true']) .
                     html_writer::span(get_string('configuration_wizard_task_open', 'block_elediaaitutor'), 'sr-only'),
                     [
                         'class' => 'lh-icon-action eat-setup-task__action',
                         'aria-label' => $task['title'],
                         'title' => $task['title'],
-                    ]),
+                    ]
+                ),
                 ['class' => 'eat-setup-task']
             );
         }
         $taskhtml .= html_writer::end_tag('ol');
     }
 
-    return html_writer::tag('section',
+    return html_writer::tag(
+        'section',
         html_writer::div(
-            html_writer::span(html_writer::tag('i', '', ['class' => 'fa fa-' . $icon, 'aria-hidden' => 'true']),
-                'eat-setup-step__icon') .
+            html_writer::span(
+                html_writer::tag('i', '', ['class' => 'fa fa-' . $icon, 'aria-hidden' => 'true']),
+                'eat-setup-step__icon'
+            ) .
             html_writer::span($statuslabel, 'eat-setup-step__status ' . $statusclass),
             'eat-setup-step__top'
         ) .
@@ -340,9 +370,11 @@ if ($ragingestpending > 0) {
         'queuepending' => 1,
         'sesskey' => sesskey(),
     ]);
-    $ragingestcta = html_writer::tag('div',
+    $ragingestcta = html_writer::tag(
+        'div',
         html_writer::tag('strong', get_string('configuration_ragingest_pending_title', 'block_elediaaitutor')) .
-        html_writer::tag('p',
+        html_writer::tag(
+            'p',
             get_string('configuration_ragingest_pending_body', 'block_elediaaitutor', $ragingestpending)
         ) .
         $OUTPUT->single_button(
@@ -354,12 +386,20 @@ if ($ragingestpending > 0) {
     );
 }
 
-echo html_writer::tag('section',
-    html_writer::tag('div',
-        html_writer::tag('h2', get_string('configuration_wizard_title', 'block_elediaaitutor'),
-            ['class' => 'eat-setup-wizard__title']) .
-        html_writer::tag('p', get_string('configuration_wizard_desc', 'block_elediaaitutor'),
-            ['class' => 'eat-setup-wizard__intro']) .
+echo html_writer::tag(
+    'section',
+    html_writer::tag(
+        'div',
+        html_writer::tag(
+            'h2',
+            get_string('configuration_wizard_title', 'block_elediaaitutor'),
+            ['class' => 'eat-setup-wizard__title']
+        ) .
+        html_writer::tag(
+            'p',
+            get_string('configuration_wizard_desc', 'block_elediaaitutor'),
+            ['class' => 'eat-setup-wizard__intro']
+        ) .
         $ragingestcta,
         ['class' => 'eat-setup-wizard__head']
     ) .
@@ -536,21 +576,27 @@ echo html_writer::tag('section',
     ['class' => 'eat-setup-wizard']
 );
 
-echo html_writer::tag('section',
-    html_writer::tag('div',
+echo html_writer::tag(
+    'section',
+    html_writer::tag(
+        'div',
         html_writer::span(
             html_writer::tag('i', '', ['class' => 'fa fa-check-circle', 'aria-hidden' => 'true']),
             'lh-plugin-card__icon lh-plugin-card__icon--generic'
         ) .
-        html_writer::tag('div',
-            html_writer::tag('div', get_string('configuration_status_title', 'block_elediaaitutor'),
-                ['class' => 'lh-plugin-card__title']),
+        html_writer::tag(
+            'div',
+            html_writer::tag(
+                'div',
+                get_string('configuration_status_title', 'block_elediaaitutor'),
+                ['class' => 'lh-plugin-card__title']
+            ),
             ['class' => 'lh-plugin-card__meta']
         ),
         ['class' => 'lh-plugin-card__top']
     ) .
     html_writer::start_tag('dl', ['class' => 'lh-plugin-card__body']) .
-    implode('', array_map(static function(array $row): string {
+    implode('', array_map(static function (array $row): string {
         return html_writer::tag('dt', $row['label']) . html_writer::tag('dd', $row['value']);
     }, $statusrows)) .
     html_writer::end_tag('dl'),

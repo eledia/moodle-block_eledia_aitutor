@@ -126,7 +126,8 @@
                     <div class="elediaaitutor-history-empty" data-region="history-empty">
                         {{#str}}nohistory, block_elediaaitutor{{/str}}
                     </div>
-                    <ul class="elediaaitutor-history-list" data-region="history-list"></ul>
+                    <ul class="elediaaitutor-history-list" data-region="history-list"
+                        aria-label="{{#str}}history, block_elediaaitutor{{/str}}"></ul>
                 </div>
             {{/historyenabled}}
 
@@ -197,7 +198,8 @@
                 </div>
             {{/stylelocked}}
 
-            <form class="elediaaitutor-composer" data-region="composer">
+            <form class="elediaaitutor-composer" data-region="composer"
+                  aria-label="{{#str}}messagelabel, block_elediaaitutor{{/str}}">
                 <label class="sr-only" for="{{uniqid}}_input">
                     {{#str}}messagelabel, block_elediaaitutor{{/str}}
                 </label>

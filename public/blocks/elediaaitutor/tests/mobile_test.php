@@ -55,7 +55,9 @@ final class mobile_test extends \advanced_testcase {
         $html = $result['templates'][0]['html'];
         $this->assertStringNotContainsString('<core-iframe', $html);
         $this->assertStringContainsString(
-            get_string('notenabledincourse', 'block_elediaaitutor'), $html);
+            get_string('notenabledincourse', 'block_elediaaitutor'),
+            $html
+        );
     }
 
     /**

@@ -80,7 +80,7 @@ class registry {
 
         $entries = [];
 
-        // --- Persona / system prompt (sent to the RAG server). --------------
+        // Persona / system prompt (sent to the RAG server).
         $entries['persona'] = self::entry('persona', 'text', [
             'sendtorag' => true, 'exposedefault' => true,
         ]);
@@ -93,7 +93,7 @@ class registry {
             'sendtorag' => true,
         ]);
 
-        // --- Colour + value tokens. Each maps to a single --eat-* property. -
+        // Colour + value tokens. Each maps to a single --eat-* property.
         // [registry key, --eat- token, group, type, exposedefault, sitekey].
         $tokens = [
             // Accent family.
@@ -164,7 +164,7 @@ class registry {
             ]);
         }
 
-        // --- Conversation & display (instanceable). ------------------------
+        // Conversation & display (instanceable).
         $entries['welcomemessage'] = self::entry('conversation', 'textarea', [
             'exposedefault' => true,
         ]);
@@ -199,7 +199,7 @@ class registry {
             'default' => 1, 'exposedefault' => true,
         ]);
 
-        // --- Launcher. ------------------------------------------------------
+        // Launcher.
         $entries['launcherstyle'] = self::entry('launcher', 'select', [
             'default' => 'pill',
             'options' => [
@@ -214,7 +214,7 @@ class registry {
             'exposedefault' => true,
         ]);
 
-        // --- Footer / white-label. Instance-overridable only when the admin
+        // Footer / white-label. Instance-overridable only when the admin
         // opts in (off by default — white-label is usually institution-wide).
         $entries['footermode'] = self::entry('footer', 'select', [
             'default' => branding::FOOTER_DEFAULT,
@@ -231,7 +231,7 @@ class registry {
             'exposedefault' => false,
         ]);
 
-        // --- Images. --------------------------------------------------------
+        // Images.
         $entries['logo'] = self::entry('files', 'file', [
             'exposedefault' => true,
         ]);
@@ -377,8 +377,11 @@ class registry {
      * @param string|null $current The currently stored value, or null.
      * @return array<string, string> value => translated label.
      */
-    public static function choice_select_options(string $key, string $emptylabel,
-            ?string $current = null): array {
+    public static function choice_select_options(
+        string $key,
+        string $emptylabel,
+        ?string $current = null
+    ): array {
         $options = ['' => $emptylabel];
         foreach ((self::choices($key) ?? []) as $value => $langkey) {
             if ((string) $value === '') {
@@ -607,7 +610,7 @@ class registry {
                 $clean = trim((string) $value);
                 return $clean === '' ? null : $clean;
             default:
-                // 'file' and anything else are not plain config values.
+                // The 'file' type and anything else are not plain config values.
                 return null;
         }
     }

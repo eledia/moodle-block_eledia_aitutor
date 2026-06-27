@@ -131,8 +131,17 @@ final class chat_service_test extends \advanced_testcase {
         ]);
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
-        $result = chat_service::send((int) $user->id, 'Q?', 5, null, \core\context\system::instance(),
-            $client, null, null, false);
+        $result = chat_service::send(
+            (int) $user->id,
+            'Q?',
+            5,
+            null,
+            \core\context\system::instance(),
+            $client,
+            null,
+            null,
+            false
+        );
 
         // The flag was sent, and the sources were dropped.
         $this->assertFalse($transport->last_payload()['params']['arguments']['rag_enabled']);
@@ -236,8 +245,15 @@ final class chat_service_test extends \advanced_testcase {
         ]);
         $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
 
-        chat_service::send((int) $user->id, 'What is due?', 42, null, \core\context\system::instance(),
-            $client, 'hint');
+        chat_service::send(
+            (int) $user->id,
+            'What is due?',
+            42,
+            null,
+            \core\context\system::instance(),
+            $client,
+            'hint'
+        );
 
         $args = $transport->last_payload()['params']['arguments'];
         $this->assertSame('hint', $args['answer_style']);
