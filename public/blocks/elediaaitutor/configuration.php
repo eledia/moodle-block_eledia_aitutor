@@ -290,27 +290,54 @@ $wizardstep = static function (
     moodle_url $url,
     string $linklabel,
     bool $ready,
-    array $tasks = []
+    array $tasks = [],
+    bool $installed = true
 ): string {
-    if ($tasks) {
+    if (!$installed) {
+        $ready = false;
+    } else if ($tasks) {
         $ready = array_reduce($tasks, static fn(bool $carry, array $task): bool => $carry && !empty($task['ready']), true);
     }
-    $statuslabel = $ready
-        ? get_string('configuration_wizard_status_ready', 'block_elediaaitutor')
-        : get_string('configuration_wizard_status_todo', 'block_elediaaitutor');
-    $statusclass = $ready ? 'eat-setup-step__status--ready' : 'eat-setup-step__status--error';
+    $statuslabel = !$installed
+        ? get_string('configuration_wizard_status_missingplugin', 'block_elediaaitutor')
+        : ($ready
+            ? get_string('configuration_wizard_status_ready', 'block_elediaaitutor')
+            : get_string('configuration_wizard_status_todo', 'block_elediaaitutor'));
+    $statusclass = !$installed
+        ? 'eat-setup-step__status--missing'
+        : ($ready ? 'eat-setup-step__status--ready' : 'eat-setup-step__status--error');
     $taskhtml = '';
     if ($tasks) {
         $taskhtml .= html_writer::start_tag('ol', ['class' => 'eat-setup-task-list']);
         foreach ($tasks as $task) {
-            $taskready = !empty($task['ready']);
-            $taskstate = $task['state'] ?? ($taskready ? 'ready' : 'error');
+            $taskavailable = $installed && ($task['available'] ?? true);
+            $taskready = $taskavailable && !empty($task['ready']);
+            $taskstate = $taskavailable ? ($task['state'] ?? ($taskready ? 'ready' : 'error')) : 'missing';
             $taskstatusclass = 'eat-setup-task__state--' . clean_param((string) $taskstate, PARAM_ALPHANUMEXT);
-            $taskstatuslabel = $taskstate === 'error'
+            $taskstatuslabel = $taskstate === 'missing'
+                ? get_string('configuration_wizard_status_missingplugin', 'block_elediaaitutor')
+                : ($taskstate === 'error'
                 ? get_string('configuration_wizard_status_error', 'block_elediaaitutor')
                 : ($taskready
                     ? get_string('configuration_wizard_status_ready', 'block_elediaaitutor')
-                    : get_string('configuration_wizard_status_todo', 'block_elediaaitutor'));
+                    : get_string('configuration_wizard_status_todo', 'block_elediaaitutor')));
+            $taskaction = $taskavailable
+                ? html_writer::link(
+                    $task['url'],
+                    html_writer::tag('i', '', ['class' => 'fa fa-arrow-right', 'aria-hidden' => 'true']) .
+                    html_writer::span(get_string('configuration_wizard_task_open', 'block_elediaaitutor'), 'sr-only'),
+                    [
+                        'class' => 'lh-icon-action eat-setup-task__action',
+                        'aria-label' => $task['title'],
+                        'title' => $task['title'],
+                    ]
+                )
+                : html_writer::span(
+                    html_writer::tag('i', '', ['class' => 'fa fa-lock', 'aria-hidden' => 'true']) .
+                    html_writer::span($taskstatuslabel, 'sr-only'),
+                    'lh-icon-action eat-setup-task__action eat-setup-task__action--disabled',
+                    ['title' => $taskstatuslabel]
+                );
             $taskhtml .= html_writer::tag(
                 'li',
                 html_writer::span('', 'eat-setup-task__dot ' . $taskstatusclass) .
@@ -320,21 +347,17 @@ $wizardstep = static function (
                     html_writer::span($taskstatuslabel, 'sr-only'),
                     'eat-setup-task__text'
                 ) .
-                html_writer::link(
-                    $task['url'],
-                    html_writer::tag('i', '', ['class' => 'fa fa-arrow-right', 'aria-hidden' => 'true']) .
-                    html_writer::span(get_string('configuration_wizard_task_open', 'block_elediaaitutor'), 'sr-only'),
-                    [
-                        'class' => 'lh-icon-action eat-setup-task__action',
-                        'aria-label' => $task['title'],
-                        'title' => $task['title'],
-                    ]
-                ),
-                ['class' => 'eat-setup-task']
+                $taskaction,
+                ['class' => $taskavailable ? 'eat-setup-task' : 'eat-setup-task eat-setup-task--disabled']
             );
         }
         $taskhtml .= html_writer::end_tag('ol');
     }
+    $missingnotice = $installed ? '' : html_writer::tag(
+        'p',
+        get_string('configuration_wizard_missing_body', 'block_elediaaitutor'),
+        ['class' => 'eat-setup-step__missing']
+    );
 
     return html_writer::tag(
         'section',
@@ -348,8 +371,9 @@ $wizardstep = static function (
         ) .
         html_writer::tag('h3', $title, ['class' => 'eat-setup-step__title']) .
         html_writer::tag('p', $body, ['class' => 'eat-setup-step__body']) .
+        $missingnotice .
         $taskhtml,
-        ['class' => 'eat-setup-step']
+        ['class' => $installed ? 'eat-setup-step' : 'eat-setup-step eat-setup-step--missing']
     );
 };
 
@@ -432,7 +456,8 @@ echo html_writer::tag(
                     'url' => $settingshellurl('local_literag', 'settings-livetools'),
                     'ready' => $literagavailable,
                 ],
-            ]
+            ],
+            $literagavailable
         ) .
         $wizardstep(
             2,
@@ -459,7 +484,8 @@ echo html_writer::tag(
                     'ready' => $ragingestavailable && $ragingestpending === 0,
                     'state' => !$ragingestavailable ? 'todo' : ($ragingestpending > 0 ? 'error' : 'ready'),
                 ],
-            ]
+            ],
+            $ragingestavailable
         ) .
         $wizardstep(
             3,
@@ -488,7 +514,8 @@ echo html_writer::tag(
                     'url' => $mcpconfigurl('id_allowed_origins'),
                     'ready' => $mcpavailable,
                 ],
-            ]
+            ],
+            $mcpavailable
         ) .
         $wizardstep(
             4,
