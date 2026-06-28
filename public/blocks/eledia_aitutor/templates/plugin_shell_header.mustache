@@ -1,0 +1,165 @@
+{{!
+    @template block_eledia_aitutor/plugin_shell_header
+
+    Shared Plugin Shell header owned by the eLeDia.ai Tutor block.
+}}
+<div class="lh-plugin-header{{#sectionnav}} lh-plugin-header--has-section-nav{{/sectionnav}}">
+    <div class="lh-plugin-header__row">
+        {{#backurl}}
+            <div class="lh-plugin-header__nav">
+                <a class="lh-plugin-header__action lh-plugin-header__action--back"
+                   href="{{ backurl }}"
+                   aria-label="{{ backlabel }}"
+                   title="{{ backlabel }}">
+                    <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                </a>
+            </div>
+        {{/backurl}}
+
+        <div class="lh-plugin-header__title-block">
+            <div class="lh-plugin-header__name">
+                <span class="lh-plugin-header__name-text">
+                    {{#homeurl}}
+                        <a class="lh-plugin-header__home"
+                           href="{{ homeurl }}"
+                           aria-label="{{ homelabel }}"
+                           title="{{ homelabel }}">{{ name }}</a>
+                    {{/homeurl}}
+                    {{^homeurl}}
+                        {{ name }}
+                    {{/homeurl}}
+                    <span class="lh-plugin-header__sep" aria-hidden="true">|</span>
+                    <span class="lh-plugin-header__tagline">{{ tagline }}</span>
+                </span>
+                {{#hastags}}
+                    <span class="lh-plugin-header__tags" aria-label="{{#str}} tags {{/str}}">
+                        {{#tags}}
+                            <span class="lh-plugin-tag lh-plugin-tag--{{ modifier }}">
+                                <i class="fa {{ faicon }}" aria-hidden="true"></i>
+                                {{ label }}
+                            </span>
+                        {{/tags}}
+                    </span>
+                {{/hastags}}
+            </div>
+            {{#subtitle}}
+                <p class="lh-plugin-header__subtitle">{{ subtitle }}</p>
+            {{/subtitle}}
+        </div>
+
+        <div class="lh-plugin-header__actions">
+            {{#ctas}}
+                <a class="lh-btn-{{ modifier }}" href="{{ url }}">
+                    {{#fa}}<i class="fa {{ fa }} me-1" aria-hidden="true"></i>{{/fa}}
+                    {{ label }}
+                </a>
+            {{/ctas}}
+            {{#createurl}}
+                <a class="lh-plugin-header__action lh-plugin-header__action--create"
+                   href="{{ createurl }}"
+                   aria-label="{{ createlabel }}"
+                   title="{{ createlabel }}">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                </a>
+            {{/createurl}}
+            {{#headeractionicons}}
+                <a class="lh-plugin-header__action {{ modifierclass }}"
+                   href="{{ url }}"
+                   aria-label="{{ label }}"
+                   title="{{ label }}">
+                    <i class="fa {{ faicon }}" aria-hidden="true"></i>
+                </a>
+            {{/headeractionicons}}
+            {{#helpurl}}
+                <a class="lh-plugin-header__action lh-plugin-header__action--help"
+                   href="{{ helpurl }}"
+                   aria-label="{{ helplabel }}"
+                   title="{{ helplabel }}">
+                    <i class="fa fa-question" aria-hidden="true"></i>
+                </a>
+            {{/helpurl}}
+            {{#settingsurl}}
+                {{#settingsiscurrent}}
+                    <span class="lh-plugin-header__action lh-plugin-header__action--settings lh-plugin-header__action--current"
+                          aria-current="page"
+                          aria-label="{{ settingslabel }}"
+                          title="{{ settingslabel }}">
+                        <i class="fa fa-gear" aria-hidden="true"></i>
+                    </span>
+                {{/settingsiscurrent}}
+                {{^settingsiscurrent}}
+                    <a class="lh-plugin-header__action lh-plugin-header__action--settings"
+                       href="{{ settingsurl }}"
+                       aria-label="{{ settingslabel }}"
+                       title="{{ settingslabel }}">
+                        <i class="fa fa-gear" aria-hidden="true"></i>
+                    </a>
+                {{/settingsiscurrent}}
+            {{/settingsurl}}
+        </div>
+    </div>
+    {{{ sectionnav }}}
+</div>
+
+{{#hasactionicons}}
+    <div class="lh-plugin-infobar lh-plugin-infobar--actions">
+        <nav class="lh-plugin-infobar__actions" aria-label="{{#str}} actions, core {{/str}}">
+            {{#actionicons}}
+                <a class="lh-icon-action {{ modifierclass }}"
+                   href="{{ url }}"
+                   aria-label="{{ label }}"
+                   title="{{ label }}">
+                    <i class="fa {{ faicon }}" aria-hidden="true"></i>
+                    <span class="sr-only">{{ label }}</span>
+                </a>
+            {{/actionicons}}
+        </nav>
+    </div>
+{{/hasactionicons}}
+
+{{#hasprogress}}
+    <div class="lh-plugin-infobar">
+        {{#progress}}
+            <div class="lh-plugin-infobar__progress">
+                <span class="lh-plugin-infobar__progress-label">{{ label }}</span>
+                <div class="lh-plugin-infobar__progress-track">
+                    <div class="lh-plugin-infobar__progress-fill"
+                         role="progressbar"
+                         style="width: {{ percent }}%"
+                         aria-valuenow="{{ percent }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100"></div>
+                </div>
+                <span class="lh-plugin-infobar__progress-count">{{ percent }}%</span>
+                <span class="lh-plugin-infobar__progress-count lh-plugin-infobar__progress-count--muted">{{ count }}</span>
+            </div>
+        {{/progress}}
+    </div>
+{{/hasprogress}}
+{{^hasprogress}}
+    {{#hasstats}}
+        <div class="lh-plugin-infobar">
+            <div class="lh-plugin-infobar__stats">
+                {{#stats}}
+                    <span class="lh-plugin-infobar__stat">
+                        {{#faicon}}<i class="fa {{ faicon }}" aria-hidden="true"></i>{{/faicon}}
+                        {{#value}}<strong>{{ value }}</strong>{{/value}}
+                        {{ label }}
+                    </span>
+                {{/stats}}
+            </div>
+        </div>
+    {{/hasstats}}
+    {{^hasstats}}
+        {{#hint}}
+            <div class="lh-plugin-infobar">
+                <div class="lh-plugin-infobar__stats">
+                    <span class="lh-plugin-infobar__stat">
+                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        {{ hint }}
+                    </span>
+                </div>
+            </div>
+        {{/hint}}
+    {{/hasstats}}
+{{/hasprogress}}

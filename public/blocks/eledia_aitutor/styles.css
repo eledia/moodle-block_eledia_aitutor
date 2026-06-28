@@ -1,0 +1,3293 @@
+/*
+ * This file is part of Moodle - http://moodle.org/
+ *
+ * Moodle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * eLeDia.ai Tutor block styles.
+ *
+ * Everything is namespaced under .eledia_aitutor-* so nothing leaks into the
+ * surrounding Moodle theme. Overlay modes are portalled to <body> by the AMD
+ * module and given a high z-index so chat menus/overlays are never clipped by
+ * block-container overflow (a known failure mode in similar blocks).
+ *
+ * @package   block_eledia_aitutor
+ * @copyright 2026 eLeDia GmbH, Berlin
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/*
+ * Custom properties are declared on BOTH the root and the panel. Overlay modes
+ * (docked/modal/fullscreen) portal the panel to <body>, i.e. outside the root,
+ * so the panel must carry its own variables or it would render unstyled.
+ */
+.eledia_aitutor-root,
+.eledia_aitutor-panel,
+.eledia_aitutor-modal,
+.eledia_aitutor-launch {
+    /* Single accent (deep navy) carries primary actions and text. */
+    --eat-accent: #1e3f59;
+    --eat-accent-dark: #16314a;
+    --eat-accent-contrast: #fff;
+    /* eLeDia brand orange — used sparingly (logo only). */
+    --eat-brand: #ed7b2d;
+    /* Neutral surfaces and hairlines. */
+    --eat-surface: #ffffff;
+    --eat-body-bg: #f4f6f8;
+    --eat-line: #e7ebef;
+    /* Text. */
+    --eat-ink: #1e3f59;
+    --eat-muted: #748495;
+    --eat-header-fg: #1e3f59;
+    /* Bubbles: warm peach for the learner, clean white card for the tutor. */
+    --eat-user-bg: #fce9db;
+    --eat-user-fg: #1e3f59;
+    --eat-bot-bg: #ffffff;
+    --eat-bot-fg: #1e3f59;
+    /* Composer input text. */
+    --eat-assistant-bg: #fff;
+    --eat-assistant-fg: #1e3f59;
+    /* Shape + rhythm. */
+    --eat-radius: 18px;
+    --eat-bubble-radius: 16px;
+    --eat-gap: 0.8rem;
+    --eat-z: 1080;
+    /* Typography — inherits the Moodle theme font unless an institution sets one. */
+    --eat-font: inherit;
+    /* State + accent surfaces (tokenised so branding overrides reach them). */
+    --eat-status-online: #22c55e;
+    /* Hover wash for the header icon buttons (settable + per-theme). */
+    --eat-icon-hover: rgba(16, 24, 40, 0.06);
+    /* Focus / pressed ring. Derived from the accent so it is theme-specific and
+       follows the brand colour; override the token to tune it independently. */
+    --eat-focus-ring: color-mix(in srgb, var(--eat-accent) 35%, transparent);
+    --eat-overlay: rgba(16, 24, 40, 0.06);
+    --eat-overlay-strong: rgba(0, 0, 0, 0.04);
+    --eat-code-bg: rgba(0, 0, 0, 0.06);
+    --eat-backdrop: rgba(16, 24, 40, 0.45);
+    --eat-error-bg: #fdecec;
+    --eat-error-fg: #842029;
+    --eat-error-line: #f5c2c7;
+    --eat-grounded-bg: #eaf1f3;
+    --eat-grounded-line: #c9d8dd;
+    --eat-muted-soft: #5b6677;
+    --eat-tint: #f4f7fa;
+    /* Cohesive shadow scale — all elevation flows from these three. */
+    --eat-shadow-sm: 0 1px 2px rgba(30, 63, 89, 0.06);
+    --eat-shadow-md: 0 2px 8px rgba(30, 63, 89, 0.10), 0 1px 2px rgba(30, 63, 89, 0.06);
+    --eat-shadow-lg: 0 10px 40px rgba(16, 24, 40, 0.16);
+    /* Avatar elevation/glow — themes (e.g. HAL) can turn this into a glow. */
+    --eat-avatar-glow: 0 4px 12px rgba(16, 24, 40, 0.12);
+    /* Floating-launcher offsets. Defaults clear Boost's bottom-right "?" help
+       button (fixed at bottom:2rem; right:2rem). Override these (e.g. via the
+       admin Custom CSS) to fit other themes:
+         .eledia_aitutor-root { --eat-fab-bottom: 1.25rem; --eat-fab-right: 1.25rem; } */
+    --eat-fab-bottom: 5.5rem;
+    --eat-fab-right: 2rem;
+}
+
+.eledia_aitutor-root,
+.eledia_aitutor-panel {
+    font-family: var(--eat-font);
+}
+/* Children inherit the widget font, but icon fonts (Font Awesome) must not be
+   overridden, so we never set font-family on [class*="fa-"]. */
+.eledia_aitutor-root :not([class*="fa-"]):not(.fa),
+.eledia_aitutor-panel :not([class*="fa-"]):not(.fa) {
+    font-family: inherit;
+}
+
+/* --- Bootstrap button state re-skin. ----------------------------------- */
+/*
+ * Moodle ships Bootstrap 5.3, whose buttons are painted entirely from --bs-btn-*
+ * custom properties (hover/active/focus colours, focus ring). Bootstrap's own
+ * state selectors (e.g. `.btn:first-child:active`, specificity 0,3,0) tie or beat
+ * our overrides, so re-colouring those states by selector is a losing fight.
+ * Instead we override the VARIABLES on our buttons: Bootstrap's rules then read
+ * our accent values, so pressing/focusing any control follows the theme rather
+ * than Bootstrap's blue. Each selector carries two classes (0,2,0), which beats
+ * Bootstrap's own `.btn { --bs-btn-*: ... }` declaration (0,1,0), so our values win.
+ * The focus ring follows --eat-focus-ring (accent-derived, adjustable).
+ */
+.eledia_aitutor-root .eledia_aitutor-launch,
+.eledia_aitutor-launch.eledia_aitutor-launch--fab,
+.eledia_aitutor-panel .eledia_aitutor-iconbtn,
+.eledia_aitutor-panel .eledia_aitutor-consent-accept,
+.eledia_aitutor-panel .eledia_aitutor-consent-link {
+    --bs-btn-focus-box-shadow: 0 0 0 0.2rem var(--eat-focus-ring);
+    --bs-btn-active-shadow: none;
+    --bs-btn-box-shadow: none;
+}
+
+/* Pill launch: stays on the light surface with accent text when hovered/pressed. */
+.eledia_aitutor-root .eledia_aitutor-launch {
+    --bs-btn-bg: var(--eat-surface);
+    --bs-btn-color: var(--eat-accent);
+    --bs-btn-border-color: var(--eat-line);
+    --bs-btn-hover-bg: var(--eat-surface);
+    --bs-btn-hover-color: var(--eat-accent);
+    --bs-btn-hover-border-color: var(--eat-accent);
+    --bs-btn-active-bg: var(--eat-surface);
+    --bs-btn-active-color: var(--eat-accent);
+    --bs-btn-active-border-color: var(--eat-accent);
+}
+
+/* Solid pill + floating button: accent fill, darker accent when hovered/pressed. */
+.eledia_aitutor-root .eledia_aitutor-launch--solid,
+.eledia_aitutor-launch.eledia_aitutor-launch--fab {
+    --bs-btn-bg: var(--eat-accent);
+    --bs-btn-color: var(--eat-accent-contrast);
+    --bs-btn-border-color: var(--eat-accent);
+    --bs-btn-hover-bg: var(--eat-accent-dark);
+    --bs-btn-hover-color: var(--eat-accent-contrast);
+    --bs-btn-hover-border-color: var(--eat-accent-dark);
+    --bs-btn-active-bg: var(--eat-accent-dark);
+    --bs-btn-active-color: var(--eat-accent-contrast);
+    --bs-btn-active-border-color: var(--eat-accent-dark);
+}
+
+/* Header / message icon buttons: only the soft hover wash, never a blue fill. */
+.eledia_aitutor-panel .eledia_aitutor-iconbtn {
+    --bs-btn-hover-bg: var(--eat-icon-hover);
+    --bs-btn-hover-color: var(--eat-header-fg);
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-bg: var(--eat-icon-hover);
+    --bs-btn-active-color: var(--eat-header-fg);
+    --bs-btn-active-border-color: transparent;
+    --bs-btn-focus-box-shadow: 0 0 0 0.18rem var(--eat-focus-ring);
+}
+
+/* Consent "accept" (accent fill) + privacy link (accent text). */
+.eledia_aitutor-panel .eledia_aitutor-consent-accept {
+    --bs-btn-bg: var(--eat-accent);
+    --bs-btn-color: var(--eat-accent-contrast);
+    --bs-btn-border-color: var(--eat-accent);
+    --bs-btn-hover-bg: var(--eat-accent-dark);
+    --bs-btn-hover-color: var(--eat-accent-contrast);
+    --bs-btn-hover-border-color: var(--eat-accent-dark);
+    --bs-btn-active-bg: var(--eat-accent-dark);
+    --bs-btn-active-color: var(--eat-accent-contrast);
+    --bs-btn-active-border-color: var(--eat-accent-dark);
+}
+
+.eledia_aitutor-panel .eledia_aitutor-consent-link {
+    --bs-btn-color: var(--eat-accent);
+    --bs-btn-hover-color: var(--eat-accent-dark);
+    --bs-btn-active-color: var(--eat-accent-dark);
+}
+
+/* --- Launch button (overlay modes). ----------------------------------- */
+/*
+ * Scoped under .eledia_aitutor-root so the flex layout beats Bootstrap's
+ * `.btn { display: inline-block }` (equal specificity would otherwise leave the
+ * icon and label baseline-aligned instead of centred).
+ */
+.eledia_aitutor-root .eledia_aitutor-launch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.55rem 1.1rem;
+    background: var(--eat-surface);
+    border: 1px solid var(--eat-line);
+    color: var(--eat-accent);
+    box-shadow: var(--eat-shadow-md);
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.eledia_aitutor-root .eledia_aitutor-launch:hover,
+.eledia_aitutor-root .eledia_aitutor-launch:focus-visible {
+    background: var(--eat-surface);
+    border-color: var(--eat-accent);
+    color: var(--eat-accent);
+    box-shadow: var(--eat-shadow-lg);
+    transform: translateY(-1px);
+}
+
+/* Mouse press / non-keyboard focus: keep the themed look instead of Bootstrap's
+   blue .btn-primary pressed background and focus ring. */
+.eledia_aitutor-root .eledia_aitutor-launch:focus,
+.eledia_aitutor-root .eledia_aitutor-launch:active {
+    background: var(--eat-surface);
+    border-color: var(--eat-accent);
+    color: var(--eat-accent);
+    box-shadow: var(--eat-shadow-md);
+    outline: none;
+}
+
+.eledia_aitutor-root .eledia_aitutor-launch:active {
+    transform: translateY(1px);
+}
+
+/* Keyboard focus gets a clear accent ring (adjustable via --eat-focus-ring). */
+.eledia_aitutor-root .eledia_aitutor-launch:focus-visible {
+    box-shadow: 0 0 0 0.2rem var(--eat-focus-ring), var(--eat-shadow-lg);
+}
+
+/* Solid variant: accent-filled pill. */
+.eledia_aitutor-root .eledia_aitutor-launch--solid {
+    background: var(--eat-accent);
+    border-color: var(--eat-accent);
+    color: var(--eat-accent-contrast);
+}
+
+.eledia_aitutor-root .eledia_aitutor-launch--solid:hover,
+.eledia_aitutor-root .eledia_aitutor-launch--solid:focus,
+.eledia_aitutor-root .eledia_aitutor-launch--solid:focus-visible,
+.eledia_aitutor-root .eledia_aitutor-launch--solid:active {
+    background: var(--eat-accent-dark);
+    border-color: var(--eat-accent-dark);
+    color: var(--eat-accent-contrast);
+}
+
+/* Floating launcher (FAB): a themed, accent-filled circular button fixed in the
+   bottom-right corner, offset above the host theme's own corner controls via the
+   --eat-fab-* tokens (default tuned for Boost's "?" help button). The launch
+   button is portalled to <body> by the JS so it stays visible regardless of the
+   block drawer; it carries the brand vars inline (see launcher.mustache) and is
+   itself a token root, so it is fully theme-coloured wherever it lives. The logo
+   sits on a small light disc so any logo reads on the accent fill. */
+/* The FAB is portalled to <body> by the JS, so it lives OUTSIDE .eledia_aitutor-root
+   and cannot rely on the root-scoped base launch rules above. It must therefore be
+   fully self-contained, and its selector doubles the class (specificity 0,2,0) so it
+   beats Bootstrap's `.btn-primary` (0,1,0) regardless of stylesheet order — otherwise
+   it falls back to a blue inline-block square with an off-centre icon. */
+.eledia_aitutor-launch.eledia_aitutor-launch--fab {
+    position: fixed;
+    right: var(--eat-fab-right, 2rem);
+    bottom: var(--eat-fab-bottom, 5.5rem);
+    z-index: var(--eat-z);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    gap: 0;
+    line-height: 1;
+    border-radius: 50%;
+    background: var(--eat-accent);
+    border: 0;
+    color: var(--eat-accent-contrast);
+    box-shadow: var(--eat-shadow-lg);
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.eledia_aitutor-launch.eledia_aitutor-launch--fab:hover,
+.eledia_aitutor-launch.eledia_aitutor-launch--fab:focus,
+.eledia_aitutor-launch.eledia_aitutor-launch--fab:focus-visible {
+    background: var(--eat-accent-dark);
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: var(--eat-shadow-lg);
+    border: 0;
+    color: var(--eat-accent-contrast);
+    outline: none;
+}
+
+/* Keyboard focus gets the accent ring; mouse press stays accent, never blue. */
+.eledia_aitutor-launch.eledia_aitutor-launch--fab:focus-visible {
+    box-shadow: 0 0 0 0.25rem var(--eat-focus-ring), var(--eat-shadow-lg);
+}
+
+.eledia_aitutor-launch.eledia_aitutor-launch--fab:active {
+    background: var(--eat-accent-dark);
+    transform: translateY(0) scale(0.98);
+    box-shadow: var(--eat-shadow-md);
+    color: var(--eat-accent-contrast);
+}
+
+.eledia_aitutor-launch--fab .eledia_aitutor-launch-icon {
+    width: 2.3rem;
+    height: 2.3rem;
+    background: #fff;
+    border-radius: 50%;
+    padding: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    /* Clip any non-square uploaded logo to the disc so its corners never spill
+       past the circle. object-fit:contain on the img keeps the whole logo visible. */
+    overflow: hidden;
+}
+
+/* On phones, sit closer to the corner (host help buttons are smaller / hidden). */
+@media (max-width: 576px) {
+    .eledia_aitutor-launch--fab {
+        right: 1rem;
+        bottom: 1rem;
+    }
+}
+
+.eledia_aitutor-launch-icon,
+.eledia_aitutor-launch-text {
+    vertical-align: middle;
+}
+
+.eledia_aitutor-launch-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: transparent;
+    flex: 0 0 auto;
+}
+
+.eledia_aitutor-launch-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* --- Panel base. ------------------------------------------------------- */
+.eledia_aitutor-panel {
+    box-sizing: border-box;
+}
+
+.eledia_aitutor-panel *,
+.eledia_aitutor-panel *::before,
+.eledia_aitutor-panel *::after {
+    box-sizing: border-box;
+}
+
+.eledia_aitutor-window {
+    display: flex;
+    flex-direction: column;
+    background: var(--eat-surface);
+    color: var(--eat-ink);
+    border: 1px solid var(--eat-line);
+    border-radius: var(--eat-radius);
+    overflow: hidden;
+    box-shadow: var(--eat-shadow-lg);
+    min-height: 0;
+}
+
+/* Embedded: fills the block, no overlay chrome. */
+.eledia_aitutor-embedded {
+    display: block;
+}
+
+.eledia_aitutor-embedded .eledia_aitutor-window {
+    height: clamp(380px, 60vh, 620px);
+    box-shadow: none;
+}
+
+/* --- Header. ----------------------------------------------------------- */
+.eledia_aitutor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    background: var(--eat-surface);
+    color: var(--eat-header-fg);
+    border-bottom: 1px solid var(--eat-overlay);
+    flex: 0 0 auto;
+}
+
+.eledia_aitutor-identity {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.eledia_aitutor-avatar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--eat-accent);
+    font-size: 1.1rem;
+    flex: 0 0 auto;
+    padding: 4px;
+    border: 1px solid rgba(16, 24, 40, 0.08);
+    box-shadow: var(--eat-avatar-glow);
+    transition: box-shadow 0.3s ease;
+}
+
+/* The header avatar links to eledia.ai; keep the badge look, signal the link. */
+a.eledia_aitutor-avatar,
+a.eledia_aitutor-avatar:hover,
+a.eledia_aitutor-avatar:focus {
+    text-decoration: none;
+}
+
+a.eledia_aitutor-avatar:hover,
+a.eledia_aitutor-avatar:focus-visible {
+    border-color: var(--eat-accent);
+    box-shadow: 0 4px 12px rgba(30, 63, 89, 0.28);
+}
+
+.eledia_aitutor-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    display: block;
+}
+
+.eledia_aitutor-status-dot {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--eat-status-online);
+    border: 2px solid var(--eat-surface);
+}
+
+.eledia_aitutor-identity-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+}
+
+.eledia_aitutor-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.eledia_aitutor-presence {
+    font-size: 0.8rem;
+    color: var(--eat-muted);
+}
+
+.eledia_aitutor-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    flex: 0 0 auto;
+}
+
+.eledia_aitutor-iconbtn {
+    /* Based on the header foreground (which every theme sets for contrast
+       against the header) rather than the faint --eat-muted, so the controls
+       stay visible on dark themes; opacity gives the secondary look. */
+    color: var(--eat-header-fg);
+    opacity: 0.7;
+    background: transparent;
+    border: 0;
+    padding: 0.35rem 0.5rem;
+    border-radius: 10px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.eledia_aitutor-iconbtn:hover,
+.eledia_aitutor-iconbtn:focus,
+.eledia_aitutor-iconbtn:focus-visible,
+.eledia_aitutor-iconbtn:active {
+    background: var(--eat-icon-hover);
+    color: var(--eat-header-fg);
+    opacity: 1;
+    box-shadow: none;
+    outline: none;
+}
+
+/* Two-class specificity so this beats Bootstrap's blue .btn pressed/focus state
+   on the header buttons (which carry .btn). Keyboard focus shows the accent ring. */
+.eledia_aitutor-actions .eledia_aitutor-iconbtn:focus,
+.eledia_aitutor-actions .eledia_aitutor-iconbtn:active,
+.eledia_aitutor-message-actions .eledia_aitutor-iconbtn:focus,
+.eledia_aitutor-message-actions .eledia_aitutor-iconbtn:active {
+    background: var(--eat-icon-hover);
+    box-shadow: none;
+    outline: none;
+}
+
+.eledia_aitutor-actions .eledia_aitutor-iconbtn:focus-visible,
+.eledia_aitutor-message-actions .eledia_aitutor-iconbtn:focus-visible {
+    box-shadow: 0 0 0 0.18rem var(--eat-focus-ring);
+}
+
+/* Every icon button in the panel uses the header foreground (two-class
+   specificity beats Bootstrap's .btn/.btn-icon colour), and — importantly — its
+   glyph inherits that colour. Bootstrap otherwise forces its own icon colour,
+   which is invisible on dark presets (e.g. the trash icon in the conversation-
+   history list). This makes the history delete icon match the four header
+   buttons on every preset. */
+.eledia_aitutor-panel .eledia_aitutor-iconbtn,
+.eledia_aitutor-actions .eledia_aitutor-iconbtn {
+    color: var(--eat-header-fg);
+}
+.eledia_aitutor-panel .eledia_aitutor-iconbtn .fa,
+.eledia_aitutor-panel .eledia_aitutor-iconbtn i {
+    color: inherit;
+}
+
+.eledia_aitutor-message-actions .eledia_aitutor-iconbtn {
+    color: var(--eat-muted);
+}
+
+.eledia_aitutor-message-actions .eledia_aitutor-iconbtn:hover {
+    background: var(--eat-overlay);
+}
+
+/* --- Message log. ------------------------------------------------------ */
+.eledia_aitutor-log {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    /* Never scroll the conversation sideways: wide content (code blocks,
+       tables) scrolls inside its own element instead. */
+    overflow-x: hidden;
+    padding: 1.1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--eat-gap);
+    background: var(--eat-body-bg);
+}
+
+.eledia_aitutor-message {
+    display: flex;
+    flex-direction: column;
+    max-width: 90%;
+    min-width: 0;
+    animation: eledia_aitutor-msg-in 0.22s ease-out both;
+}
+
+@keyframes eledia_aitutor-msg-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.eledia_aitutor-user {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.eledia_aitutor-assistant {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+/* Sender meta row (avatar + name) above each bubble. */
+.eledia_aitutor-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0.35rem 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--eat-muted);
+}
+
+.eledia_aitutor-user .eledia_aitutor-meta {
+    flex-direction: row-reverse;
+}
+
+.eledia_aitutor-msg-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.45rem;
+    height: 1.45rem;
+    border-radius: 50%;
+    background: #fff;
+    flex: 0 0 auto;
+    padding: 2px;
+    border: 1px solid var(--eat-line);
+    /* Clip non-square logos to the circle (matches the header avatar). */
+    overflow: hidden;
+}
+
+.eledia_aitutor-msg-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.eledia_aitutor-bubble {
+    padding: 0.7rem 0.95rem;
+    border-radius: var(--eat-bubble-radius);
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.55;
+    max-width: 100%;
+    min-width: 0;
+}
+
+/* Sides are distinguished by fill + alignment + a single soft shadow -- no
+   borders, to keep the conversation clean and quiet. */
+.eledia_aitutor-user .eledia_aitutor-bubble {
+    background: var(--eat-user-bg);
+    color: var(--eat-user-fg);
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 1px 2px rgba(30, 63, 89, 0.06);
+}
+
+.eledia_aitutor-assistant .eledia_aitutor-bubble {
+    background: var(--eat-bot-bg);
+    color: var(--eat-bot-fg);
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 1px 2px rgba(30, 63, 89, 0.05), 0 8px 24px rgba(30, 63, 89, 0.05);
+}
+
+.eledia_aitutor-assistant:not(.eledia_aitutor-failed) .eledia_aitutor-bubble a {
+    color: var(--eat-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.eledia_aitutor-failed .eledia_aitutor-bubble {
+    background: var(--eat-error-bg);
+    color: var(--eat-error-fg);
+    border: 1px solid var(--eat-error-line);
+}
+
+.eledia_aitutor-markdown > *:first-child {
+    margin-top: 0;
+}
+
+.eledia_aitutor-markdown > *:last-child {
+    margin-bottom: 0;
+}
+
+.eledia_aitutor-markdown pre {
+    background: var(--eat-code-bg);
+    padding: 0.6rem;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.eledia_aitutor-markdown code {
+    word-break: break-word;
+}
+
+.eledia_aitutor-markdown table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.eledia_aitutor-markdown img {
+    max-width: 100%;
+    height: auto;
+}
+
+.eledia_aitutor-markdown pre,
+.eledia_aitutor-markdown blockquote {
+    max-width: 100%;
+}
+
+/* --- Prompt starters (suggested questions under the welcome message). --- */
+.eledia_aitutor-starters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    max-width: 90%;
+    align-self: flex-start;
+}
+
+.eledia_aitutor-starter {
+    border: 1px solid var(--eat-line);
+    background: var(--eat-surface);
+    color: var(--eat-accent);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.35rem 0.85rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.eledia_aitutor-starter:hover,
+.eledia_aitutor-starter:focus-visible {
+    border-color: var(--eat-accent);
+    background: var(--eat-tint);
+}
+
+.eledia_aitutor-starter:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.18rem var(--eat-focus-ring);
+}
+
+.eledia_aitutor-starter:active {
+    background: var(--eat-tint);
+}
+
+/* --- Sources / citations. --------------------------------------------- */
+.eledia_aitutor-sources {
+    margin-top: 0.5rem;
+    font-size: 0.82rem;
+}
+
+.eledia_aitutor-sources-title {
+    font-weight: 600;
+    opacity: 0.75;
+    margin-bottom: 0.2rem;
+}
+
+.eledia_aitutor-sources-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.eledia_aitutor-source-snippet {
+    display: block;
+    opacity: 0.7;
+    font-size: 0.78rem;
+}
+
+.eledia_aitutor-message-actions {
+    margin-top: 0.2rem;
+    display: flex;
+    gap: 0.25rem;
+}
+
+/* --- Typing indicator. ------------------------------------------------- */
+.eledia_aitutor-typing .eledia_aitutor-bubble {
+    display: inline-flex;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.eledia_aitutor-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.4;
+    animation: eledia_aitutor-bounce 1.2s infinite ease-in-out;
+}
+
+.eledia_aitutor-dot:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.eledia_aitutor-dot:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes eledia_aitutor-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 0.9; }
+}
+
+/* --- Status live region. ----------------------------------------------- */
+.eledia_aitutor-status {
+    min-height: 1.1rem;
+    padding: 0 0.85rem;
+    font-size: 0.78rem;
+    color: var(--eat-muted-soft);
+}
+
+.eledia_aitutor-status:empty {
+    min-height: 0;
+}
+
+/* --- Composer. --------------------------------------------------------- */
+.eledia_aitutor-composer {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--eat-overlay);
+    background: var(--eat-surface);
+    flex: 0 0 auto;
+}
+
+.eledia_aitutor-input {
+    flex: 1 1 auto;
+    resize: none;
+    border: 0;
+    background: transparent;
+    border-radius: 12px;
+    padding: 0.55rem 0.4rem;
+    max-height: 160px;
+    line-height: 1.45;
+    font: inherit;
+    color: var(--eat-assistant-fg);
+}
+
+.eledia_aitutor-input::placeholder {
+    color: var(--eat-muted);
+}
+
+.eledia_aitutor-input:focus {
+    outline: 0;
+}
+
+.eledia_aitutor-input:focus-visible {
+    outline: 2px solid var(--eat-accent);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.eledia_aitutor-send {
+    flex: 0 0 auto;
+    border: 0;
+    background: var(--eat-accent);
+    color: var(--eat-accent-contrast);
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(30, 63, 89, 0.25);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.eledia_aitutor-send:hover,
+.eledia_aitutor-send:focus,
+.eledia_aitutor-send:focus-visible {
+    background: var(--eat-accent-dark);
+    box-shadow: 0 3px 12px rgba(30, 63, 89, 0.35);
+}
+
+.eledia_aitutor-send:focus {
+    outline: none;
+}
+
+.eledia_aitutor-send:focus-visible {
+    outline: 2px solid var(--eat-focus-ring);
+    outline-offset: 2px;
+}
+
+.eledia_aitutor-send:active {
+    transform: scale(0.92);
+}
+
+/* --- Grounding badge (in the message meta row). ------------------------ */
+.eledia_aitutor-grounding {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    margin-left: 0.25rem;
+}
+
+.eledia_aitutor-grounded {
+    background: var(--eat-grounded-bg);
+    color: var(--eat-accent);
+    border: 1px solid var(--eat-grounded-line);
+}
+
+.eledia_aitutor-ungrounded {
+    background: transparent;
+    color: var(--eat-muted);
+    border: 1px solid var(--eat-line);
+}
+
+/* --- Standalone page (view.php; Moodle App embedding). ------------------ */
+.eledia_aitutor-page {
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.eledia_aitutor-page .eledia_aitutor-embedded .eledia_aitutor-window {
+    height: clamp(420px, 72vh, 860px);
+}
+
+/* Inside the app/iframe (chrome-less embedded layout) fill the viewport. */
+.eledia_aitutor-pagebody.pagelayout-embedded .eledia_aitutor-page .eledia_aitutor-embedded .eledia_aitutor-window {
+    height: calc(100vh - 2rem);
+}
+
+/* --- LLM-only mode banner. ---------------------------------------------- */
+.eledia_aitutor-modenote {
+    flex: 0 0 auto;
+    padding: 0.4rem 1rem;
+    font-size: 0.78rem;
+    color: var(--eat-muted);
+    background: var(--eat-tint);
+    border-bottom: 1px solid var(--eat-line);
+}
+
+.eledia_aitutor-modenote .fa {
+    color: var(--eat-accent);
+    margin-right: 0.35rem;
+}
+
+/* --- First-use privacy consent gate. ------------------------------------ */
+.eledia_aitutor-consent {
+    flex: 0 0 auto;
+    padding: 0.85rem 1rem;
+    background: var(--eat-surface);
+    border-top: 1px solid var(--eat-overlay);
+    color: var(--eat-ink);
+    font-size: 0.85rem;
+}
+
+.eledia_aitutor-consent-text {
+    margin: 0 0 0.35rem;
+}
+
+.eledia_aitutor-consent-text .fa {
+    color: var(--eat-accent);
+    margin-right: 0.35rem;
+}
+
+.eledia_aitutor-panel .eledia_aitutor-consent-link {
+    font-size: 0.82rem;
+    color: var(--eat-accent);
+    text-decoration: underline;
+}
+
+.eledia_aitutor-consent-check {
+    margin: 0.5rem 0;
+}
+
+.eledia_aitutor-panel .eledia_aitutor-consent-accept {
+    background: var(--eat-accent);
+    border-color: var(--eat-accent);
+    color: var(--eat-accent-contrast);
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.3rem 1rem;
+}
+
+.eledia_aitutor-panel .eledia_aitutor-consent-accept:hover,
+.eledia_aitutor-panel .eledia_aitutor-consent-accept:focus,
+.eledia_aitutor-panel .eledia_aitutor-consent-accept:active {
+    background: var(--eat-accent-dark);
+    border-color: var(--eat-accent-dark);
+    color: var(--eat-accent-contrast);
+    box-shadow: none;
+    outline: none;
+}
+
+.eledia_aitutor-panel .eledia_aitutor-consent-accept:focus-visible {
+    box-shadow: 0 0 0 0.2rem var(--eat-focus-ring);
+}
+
+.eledia_aitutor-panel .eledia_aitutor-consent-accept:disabled {
+    opacity: 0.45;
+}
+
+/* The privacy link in the consent gate carries Bootstrap's btn-link (blue); keep
+   it on the brand accent in every state. */
+.eledia_aitutor-panel .eledia_aitutor-consent-link,
+.eledia_aitutor-panel .eledia_aitutor-consent-link:hover,
+.eledia_aitutor-panel .eledia_aitutor-consent-link:focus,
+.eledia_aitutor-panel .eledia_aitutor-consent-link:active {
+    color: var(--eat-accent);
+    box-shadow: none;
+    outline: none;
+}
+
+.eledia_aitutor-panel .eledia_aitutor-consent-link:focus-visible {
+    box-shadow: 0 0 0 0.2rem var(--eat-focus-ring);
+    border-radius: 4px;
+}
+
+/* While the gate is shown the composer is disabled; make that visible. */
+.eledia_aitutor-input:disabled,
+.eledia_aitutor-send:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* --- Answer-style chips. ------------------------------------------------ */
+.eledia_aitutor-styles {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem 0;
+    background: var(--eat-surface);
+    border-top: 1px solid var(--eat-overlay);
+    flex: 0 0 auto;
+}
+
+.eledia_aitutor-stylechip {
+    border: 1px solid var(--eat-line);
+    background: var(--eat-surface);
+    color: var(--eat-ink);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.25rem 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.eledia_aitutor-stylechip:hover,
+.eledia_aitutor-stylechip:focus-visible {
+    border-color: var(--eat-accent);
+}
+
+.eledia_aitutor-stylechip:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.18rem var(--eat-focus-ring);
+}
+
+.eledia_aitutor-stylechip-active {
+    background: var(--eat-accent);
+    border-color: var(--eat-accent);
+    color: var(--eat-accent-contrast);
+}
+
+.eledia_aitutor-stylechip-locked {
+    cursor: default;
+    color: var(--eat-muted);
+}
+
+/* The chips sit visually with the composer: remove its doubled top border. */
+.eledia_aitutor-styles + .eledia_aitutor-composer {
+    border-top: 0;
+}
+
+/* --- Footer. ----------------------------------------------------------- */
+.eledia_aitutor-footer {
+    flex: 0 0 auto;
+    text-align: center;
+    padding: 0.45rem;
+    font-size: 0.72rem;
+    color: var(--eat-muted);
+    background: var(--eat-surface);
+    border-top: 1px solid rgba(16, 24, 40, 0.04);
+}
+
+/* --- History panel. ---------------------------------------------------- */
+.eledia_aitutor-history {
+    flex: 0 0 auto;
+    max-height: 40%;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--eat-line);
+    background: var(--eat-surface);
+    color: var(--eat-ink);
+    padding: 0.4rem;
+}
+
+.eledia_aitutor-history-empty {
+    padding: 0.6rem;
+    color: var(--eat-muted-soft);
+    font-size: 0.85rem;
+}
+
+.eledia_aitutor-history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.eledia_aitutor-history-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 8px;
+    padding: 0.15rem 0.3rem;
+}
+
+.eledia_aitutor-history-item:hover {
+    background: var(--eat-overlay-strong);
+}
+
+.eledia_aitutor-history-open {
+    flex: 1 1 auto;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    padding: 0.35rem 0.4rem;
+    cursor: pointer;
+    min-width: 0;
+    color: var(--eat-ink);
+}
+
+.eledia_aitutor-history-open:focus {
+    outline: none;
+}
+
+.eledia_aitutor-history-open:focus-visible {
+    box-shadow: 0 0 0 2px var(--eat-focus-ring);
+    outline: none;
+}
+
+.eledia_aitutor-history-title {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.eledia_aitutor-privacy-heading {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 1rem 0 0.35rem;
+}
+
+.eledia_aitutor-history-preview {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--eat-muted-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Overlay: docked (bottom-right). ----------------------------------- */
+.eledia_aitutor-docked {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    width: 380px;
+    max-width: calc(100vw - 2rem);
+    z-index: var(--eat-z);
+}
+
+.eledia_aitutor-docked .eledia_aitutor-window {
+    height: min(70vh, 560px);
+}
+
+/* --- Overlay: modal (centered + backdrop). ----------------------------- */
+.eledia_aitutor-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--eat-z);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.eledia_aitutor-modal .eledia_aitutor-window {
+    width: min(640px, 100%);
+    height: min(80vh, 720px);
+    position: relative;
+    z-index: 1;
+}
+
+.eledia_aitutor-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--eat-backdrop);
+    z-index: 0;
+}
+
+/* --- Overlay: fullscreen. ---------------------------------------------- */
+.eledia_aitutor-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: var(--eat-z);
+}
+
+.eledia_aitutor-fullscreen .eledia_aitutor-window {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    border: 0;
+}
+
+/* Full-bleed chrome, but keep the conversation in a readable centred column. */
+.eledia_aitutor-fullscreen .eledia_aitutor-log,
+.eledia_aitutor-fullscreen .eledia_aitutor-composer,
+.eledia_aitutor-fullscreen .eledia_aitutor-status {
+    padding-left: max(1rem, calc(50% - 23rem));
+    padding-right: max(1rem, calc(50% - 23rem));
+}
+
+body.eledia_aitutor-noscroll {
+    overflow: hidden;
+}
+
+/* --- Unavailable notice. ----------------------------------------------- */
+.eledia_aitutor-unavailable {
+    font-size: 0.9rem;
+}
+
+/* --- Responsive. ------------------------------------------------------- */
+@media (max-width: 576px) {
+    .eledia_aitutor-docked {
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: auto;
+        max-width: 100%;
+    }
+
+    .eledia_aitutor-docked .eledia_aitutor-window {
+        height: 80vh;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .eledia_aitutor-modal {
+        padding: 0;
+    }
+
+    .eledia_aitutor-modal .eledia_aitutor-window {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+    }
+
+    .eledia_aitutor-message {
+        max-width: 95%;
+    }
+}
+
+/* --- Themed modals (privacy guidelines, confirmations). ----------------- *
+ * Core modals are portalled to <body>, outside the widget, so they don't
+ * inherit the --eat-* tokens. The JS sets the brand variables inline on the
+ * modal root and adds .eledia_aitutor-modal; these rules then theme it. */
+.eledia_aitutor-modal .modal-content {
+    background: var(--eat-surface);
+    color: var(--eat-ink);
+}
+
+.eledia_aitutor-modal .modal-header,
+.eledia_aitutor-modal .modal-footer {
+    background: var(--eat-surface);
+    color: var(--eat-ink);
+    border-color: var(--eat-line);
+}
+
+.eledia_aitutor-modal .modal-title,
+.eledia_aitutor-modal .close {
+    color: var(--eat-ink);
+}
+
+/* The Bootstrap 5 close button is an SVG background image with a fixed dark
+   fill, so a colour rule can't recolour it — it's low-contrast/invisible on dark
+   presets. Re-draw the same glyph as a mask filled with --eat-ink, which
+   contrasts the modal surface on every preset. */
+.eledia_aitutor-modal .btn-close {
+    background: var(--eat-ink);
+    -webkit-mask: var(--bs-btn-close-bg) center / 1em auto no-repeat;
+    mask: var(--bs-btn-close-bg) center / 1em auto no-repeat;
+    opacity: 0.7;
+}
+.eledia_aitutor-modal .btn-close:hover,
+.eledia_aitutor-modal .btn-close:focus-visible {
+    opacity: 1;
+}
+
+.eledia_aitutor-modal .eledia_aitutor-privacy {
+    color: var(--eat-ink);
+}
+
+.eledia_aitutor-modal .eledia_aitutor-privacy h5 {
+    color: var(--eat-header-fg);
+}
+
+/* Token-styled accuracy callout (replaces Bootstrap .alert-warning so it reads
+   on every theme, light or dark). */
+.eledia_aitutor-callout {
+    background: var(--eat-grounded-bg);
+    color: var(--eat-ink);
+    border: 1px solid var(--eat-grounded-line);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+}
+
+/* --- Reduced motion. --------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .eledia_aitutor-dot,
+    .eledia_aitutor-message {
+        animation: none;
+    }
+
+    .eledia_aitutor-log {
+        scroll-behavior: auto;
+    }
+}
+
+/*
+ * The widget intentionally keeps its own light palette regardless of the OS
+ * colour scheme, so it reads as a clean, consistent product embedded in any
+ * Moodle theme rather than flipping to a dark card on a light page.
+ */
+
+/* =======================================================================
+ * Admin / management pages (Manage tutors, the per-instance tutor page).
+ * Scoped under .eat-admin so nothing here touches the chat widget or the
+ * surrounding Moodle theme. Uses neutral surfaces that sit well on the admin
+ * layout; the accent for primary actions is the eLeDia navy.
+ * ======================================================================= */
+.eat-admin {
+    --eat-a-accent: var(--lh-primary, #194866);
+    --eat-a-accent-dark: var(--lh-primary-dark, #0f2b3d);
+    --eat-a-accent-light: var(--lh-primary-light, #f3f5f8);
+    --eat-a-line: var(--lh-border, #dbe7ee);
+    --eat-a-line-light: var(--lh-border-light, #f0f0f0);
+    --eat-a-muted: var(--lh-text-secondary, #5f6b77);
+    --eat-a-card: var(--lh-bg-white, #ffffff);
+    --eat-a-surface: var(--lh-bg-soft, #f3f5f8);
+    --eat-a-radius: var(--lh-radius-sm, 8px);
+    --eat-a-shadow: var(--lh-shadow-card, 0 2px 8px rgba(15, 23, 42, 0.05));
+}
+
+.eat-admin-intro {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    background: var(--eat-a-surface);
+    border: 1px solid var(--eat-a-line);
+    border-radius: var(--eat-a-radius);
+    padding: 0.9rem 1.1rem;
+    margin: 0 0 1.25rem;
+    color: var(--lh-text, #1f2937);
+}
+.eat-admin-intro .fa {
+    color: var(--eat-a-accent);
+    font-size: 1.2rem;
+    margin-top: 0.1rem;
+}
+
+.eat-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0 0 1.5rem;
+}
+.eat-toolbar .singlebutton {
+    margin: 0;
+}
+.eat-admin .btn,
+.eat-admin input[type="submit"].btn,
+.eat-admin button.btn,
+.eat-admin .singlebutton .btn {
+    align-items: center;
+    border: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: var(--lh-radius-btn, 8px);
+    cursor: pointer;
+    display: inline-flex;
+    font-weight: 700;
+    gap: 0.4rem;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.8rem;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+}
+.eat-admin .btn-primary,
+.eat-admin input[type="submit"].btn-primary {
+    background: var(--lh-primary, #194866);
+    border-color: var(--lh-primary, #194866);
+    color: #fff;
+}
+.eat-admin .btn-primary:hover,
+.eat-admin .btn-primary:focus,
+.eat-admin input[type="submit"].btn-primary:hover,
+.eat-admin input[type="submit"].btn-primary:focus {
+    background: var(--lh-primary-dark, #0f2b3d);
+    border-color: var(--lh-primary-dark, #0f2b3d);
+    color: #fff;
+}
+.eat-admin .btn-secondary,
+.eat-admin .btn-outline-secondary {
+    background: #fff;
+    border-color: var(--lh-border, #dbe7ee);
+    color: var(--lh-primary, #194866);
+}
+.eat-admin .btn-secondary:hover,
+.eat-admin .btn-secondary:focus,
+.eat-admin .btn-outline-secondary:hover,
+.eat-admin .btn-outline-secondary:focus {
+    background: var(--lh-primary-light, #f3f5f8);
+    border-color: var(--lh-primary, #194866);
+    color: var(--lh-primary, #194866);
+}
+.eat-admin .btn-outline-danger {
+    background: #fff;
+    border-color: var(--lh-danger, #ab1d79);
+    color: var(--lh-danger, #ab1d79);
+}
+.eat-admin .btn-outline-danger:hover,
+.eat-admin .btn-outline-danger:focus {
+    background: var(--lh-danger-light, #f5e4ef);
+    border-color: var(--lh-danger, #ab1d79);
+    color: var(--lh-danger, #ab1d79);
+}
+.eat-toolbar .singlebutton:first-child .btn {
+    background: var(--lh-primary, #194866);
+    border-color: var(--lh-primary, #194866);
+    color: #fff;
+}
+.eat-toolbar .singlebutton:first-child .btn:hover,
+.eat-toolbar .singlebutton:first-child .btn:focus {
+    background: var(--lh-primary-dark, #0f2b3d);
+    border-color: var(--lh-primary-dark, #0f2b3d);
+    color: #fff;
+}
+
+.eat-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 1.75rem 0 0.85rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--eat-a-line);
+    color: var(--lh-text, #1f2937);
+}
+.eat-section-head {
+    align-items: center;
+    border-bottom: 1px solid var(--eat-a-line);
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin: 1.75rem 0 0.85rem;
+    padding-bottom: 0.4rem;
+}
+.eat-section-head .eat-section-title {
+    border-bottom: 0;
+    margin: 0;
+    padding-bottom: 0;
+}
+.eat-section-actions {
+    flex: 0 0 auto;
+}
+.eat-section-title--form {
+    margin-top: 0.9rem;
+}
+.eat-form-nav {
+    margin-bottom: 0.85rem;
+}
+.eat-back-link .fa {
+    margin-right: 0.35rem;
+}
+.eat-form-card {
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: var(--eat-a-radius);
+    box-shadow: var(--eat-a-shadow);
+    padding: 1rem;
+}
+.eat-form-card .mform {
+    margin: 0;
+}
+.eat-form-card .collapsible-actions {
+    display: none;
+}
+
+/* Tutor card grid. */
+.eat-tutor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: start;
+}
+.eat-tutor-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: var(--eat-a-radius);
+    overflow: hidden;
+    box-shadow: var(--eat-a-shadow);
+    min-width: 0;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.eat-tutor-card:hover {
+    box-shadow: var(--lh-shadow-hover, 0 4px 16px rgba(60, 64, 67, 0.18));
+    border-color: var(--lh-border, #dbe7ee);
+}
+
+/* Mini chat-mockup preview rendered from the tutor's own palette. */
+.eat-preview {
+    height: 116px;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--eat-a-line);
+    border-radius: var(--eat-a-radius) var(--eat-a-radius) 0 0;
+    overflow: hidden;
+}
+.eat-preview-head {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.7rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+.eat-preview-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #46d18a;
+    flex: 0 0 auto;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+.eat-preview-body {
+    flex: 1;
+    padding: 0.55rem 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    overflow: hidden;
+}
+.eat-preview-bubble {
+    font-size: 0.72rem;
+    line-height: 1;
+    padding: 0.35rem 0.55rem;
+    border-radius: var(--lh-radius, 12px);
+    max-width: 78%;
+}
+.eat-preview-bot {
+    align-self: flex-start;
+    border: 1px solid rgba(16, 24, 40, 0.08);
+}
+.eat-preview-user {
+    align-self: flex-end;
+}
+
+.eat-tutor-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem;
+    flex: 1;
+}
+.eat-tutor-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.eat-tutor-name {
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--lh-text, #1f2937);
+    overflow-wrap: anywhere;
+}
+.eat-tutor-persona {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--eat-a-muted);
+}
+.eat-badge {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.eat-badge-preset {
+    background: var(--lh-primary-light, #f3f5f8);
+    color: var(--lh-primary, #194866);
+}
+.eat-badge-custom {
+    background: #ecfdf5;
+    color: #166534;
+}
+.eat-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.15rem;
+}
+.eat-actions .lh-row-actions {
+    margin: 0;
+}
+.eat-actions .eat-card-icons {
+    gap: 0.25rem;
+}
+.eat-admin .lh-icon-action {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: 50%;
+    color: var(--lh-primary, #194866);
+    display: inline-flex;
+    flex-shrink: 0;
+    height: 2rem;
+    justify-content: center;
+    min-width: 2rem;
+    padding: 0;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+.eat-admin .lh-icon-action:hover,
+.eat-admin .lh-icon-action:focus {
+    background: var(--lh-primary-light, #f3f5f8);
+    border-color: var(--lh-primary, #194866);
+    color: var(--lh-primary, #194866);
+    text-decoration: none;
+    transform: scale(1.06);
+}
+.eat-admin .lh-icon-action:focus-visible {
+    outline: 2px solid var(--lh-accent, #f98012);
+    outline-offset: 2px;
+}
+.eat-admin .lh-icon-action--danger {
+    color: var(--lh-danger, #ab1d79);
+}
+.eat-admin .lh-icon-action--danger:hover,
+.eat-admin .lh-icon-action--danger:focus {
+    background: var(--lh-danger-light, #f5e4ef);
+    border-color: var(--lh-danger, #ab1d79);
+    color: var(--lh-danger, #ab1d79);
+}
+.eat-applysite-action {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.4rem;
+}
+.eat-admin .eat-actions .btn {
+    font-size: 0.8125rem;
+    min-height: 1.875rem;
+    padding: 0.3rem 0.7rem;
+}
+
+/* Per-instance cards. */
+.eat-instance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1rem;
+    align-items: start;
+}
+.eat-instance-card {
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: var(--eat-a-radius);
+    box-shadow: var(--eat-a-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+}
+.eat-instance-loc {
+    font-weight: 600;
+    color: var(--lh-text, #1f2937);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.eat-instance-loc .fa {
+    color: var(--eat-a-muted);
+}
+.eat-instance-id {
+    font-size: 0.75rem;
+    color: var(--eat-a-muted);
+    font-weight: 400;
+}
+.eat-instance-apply {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.eat-instance-apply .lh-plugin-select-wrap {
+    display: inline-flex;
+    flex: 1 1 14rem;
+    min-width: min(18rem, 100%);
+    position: relative;
+}
+.eat-instance-apply .lh-plugin-select-wrap::after {
+    border-bottom: 2px solid var(--lh-text-secondary, #5f6b77);
+    border-right: 2px solid var(--lh-text-secondary, #5f6b77);
+    content: "";
+    height: 0.45rem;
+    pointer-events: none;
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-65%) rotate(45deg);
+    width: 0.45rem;
+}
+.eat-instance-apply select {
+    appearance: none;
+    background: var(--lh-bg-white, #ffffff);
+    border: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: var(--lh-radius-sm, 8px);
+    color: var(--lh-text, #1f2937);
+    cursor: pointer;
+    min-height: 2.5rem;
+    padding: 0.55rem 2.3rem 0.55rem 0.8rem;
+    width: 100%;
+}
+.eat-instance-apply select:focus-visible {
+    border-color: var(--lh-primary, #194866);
+    box-shadow: 0 0 0 3px rgba(25, 72, 102, 0.12);
+    outline: none;
+}
+.eat-instance-apply .eat-applyinstance-action {
+    cursor: pointer;
+}
+.eat-instance-icons {
+    gap: 0.25rem;
+    margin-top: 0;
+}
+
+/* Card layout for the per-instance teacher page sections. */
+.eat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+.eat-card {
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: var(--eat-a-radius);
+    padding: 1.1rem 1.2rem;
+    box-shadow: var(--eat-a-shadow);
+}
+.eat-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    color: var(--lh-text, #1f2937);
+}
+.eat-card h3 .fa {
+    color: var(--eat-a-accent);
+}
+.eat-card p {
+    color: var(--eat-a-muted);
+    font-size: 0.88rem;
+}
+
+/* A small inline note/callout used on the settings page heading. */
+.eat-settings-callout {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    background: var(--eat-a-surface);
+    border: 1px solid var(--eat-a-line);
+    border-radius: var(--eat-a-radius);
+    padding: 0.7rem 0.9rem;
+    margin-top: 0.5rem;
+}
+.eat-settings-callout .fa {
+    color: var(--eat-a-accent);
+}
+
+/* LernHive-style treatment for Moodle's native admin settings form. The
+   settings remain Moodle admin_setting controls; this layer only changes the
+   surface so the operator page sits more naturally next to Plugin Shell pages. */
+#page-admin-setting-blocksettingeledia_aitutor {
+    --eat-settings-primary: var(--lh-primary, #194866);
+    --eat-settings-primary-light: var(--lh-primary-light, #f3f5f8);
+    --eat-settings-border: var(--lh-border, #dbe7ee);
+    --eat-settings-muted: var(--lh-text-secondary, #5f6b77);
+    --eat-settings-text: var(--lh-text, #1f2937);
+    --eat-settings-radius: var(--lh-radius-sm, 8px);
+    --eat-settings-shadow: var(--lh-shadow-card, 0 2px 8px rgba(15, 23, 42, 0.05));
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings {
+    max-width: var(--lh-page-max-default, 72rem);
+}
+body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-pending #adminsettings {
+    min-height: 24rem;
+    opacity: 0;
+}
+#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-ready #adminsettings {
+    opacity: 1;
+    transition: opacity 0.08s ease;
+}
+.eat-admin-settings-shell #adminsettings {
+    max-width: none;
+    width: 100%;
+}
+.eat-admin-settings-shell-page #page-header,
+.eat-admin-settings-shell-page .secondary-navigation,
+.eat-admin-settings-shell-page #region-main > div[role="main"] > h1:first-child,
+.eat-admin-settings-shell-page #region-main > div[role="main"] > h2:first-child,
+.eat-admin-settings-shell #adminsettings > h1,
+.eat-admin-settings-shell #adminsettings > h2 {
+    display: none;
+}
+body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page #theme_boost-drawers-blocks,
+body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page #block-region-side-pre,
+body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page .drawer-toggles .drawer-right-toggle,
+body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page #page .drawer-right-toggle {
+    display: none !important;
+}
+.eat-admin-settings-shell-page #region-main {
+    background: transparent;
+    border: 0;
+    padding-top: 0;
+}
+.eat-settings-hub {
+    margin-bottom: 0.85rem;
+}
+.eat-settings-hub__head {
+    display: none;
+}
+.eat-settings-hub__head h2 {
+    color: var(--eat-settings-text);
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.25;
+    margin: 0;
+}
+.eat-settings-hub__head p {
+    display: none;
+}
+.eat-settings-hub__grid {
+    display: grid;
+    gap: 0.55rem;
+    grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+    margin-bottom: 0.55rem;
+}
+.eat-settings-hub-card {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--eat-settings-border);
+    border-radius: var(--eat-settings-radius);
+    box-shadow: var(--eat-settings-shadow);
+    color: var(--eat-settings-text);
+    cursor: pointer;
+    display: flex;
+    gap: 0.7rem;
+    min-height: 4.1rem;
+    padding: 0.75rem;
+    position: relative;
+    text-align: left;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.18s ease, transform 0.15s ease;
+    width: 100%;
+}
+.eat-settings-hub-card:hover,
+.eat-settings-hub-card:focus {
+    border-color: var(--eat-settings-primary);
+    box-shadow: 0 4px 12px rgba(25, 72, 102, 0.14);
+    outline: none;
+    transform: translateY(-1px);
+}
+.eat-settings-hub-card:focus-visible {
+    outline: 2px solid var(--eat-settings-primary);
+    outline-offset: 2px;
+}
+.eat-settings-hub-card--active {
+    background: #fff;
+    border-color: var(--eat-settings-primary);
+    box-shadow: inset 0 0 0 1px var(--eat-settings-primary), 0 2px 8px rgba(25, 72, 102, 0.08);
+}
+.eat-settings-hub-card__icon {
+    align-items: center;
+    background: var(--eat-settings-primary-light);
+    border-radius: var(--eat-settings-radius);
+    color: var(--eat-settings-primary);
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 2.25rem;
+    justify-content: center;
+    width: 2.25rem;
+}
+.eat-settings-hub-card__text {
+    min-width: 0;
+}
+.eat-settings-hub-card__title {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+.eat-settings-backnav {
+    margin: 0.35rem 0 1.15rem;
+    text-align: left;
+}
+.eat-settings-actionbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    justify-content: center;
+}
+.eat-settings-actionbar .eat-settings-backnav {
+    margin: 0;
+}
+.eat-settings-backnav__button {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--eat-settings-border);
+    border-radius: var(--eat-settings-radius);
+    color: var(--eat-settings-primary);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 0.76rem;
+    font-weight: 800;
+    gap: 0.35rem;
+    line-height: 1.2;
+    padding: 0.34rem 0.62rem;
+}
+.eat-settings-backnav__button:hover,
+.eat-settings-backnav__button:focus {
+    background: var(--eat-settings-primary-light);
+    border-color: var(--eat-settings-primary);
+    outline: none;
+}
+.eat-settings-backnav__button:focus-visible {
+    outline: 2px solid var(--eat-settings-primary);
+    outline-offset: 2px;
+}
+.eat-settings-hub-card__body {
+    display: none;
+}
+.eat-settings-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0;
+}
+.eat-settings-topic {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--eat-settings-border);
+    border-radius: 999px;
+    color: var(--eat-settings-primary);
+    cursor: pointer;
+    display: inline-flex;
+    min-height: 1.95rem;
+    padding: 0.28rem 0.68rem;
+    text-align: left;
+}
+.eat-settings-topic__title {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1.2;
+    min-width: 0;
+}
+.eat-settings-topic:hover,
+.eat-settings-topic:focus {
+    background: var(--eat-settings-primary-light);
+    border-color: var(--eat-settings-primary);
+    box-shadow: none;
+    outline: none;
+}
+.eat-settings-topic--active {
+    background: #fff;
+    border-color: var(--eat-settings-primary);
+    box-shadow: inset 0 0 0 1px var(--eat-settings-primary);
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings h3.main {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--eat-settings-border);
+    border-radius: 0;
+    color: var(--eat-settings-text);
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.25;
+    margin: 1.1rem 0 0.55rem;
+    padding: 0 0 0.45rem;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings h3.main[data-eat-major-heading="1"] {
+    display: none !important;
+}
+.eat-settings-group {
+    background: #fff;
+    border: 1px solid var(--eat-settings-border);
+    border-radius: var(--eat-settings-radius);
+    box-shadow: none;
+    margin: 0 0 0.65rem;
+    overflow: hidden;
+    padding-bottom: 0;
+}
+.eat-settings-group--untitled {
+    padding-top: 0.15rem;
+}
+.eat-admin-settings-shell-page #adminsettings .formsettingheading {
+    display: none;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .formsettingheading:not([data-eat-info-hidden="1"]) {
+    background: #fff;
+    border: 1px solid var(--eat-settings-border);
+    border-radius: var(--eat-settings-radius);
+    box-shadow: var(--eat-settings-shadow);
+    color: var(--eat-settings-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    margin: 0;
+    padding: 1rem;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .formsettingheading p:last-child {
+    margin-bottom: 0;
+}
+#page-admin-setting-blocksettingeledia_aitutor .eat-settings-infocards {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    margin-top: 0.9rem;
+}
+#page-admin-setting-blocksettingeledia_aitutor .eat-settings-infocard {
+    align-items: flex-start;
+    background: var(--eat-settings-primary-light);
+    border: 1px solid var(--eat-settings-border);
+    border-radius: var(--eat-settings-radius);
+    display: flex;
+    gap: 0.65rem;
+    padding: 0.75rem;
+}
+#page-admin-setting-blocksettingeledia_aitutor .eat-settings-infocard__icon {
+    align-items: center;
+    background: #fff;
+    border-radius: var(--eat-settings-radius);
+    color: var(--eat-settings-primary);
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 2rem;
+    justify-content: center;
+    width: 2rem;
+}
+#page-admin-setting-blocksettingeledia_aitutor .eat-settings-infocard__title {
+    color: var(--eat-settings-text);
+    font-size: 0.88rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+#page-admin-setting-blocksettingeledia_aitutor .eat-settings-infocard__body {
+    color: var(--eat-settings-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.35;
+    margin-top: 0.18rem;
+}
+#page-admin-setting-blocksettingeledia_aitutor .eat-settings-callout {
+    background: var(--eat-settings-primary-light);
+    border-color: var(--eat-settings-border);
+    border-radius: var(--eat-settings-radius);
+    margin-top: 0.85rem;
+}
+#page-admin-setting-blocksettingeledia_aitutor .eat-settings-callout .btn {
+    background: var(--eat-settings-primary);
+    border-color: var(--eat-settings-primary);
+    border-radius: var(--lh-radius-btn, 8px);
+    color: #fff;
+    font-weight: 700;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item {
+    align-items: flex-start;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(219, 231, 238, 0.72);
+    border-radius: 0;
+    box-shadow: none;
+    column-gap: 1.35rem;
+    display: grid;
+    grid-template-columns: 14.5rem minmax(0, 1fr);
+    margin: 0;
+    padding: 0.85rem 1.75rem 0.8rem;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-group > .form-item:last-child {
+    border-bottom: 0;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-target-highlight {
+    background: rgba(249, 128, 18, 0.08);
+    transition: background 0.35s ease;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose {
+    column-gap: 1.35rem;
+    display: grid;
+    grid-template-columns: 14.5rem minmax(0, 1fr);
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .form-label {
+    grid-column: 1;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .form-setting {
+    grid-column: 2;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-expose-inline {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    column-gap: 0.45rem;
+    display: flex;
+    grid-column: 2;
+    justify-self: start;
+    margin: 0.55rem 0 0;
+    max-width: 100%;
+    padding: 0;
+    width: auto;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-expose-inline .form-label {
+    display: none;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-expose-inline .form-setting {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto !important;
+    gap: 0.5rem;
+    max-width: none !important;
+    padding: 0;
+    white-space: nowrap;
+    width: auto !important;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-expose-inline input[type="checkbox"] {
+    margin: 0;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-expose-inline .form-defaultinfo {
+    margin: 0 0 0 0.25rem;
+    padding: 0.15rem 0.55rem;
+    white-space: nowrap;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-expose-label {
+    color: var(--eat-settings-text);
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item + .form-item {
+    padding-top: 0.35rem;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-label {
+    flex: none;
+    grid-column: 1;
+    justify-self: stretch;
+    max-width: none;
+    padding-top: 0.2rem;
+    text-align: right !important;
+    width: 100%;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-label label {
+    color: var(--eat-settings-text);
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.25;
+    max-width: none;
+    overflow-wrap: normal;
+    width: 100%;
+    word-break: normal;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-setting {
+    flex: 1 1 auto;
+    grid-column: 2;
+    max-width: none;
+    min-width: 0;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-shortname {
+    color: var(--eat-settings-muted) !important;
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-top: 0.3rem;
+    max-width: none;
+    overflow-wrap: normal !important;
+    white-space: normal;
+    word-break: normal !important;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-control,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .custom-select,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings select,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings textarea {
+    border-color: var(--eat-settings-border);
+    border-radius: var(--eat-settings-radius);
+    color: var(--eat-settings-text);
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-control:focus,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .custom-select:focus,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings select:focus,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings textarea:focus {
+    border-color: var(--eat-settings-primary);
+    box-shadow: 0 0 0 3px rgba(25, 72, 102, 0.12);
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-defaultinfo {
+    background: var(--eat-settings-primary-light);
+    border-radius: 999px;
+    color: var(--eat-settings-muted) !important;
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin: 0.2rem 0 0;
+    padding: 0.15rem 0.55rem;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-text {
+    color: var(--eat-settings-muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-text p:last-child {
+    margin-bottom: 0;
+}
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings input[type="checkbox"] {
+    accent-color: var(--eat-settings-primary);
+    min-height: 1.1rem;
+    min-width: 1.1rem;
+}
+@media (max-width: 700px) {
+    #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item {
+        display: block;
+    }
+    #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-label {
+        flex-basis: auto;
+        max-width: none;
+        padding-bottom: 0.45rem;
+    }
+    #page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-expose-inline {
+        grid-column: 1;
+        margin-left: 0;
+    }
+    #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose {
+        display: block;
+    }
+}
+
+/* Plugin Shell base styles owned by the aiTutor block. */
+body:not(.theme-lernhive) {
+    --lh-primary: #194866;
+    --lh-primary-dark: #0f2b3d;
+    --lh-primary-light: #f3f5f8;
+    --lh-accent: #f98012;
+    --lh-accent-dark: #c25b00;
+    --lh-accent-light: #ffecdb;
+    --lh-bg-white: #ffffff;
+    --lh-bg-soft: #f3f5f8;
+    --lh-text: #1f2937;
+    --lh-text-secondary: #5f6b77;
+    --lh-muted: #5f6b77;
+    --lh-border: #dbe7ee;
+    --lh-border-light: #f0f0f0;
+    --lh-radius-sm: 8px;
+    --lh-radius-btn: 8px;
+    --lh-radius-pill: 9999px;
+    --lh-shadow-card: 0 2px 8px rgba(15, 23, 42, 0.05);
+    --lh-page-max-default: 58rem;
+    --lh-page-max-reading: 58rem;
+    --lh-page-max-wide: 88rem;
+    --lh-page-max-full: none;
+}
+body:not(.theme-lernhive) .lh-plugin-shell {
+    margin: 0 auto;
+    max-width: var(--lh-page-max-default);
+    width: 100%;
+}
+body:not(.theme-lernhive) .lh-plugin-shell--reading {
+    max-width: var(--lh-page-max-reading);
+}
+body:not(.theme-lernhive) .lh-plugin-shell--wide {
+    max-width: var(--lh-page-max-wide);
+}
+body:not(.theme-lernhive) .lh-plugin-shell--full {
+    max-width: var(--lh-page-max-full);
+}
+
+.eat-admin-launcher-host {
+    align-items: center;
+    display: inline-flex;
+    margin: 0 0.15rem;
+    position: relative;
+    z-index: 1040;
+}
+
+.eat-admin-launcher-host[hidden] {
+    display: none !important;
+}
+
+.eat-admin-launcher-host__link {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    color: var(--lh-primary, #194866);
+    cursor: pointer;
+    display: inline-flex;
+    height: 2.25rem;
+    justify-content: center;
+    outline: none;
+    padding: 0;
+    text-decoration: none;
+    transition: background 120ms ease, color 120ms ease;
+    width: 2.25rem;
+}
+
+.eat-admin-launcher-host__link:hover,
+.eat-admin-launcher-host__link:focus-visible {
+    background: var(--lh-primary-light, #f3f5f8);
+    color: var(--lh-primary-dark, #0f344b);
+    outline: none;
+}
+
+.eat-admin-launcher-host__icon,
+.eat-admin-launcher-host__icon svg {
+    display: block;
+    height: 1.15rem;
+    width: 1.15rem;
+}
+
+.eat-admin-launcher-host__icon svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+}
+
+body:not(.theme-lernhive) .lh-plugin-header {
+    background: #fff;
+    border: 1px solid var(--lh-border);
+    border-radius: var(--lh-radius-sm);
+    margin: 0 0 0.75rem;
+    min-height: 6.5rem;
+    padding: 1rem;
+}
+body:not(.theme-lernhive) .lh-plugin-header__row {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+body:not(.theme-lernhive) .lh-plugin-header__title-block {
+    min-width: 0;
+}
+body:not(.theme-lernhive) .lh-plugin-header__tags {
+    align-items: center;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-left: 0.5rem;
+}
+body:not(.theme-lernhive) .lh-plugin-tag {
+    align-items: center;
+    background: var(--lh-bg-soft);
+    border: 1px solid var(--lh-border);
+    border-radius: 999px;
+    color: var(--lh-text-secondary);
+    display: inline-flex;
+    font-size: 0.78rem;
+    font-weight: 700;
+    gap: 0.3rem;
+    line-height: 1.2;
+    padding: 0.18rem 0.55rem;
+}
+body:not(.theme-lernhive) .lh-plugin-header__home {
+    color: inherit;
+    text-decoration: none;
+}
+body:not(.theme-lernhive) .lh-plugin-header__home:hover,
+body:not(.theme-lernhive) .lh-plugin-header__home:focus-visible {
+    color: var(--lh-accent-dark);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+body:not(.theme-lernhive) .lh-plugin-header__actions {
+    align-items: center;
+    align-self: flex-start;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 0.4rem;
+    margin-left: auto;
+}
+body:not(.theme-lernhive) .lh-plugin-header__action {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--lh-border);
+    border-radius: 999px;
+    color: var(--lh-primary);
+    display: inline-flex;
+    height: 2.25rem;
+    justify-content: center;
+    text-decoration: none;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    width: 2.25rem;
+}
+body:not(.theme-lernhive) .lh-plugin-header__action:hover,
+body:not(.theme-lernhive) .lh-plugin-header__action:focus-visible {
+    background: var(--lh-primary-light);
+    border-color: var(--lh-primary);
+    color: var(--lh-primary);
+    outline: none;
+    text-decoration: none;
+}
+body:not(.theme-lernhive) .lh-plugin-header__action--current {
+    background: var(--lh-primary-light);
+    border-color: var(--lh-primary);
+    color: var(--lh-primary);
+    cursor: default;
+}
+body:not(.theme-lernhive) .lh-btn-primary,
+body:not(.theme-lernhive) .lh-btn-secondary,
+body:not(.theme-lernhive) .lh-btn-default {
+    align-items: center;
+    border: 1px solid var(--lh-border);
+    border-radius: var(--lh-radius-btn);
+    display: inline-flex;
+    font-size: 0.88rem;
+    font-weight: 700;
+    gap: 0.35rem;
+    line-height: 1.2;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.8rem;
+    text-decoration: none;
+}
+body:not(.theme-lernhive) .lh-btn-primary {
+    background: var(--lh-primary);
+    border-color: var(--lh-primary);
+    color: #fff;
+}
+body:not(.theme-lernhive) .lh-btn-secondary,
+body:not(.theme-lernhive) .lh-btn-default {
+    background: #fff;
+    color: var(--lh-primary);
+}
+body:not(.theme-lernhive) .lh-btn-primary:hover,
+body:not(.theme-lernhive) .lh-btn-primary:focus-visible,
+body:not(.theme-lernhive) .lh-btn-secondary:hover,
+body:not(.theme-lernhive) .lh-btn-secondary:focus-visible,
+body:not(.theme-lernhive) .lh-btn-default:hover,
+body:not(.theme-lernhive) .lh-btn-default:focus-visible {
+    background: var(--lh-primary-light);
+    border-color: var(--lh-primary);
+    color: var(--lh-primary);
+    outline: none;
+    text-decoration: none;
+}
+body:not(.theme-lernhive) .lh-plugin-header__name {
+    align-items: center;
+    color: var(--lh-primary);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 1.25rem;
+    font-weight: 800;
+    gap: 0.6rem;
+    line-height: 1.25;
+}
+body:not(.theme-lernhive) .lh-plugin-header__name-text {
+    display: inline;
+}
+body:not(.theme-lernhive) .lh-plugin-header__sep {
+    color: #9aa8b3;
+    margin: 0 0.25rem;
+}
+body:not(.theme-lernhive) .lh-plugin-header__tagline {
+    color: var(--lh-text);
+    font-weight: 650;
+}
+body:not(.theme-lernhive) .lh-plugin-header__subtitle {
+    color: var(--lh-muted);
+    margin: 0.35rem 0 0;
+}
+body:not(.theme-lernhive) .lh-plugin-section-nav {
+    background: transparent;
+    border-top: 1px solid var(--lh-border);
+    display: flex;
+    gap: 0.25rem;
+    margin: 1rem -1rem -1rem;
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.75rem), transparent);
+    overflow-x: auto;
+    padding: 0 1.75rem 0 0.9rem;
+    scrollbar-width: thin;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.75rem), transparent);
+}
+body:not(.theme-lernhive) .lh-plugin-section-nav__item {
+    align-items: center;
+    border-bottom: 3px solid transparent;
+    color: var(--lh-text-secondary);
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 0.96rem;
+    font-weight: 700;
+    gap: 0.45rem;
+    min-height: 3rem;
+    padding: 0.1rem 0.75rem 0;
+    text-decoration: none;
+}
+body:not(.theme-lernhive) .lh-plugin-section-nav__item:hover,
+body:not(.theme-lernhive) .lh-plugin-section-nav__item:focus-visible {
+    background: var(--lh-primary-light);
+    color: var(--lh-primary);
+    outline: none;
+    text-decoration: none;
+}
+body:not(.theme-lernhive) .lh-plugin-section-nav__item[aria-current="page"] {
+    border-bottom-color: var(--lh-accent);
+    color: var(--lh-primary-dark);
+}
+body:not(.theme-lernhive) .lh-plugin-content-area {
+    min-width: 0;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar {
+    background: #fff;
+    border: 1px solid var(--lh-border);
+    border-radius: var(--lh-radius-sm);
+    margin: 0 0 0.75rem;
+    padding: 0.75rem 1rem;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar--actions {
+    padding: 0.6rem 1rem;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__actions,
+body:not(.theme-lernhive) .lh-row-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress {
+    align-items: center;
+    display: grid;
+    gap: 0.55rem;
+    grid-template-columns: auto minmax(8rem, 1fr) auto auto;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress-label,
+body:not(.theme-lernhive) .lh-plugin-infobar__stat {
+    color: var(--lh-text-secondary);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress-track {
+    background: var(--lh-bg-soft);
+    border-radius: 999px;
+    height: 0.45rem;
+    overflow: hidden;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress-fill {
+    background: var(--lh-primary);
+    height: 100%;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress-count {
+    color: var(--lh-primary);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__progress-count--muted {
+    color: var(--lh-text-secondary);
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__stats {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+body:not(.theme-lernhive) .lh-plugin-infobar__stat {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.35rem;
+}
+@media (max-width: 720px) {
+    body:not(.theme-lernhive) .lh-plugin-header__row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    body:not(.theme-lernhive) .lh-plugin-header__actions {
+        margin-left: 0;
+    }
+}
+
+/* Plugin Shell content helpers for the aiTutor configuration overview. */
+.path-block-eledia_aitutor .lh-plugin-grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+.path-block-eledia_aitutor .lh-plugin-grid--cols-3 {
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+.path-block-eledia_aitutor .eat-setup-wizard {
+    background: var(--lh-bg-white, #ffffff);
+    border: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: var(--lh-radius-sm, 8px);
+    box-shadow: var(--lh-shadow-card, 0 2px 8px rgba(15, 23, 42, 0.05));
+    margin-bottom: 1rem;
+    padding: 1rem;
+}
+.path-block-eledia_aitutor .eat-setup-wizard__head {
+    margin-bottom: 1rem;
+}
+.path-block-eledia_aitutor .eat-setup-wizard__title {
+    color: var(--lh-text, #1f2937);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.25;
+    margin: 0;
+}
+.path-block-eledia_aitutor .eat-setup-wizard__intro {
+    color: var(--lh-muted, #64748b);
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.45;
+    margin: 0.35rem 0 0;
+}
+.path-block-eledia_aitutor .eat-setup-callout {
+    align-items: center;
+    border: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: var(--lh-radius-sm, 8px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding: 0.75rem;
+}
+.path-block-eledia_aitutor .eat-setup-callout--warning {
+    background: #fff7ed;
+    border-color: #fed7aa;
+}
+.path-block-eledia_aitutor .eat-setup-callout strong {
+    color: var(--lh-text, #1f2937);
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+.path-block-eledia_aitutor .eat-setup-callout p {
+    color: var(--lh-muted, #64748b);
+    flex: 1 1 18rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.35;
+    margin: 0;
+}
+.path-block-eledia_aitutor .eat-setup-callout .singlebutton {
+    margin: 0;
+}
+.path-block-eledia_aitutor .eat-setup-wizard__steps {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+.path-block-eledia_aitutor .eat-setup-step {
+    border: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: var(--lh-radius-sm, 8px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    min-width: 0;
+    padding: 0.85rem;
+}
+.path-block-eledia_aitutor .eat-setup-step__top {
+    align-items: center;
+    display: flex;
+    gap: 0.45rem;
+}
+.path-block-eledia_aitutor .eat-setup-step__number,
+.path-block-eledia_aitutor .eat-setup-step__icon {
+    align-items: center;
+    border-radius: 50%;
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 1.85rem;
+    justify-content: center;
+    width: 1.85rem;
+}
+.path-block-eledia_aitutor .eat-setup-step__number {
+    background: var(--lh-primary, #194866);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+.path-block-eledia_aitutor .eat-setup-step__icon {
+    background: var(--lh-primary-light, #f3f5f8);
+    color: var(--lh-primary, #194866);
+}
+.path-block-eledia_aitutor .eat-setup-step__status {
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    margin-left: auto;
+    padding: 0.15rem 0.5rem;
+}
+.path-block-eledia_aitutor .eat-setup-step__status--ready {
+    background: #ecfdf5;
+    color: #166534;
+}
+.path-block-eledia_aitutor .eat-setup-step__status--todo {
+    background: var(--lh-primary-light, #f3f5f8);
+    color: var(--lh-primary, #194866);
+}
+.path-block-eledia_aitutor .eat-setup-step__status--error {
+    background: #fef2f2;
+    color: #991b1b;
+}
+.path-block-eledia_aitutor .eat-setup-step__status--missing {
+    background: #f3f5f8;
+    color: #5f6b77;
+}
+.path-block-eledia_aitutor .eat-setup-step--missing {
+    opacity: 0.72;
+}
+.path-block-eledia_aitutor .eat-setup-step__title {
+    color: var(--lh-text, #1f2937);
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.25;
+    margin: 0;
+}
+.path-block-eledia_aitutor .eat-setup-step__body {
+    color: var(--lh-muted, #64748b);
+    font-size: 0.84rem;
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 0;
+}
+.path-block-eledia_aitutor .eat-setup-step__missing {
+    color: var(--lh-muted, #64748b);
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin: -0.15rem 0 0;
+}
+.path-block-eledia_aitutor .eat-setup-task-list {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.45rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.path-block-eledia_aitutor .eat-setup-task {
+    align-items: flex-start;
+    background: var(--lh-primary-light, #f3f5f8);
+    border-radius: var(--lh-radius-sm, 8px);
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 0.55rem;
+}
+.path-block-eledia_aitutor .eat-setup-task__dot {
+    border-radius: 50%;
+    height: 0.6rem;
+    margin-top: 0.35rem;
+    width: 0.6rem;
+}
+.path-block-eledia_aitutor .eat-setup-task__state--ready {
+    background: #22c55e;
+}
+.path-block-eledia_aitutor .eat-setup-task__state--todo {
+    background: var(--lh-accent, #f98012);
+}
+.path-block-eledia_aitutor .eat-setup-task__state--error {
+    background: #dc2626;
+}
+.path-block-eledia_aitutor .eat-setup-task__state--missing {
+    background: #94a3b8;
+}
+.path-block-eledia_aitutor .eat-setup-task--disabled {
+    background: #f8fafc;
+}
+.path-block-eledia_aitutor .eat-setup-task__title {
+    color: var(--lh-text, #1f2937);
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+.path-block-eledia_aitutor .eat-setup-task__body {
+    color: var(--lh-muted, #64748b);
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-top: 0.12rem;
+}
+.path-block-eledia_aitutor .eat-setup-task__action {
+    height: 1.75rem;
+    min-width: 1.75rem;
+}
+.path-block-eledia_aitutor .eat-setup-task__action .fa {
+    font-size: 0.78rem;
+}
+.path-block-eledia_aitutor .eat-setup-task__action--disabled {
+    cursor: default;
+    opacity: 0.65;
+    pointer-events: none;
+}
+.path-block-eledia_aitutor .eat-setup-step__action {
+    align-self: flex-start;
+    margin-top: 0.1rem;
+}
+.path-block-eledia_aitutor .lh-plugin-card {
+    background: var(--lh-bg-white, #ffffff);
+    border: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: var(--lh-radius-sm, 8px);
+    box-shadow: var(--lh-shadow-card, 0 2px 8px rgba(15, 23, 42, 0.05));
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+}
+.path-block-eledia_aitutor .lh-plugin-card__top {
+    align-items: flex-start;
+    display: flex;
+    gap: 0.75rem;
+}
+.path-block-eledia_aitutor .lh-plugin-card__icon {
+    align-items: center;
+    background: var(--lh-primary-light, #f3f5f8);
+    border-radius: var(--lh-radius-sm, 8px);
+    color: var(--lh-primary, #194866);
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 2.5rem;
+    justify-content: center;
+    width: 2.5rem;
+}
+.path-block-eledia_aitutor .lh-plugin-card__meta {
+    min-width: 0;
+}
+.path-block-eledia_aitutor .lh-plugin-card__title {
+    color: var(--lh-text, #1f2937);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+.path-block-eledia_aitutor .lh-plugin-card__sub {
+    color: var(--lh-muted, #64748b);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-top: 0.2rem;
+}
+.path-block-eledia_aitutor .lh-plugin-card__body {
+    color: var(--lh-muted, #64748b);
+    flex: 1 1 auto;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.45;
+    margin: 0;
+}
+.path-block-eledia_aitutor dl.lh-plugin-card__body {
+    display: grid;
+    gap: 0.45rem 1rem;
+    grid-template-columns: minmax(10rem, max-content) 1fr;
+}
+.path-block-eledia_aitutor .lh-plugin-card__body dt {
+    color: var(--lh-text-secondary, #5f6b77);
+    font-weight: 600;
+}
+.path-block-eledia_aitutor .lh-plugin-card__body dd {
+    margin: 0;
+}
+.path-block-eledia_aitutor .lh-plugin-card__actions {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    margin-left: auto;
+    margin-top: 0;
+}
+.path-block-eledia_aitutor .lh-plugin-card__actions .lh-icon-action {
+    align-items: center;
+    background: rgba(25, 72, 102, 0.08);
+    border: 0;
+    border-radius: 50%;
+    color: var(--lh-text-secondary, #5f6b77);
+    display: inline-flex;
+    flex-shrink: 0;
+    height: 2.25rem;
+    justify-content: center;
+    padding: 0;
+    text-decoration: none;
+    transition: background 0.15s ease, box-shadow 0.18s ease, color 0.15s ease, transform 0.15s ease;
+    width: 2.25rem;
+}
+.path-block-eledia_aitutor .lh-plugin-card__actions .lh-icon-action:hover,
+.path-block-eledia_aitutor .lh-plugin-card__actions .lh-icon-action:focus {
+    background: var(--lh-primary, #194866);
+    box-shadow: 0 4px 12px rgba(25, 72, 102, 0.18);
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+.path-block-eledia_aitutor .lh-plugin-card__actions .lh-icon-action:focus-visible {
+    outline: 2px solid var(--lh-accent, #f98012);
+    outline-offset: 2px;
+}
+.path-block-eledia_aitutor .lh-btn,
+.path-block-eledia_aitutor .lh-btn--secondary {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: var(--lh-radius-btn, 8px);
+    color: var(--lh-primary, #194866);
+    display: inline-flex;
+    font-weight: 600;
+    gap: 0.35rem;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.8rem;
+    text-decoration: none;
+}
+.path-block-eledia_aitutor .lh-btn:hover,
+.path-block-eledia_aitutor .lh-btn:focus,
+.path-block-eledia_aitutor .lh-btn--secondary:hover,
+.path-block-eledia_aitutor .lh-btn--secondary:focus {
+    background: var(--lh-primary-light, #f3f5f8);
+    color: var(--lh-primary, #194866);
+    text-decoration: none;
+}
+
+@media (max-width: 600px) {
+    .path-block-eledia_aitutor dl.lh-plugin-card__body {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Simple Moodle-like admin settings inside the Plugin Shell. */
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings {
+    margin: 1rem auto 0;
+    max-width: 58rem;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings fieldset {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    margin: 0;
+    overflow: visible;
+    padding: 0;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings h3.main {
+    background: #fff;
+    border: 0;
+    border-bottom: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: 0;
+    color: var(--lh-text, #1f2937);
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0 0 0.85rem;
+    padding: 1rem 0 0.45rem;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .formsettingheading,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .formsettingheading:not([data-eat-info-hidden="1"]) {
+    background: #fff;
+    border: 0;
+    border-bottom: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: 0;
+    box-shadow: none;
+    color: #555;
+    display: block !important;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    margin: 0;
+    padding: 1rem 1.25rem 1rem 15.25rem;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .formsettingheading[data-eat-info-hidden="1"] {
+    display: none !important;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-group {
+    background: #fff;
+    border: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: var(--lh-radius-sm, 8px);
+    box-shadow: none;
+    margin: 0 0 0.65rem;
+    overflow: hidden;
+    padding: 0;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor .eat-settings-backnav {
+    margin: 0.55rem 0 1.35rem;
+    text-align: left;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor .eat-settings-backnav__button {
+    background: #fff;
+    border: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: var(--lh-radius-sm, 8px);
+    color: var(--lh-primary, #194866);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.4rem 0.7rem;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose {
+    align-items: start;
+    background: #fff;
+    border: 0;
+    border-bottom: 1px solid var(--lh-border, #dbe7ee);
+    border-radius: 0;
+    box-shadow: none;
+    column-gap: 1.25rem;
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    margin: 0;
+    padding: 1rem 1.25rem;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose {
+    row-gap: 0.55rem;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .eat-settings-expose-inline {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    display: flex;
+    grid-column: 2;
+    margin: 0;
+    padding: 0;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .form-label {
+    display: none;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .form-setting {
+    align-items: center;
+    display: inline-flex;
+    gap: 0;
+    max-width: none;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .eat-settings-expose-label {
+    color: #222;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .form-defaultinfo {
+    background: transparent;
+    border-radius: 0;
+    color: var(--lh-text-secondary, #5f6b77) !important;
+    display: inline;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.35;
+    margin-left: 1.25rem;
+    padding: 0;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item:last-child,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings fieldset > *:last-child {
+    border-bottom: 0;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-label {
+    grid-column: 1;
+    justify-self: stretch;
+    max-width: none;
+    padding: 0;
+    text-align: right !important;
+    width: auto;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-label label {
+    color: #222;
+    display: block;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.35;
+    margin: 0;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-shortname {
+    color: #666 !important;
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.35;
+    margin-top: 0.15rem;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-setting {
+    grid-column: 2;
+    max-width: none;
+    min-width: 0;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-defaultinfo {
+    background: transparent;
+    border-radius: 0;
+    color: #666 !important;
+    display: inline;
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 0 0 0 0.25rem;
+    padding: 0;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-text {
+    color: #555;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    margin-top: 0.55rem;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-control,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .custom-select,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings select,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings textarea {
+    border-color: #b8c2cc;
+    border-radius: 6px;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings input[type="checkbox"] {
+    accent-color: auto;
+    min-height: auto;
+    min-width: auto;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-expose-inline input[type="checkbox"] {
+    margin: 0 0.55rem 0 0;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-buttons,
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .settingsformbuttons {
+    background: transparent;
+    border: 0;
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    margin: 0;
+    padding: 1rem 0 0;
+}
+
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-cancel {
+    margin-right: 0.6rem;
+}
+
+@media (max-width: 700px) {
+    #page-admin-setting-blocksettingeledia_aitutor #adminsettings .formsettingheading,
+    #page-admin-setting-blocksettingeledia_aitutor #adminsettings .formsettingheading:not([data-eat-info-hidden="1"]),
+    #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item,
+    #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose {
+        display: block;
+        padding: 1rem;
+    }
+
+    #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-label {
+        padding-bottom: 0.5rem;
+        text-align: left !important;
+    }
+}
+
+/* --- Question-analytics report. --------------------------------------- */
+.eat-report .eat-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1rem;
+    margin: 0.5rem 0 1.5rem;
+}
+.eat-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+.eat-stat-icon {
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex: 0 0 auto;
+    background: #eef2fb;
+    color: #0b3d91;
+}
+.eat-stat-num {
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #1f2a37;
+}
+.eat-stat-label {
+    font-size: 0.82rem;
+    color: var(--eat-a-muted);
+    margin-top: 0.25rem;
+}
+.eat-report-card {
+    background: var(--eat-a-card);
+    border: 1px solid var(--eat-a-line);
+    border-radius: 14px;
+    padding: 1.1rem 1.3rem 1.3rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+.eat-report-card .eat-report-title {
+    margin: 0 0 0.9rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2a37;
+}
+.eat-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+.eat-bar-row {
+    display: grid;
+    grid-template-columns: minmax(6rem, 11rem) 1fr;
+    align-items: center;
+    gap: 0.9rem;
+}
+.eat-bar-label {
+    font-size: 0.85rem;
+    color: #2a3340;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.eat-bar-label a {
+    color: var(--eat-a-accent);
+}
+.eat-bar-track {
+    background: #eef2f7;
+    border-radius: 999px;
+    height: 1.5rem;
+    overflow: hidden;
+}
+.eat-bar-fill {
+    height: 100%;
+    min-width: 1.9rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1e3f59, #3a6ea5);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 0.55rem;
+    color: #fff;
+    font-size: 0.74rem;
+    font-weight: 700;
+    box-sizing: border-box;
+}
+.eat-bar-fill.eat-bar-zero {
+    background: #e3e8ef;
+    color: #5b6677;
+}
+.eat-report-card .generaltable {
+    margin-bottom: 0;
+}

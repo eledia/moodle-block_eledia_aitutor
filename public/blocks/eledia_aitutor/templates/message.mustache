@@ -1,0 +1,109 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_eledia_aitutor/message
+
+    A single chat message bubble. Rendered client-side by the chat AMD module.
+
+    For user messages, the "text" value is escaped by Mustache (HTML-safe). For
+    assistant messages, the "html" value is server-sanitised Markdown output and
+    is intentionally rendered unescaped (triple-mustache).
+
+    Example context (json):
+    {
+        "isuser": false,
+        "isassistant": true,
+        "sendername": "eLeDia.ai Tutor",
+        "avatarurl": "https://moodle.example.com/blocks/eledia_aitutor/pix/logo.png",
+        "html": "<p>Here is your answer.</p>",
+        "failuretext": "",
+        "text": "",
+        "failed": false,
+        "sources": [
+            {"title": "Week 1 notes", "url": "https://example.com/n", "hasurl": true, "snippet": "..."}
+        ],
+        "hassources": true,
+        "copylabel": "Copy answer",
+        "retrylabel": "Retry"
+    }
+}}
+<div class="eledia_aitutor-message {{#isuser}}eledia_aitutor-user{{/isuser}}{{#isassistant}}eledia_aitutor-assistant{{/isassistant}}{{#failed}} eledia_aitutor-failed{{/failed}}"
+     data-region="message" role="article">
+    <div class="eledia_aitutor-meta">
+        {{#isassistant}}<span class="eledia_aitutor-msg-avatar" aria-hidden="true">
+            <img class="eledia_aitutor-msg-avatar-img" src="{{avatarurl}}" alt="" width="20" height="20">
+        </span>{{/isassistant}}
+        <span class="eledia_aitutor-sender">{{sendername}}</span>
+        {{#showgrounding}}
+            {{#grounded}}
+                <span class="eledia_aitutor-grounding eledia_aitutor-grounded"
+                      title="{{#str}}groundedbadge_title, block_eledia_aitutor{{/str}}">
+                    <i class="fa fa-book" aria-hidden="true"></i>
+                    {{#str}}groundedbadge, block_eledia_aitutor{{/str}}
+                </span>
+            {{/grounded}}
+            {{^grounded}}
+                <span class="eledia_aitutor-grounding eledia_aitutor-ungrounded"
+                      title="{{#str}}ungroundedbadge_title, block_eledia_aitutor{{/str}}">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                    {{#str}}ungroundedbadge, block_eledia_aitutor{{/str}}
+                </span>
+            {{/grounded}}
+        {{/showgrounding}}
+    </div>
+    <div class="eledia_aitutor-bubble">
+        {{#isuser}}{{text}}{{/isuser}}
+        {{#isassistant}}
+            <div class="eledia_aitutor-markdown">
+                {{#failuretext}}<p>{{failuretext}}</p>{{/failuretext}}
+                {{^failuretext}}{{{html}}}{{/failuretext}}
+            </div>
+            {{#hassources}}
+                <div class="eledia_aitutor-sources">
+                    <div class="eledia_aitutor-sources-title">{{#str}}sources, block_eledia_aitutor{{/str}}</div>
+                    <ul class="eledia_aitutor-sources-list">
+                        {{#sources}}
+                            <li class="eledia_aitutor-source">
+                                {{#num}}<span class="eledia_aitutor-source-num">[S{{num}}]</span> {{/num}}
+                                {{#hasurl}}
+                                    {{! url is server-normalised with PARAM_URL before it reaches this template. }}
+                                    <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{title}}</a>
+                                {{/hasurl}}
+                                {{^hasurl}}<span>{{title}}</span>{{/hasurl}}
+                                {{#snippet}}<span class="eledia_aitutor-source-snippet">{{snippet}}</span>{{/snippet}}
+                            </li>
+                        {{/sources}}
+                    </ul>
+                </div>
+            {{/hassources}}
+        {{/isassistant}}
+    </div>
+    {{#isassistant}}
+        <div class="eledia_aitutor-message-actions">
+            <button type="button" class="btn btn-icon btn-sm eledia_aitutor-iconbtn"
+                    data-action="copy" aria-label="{{copylabel}}" title="{{copylabel}}">
+                <i class="fa fa-copy" aria-hidden="true"></i>
+            </button>
+        </div>
+    {{/isassistant}}
+    {{#failed}}
+        <div class="eledia_aitutor-message-actions">
+            <button type="button" class="btn btn-sm btn-outline-secondary"
+                    data-action="retry">{{retrylabel}}</button>
+        </div>
+    {{/failed}}
+</div>

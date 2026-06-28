@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/eledia_aitutor/db" VERSION="20260613" COMMENT="eLeDia.ai Tutor block database schema."
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="block_eledia_aitutor_conv" COMMENT="Local conversation metadata for the eLeDia.ai Tutor. Full chat history is owned by the external RAG/Tutor server; this table only tracks the lightweight pointer (the server-issued conversation id) plus display metadata so a user can resume and list their own conversations. No full message content is stored here.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Owner of the conversation (the Moodle user)."/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Course context the conversation was started in, or null/0 for global chat."/>
+        <FIELD NAME="conversationid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Opaque conversation identifier issued by the external RAG/Tutor server."/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Optional display title for the conversation."/>
+        <FIELD NAME="lastpreview" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Short preview of the last message, for the conversation list. Truncated; not a full transcript."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Creation timestamp."/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Last-modified timestamp."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid-timemodified" UNIQUE="false" FIELDS="userid,timemodified" COMMENT="List a user's conversations newest-first."/>
+        <INDEX NAME="userid-conversationid" UNIQUE="true" FIELDS="userid,conversationid" COMMENT="Resolve a server conversation id within an owner, and guard against duplicates."/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_eledia_aitutor_qlog" COMMENT="Opt-in question analytics: learner questions (never answers) logged per course so teachers can spot confusion hotspots. Collection is disabled by default; rows are pruned by a scheduled task after the configured retention and are covered by the privacy provider.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The asker. Stored so privacy export/erasure works; never displayed in reports."/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Course the question was asked in, or 0 for global chat."/>
+        <FIELD NAME="question" TYPE="char" LENGTH="1000" NOTNULL="true" SEQUENCE="false" COMMENT="The question text, truncated."/>
+        <FIELD NAME="grounded" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 when the answer cited course materials."/>
+        <FIELD NAME="answerstyle" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Effective answer style (explain|hint|quiz), if any."/>
+        <FIELD NAME="topic" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Canonical topic label supplied by the RAG server, used to cluster questions in the teacher report."/>
+        <FIELD NAME="sourcetitle" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Title of the primary cited source (sources[0]); hotspot fallback when no topic was supplied."/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Course module id resolved from the primary source URL, when it points at this site."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="When the question was asked."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="courseid-timecreated" UNIQUE="false" FIELDS="courseid,timecreated" COMMENT="Course report queries."/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated" COMMENT="Retention pruning."/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_eledia_aitutor_consent" COMMENT="Documented privacy-guidelines acknowledgements: one timestamped row per user, written the first time they confirm the privacy guidelines before using the tutor. Erased when the user account is deleted (event observer) and covered by the privacy provider.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The consenting user."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="When the user acknowledged the privacy guidelines."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign-unique" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="At most one consent record per user."/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="block_eledia_aitutor_usage" COMMENT="Per-user daily message counters for quota/cost governance: one row per user per day, incremented on each successful chat turn. Pruned after a short retention; covered by the privacy provider and erased on user deletion.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The chatting user."/>
+        <FIELD NAME="daykey" TYPE="int" LENGTH="8" NOTNULL="true" SEQUENCE="false" COMMENT="Day as YYYYMMDD (server timezone)."/>
+        <FIELD NAME="messagecount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Messages sent that day."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid-daykey" UNIQUE="true" FIELDS="userid,daykey" COMMENT="One counter per user per day."/>
+        <INDEX NAME="daykey" UNIQUE="false" FIELDS="daykey" COMMENT="Retention pruning."/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_eledia_aitutor_tutor" COMMENT="Saved site-wide tutor profiles: a named, reusable bundle of tutor settings (persona + every design token + behaviour/launcher/footer) serialised as JSON, plus optional logo/avatar images stored in the system context (file areas tutorlogo/tutoravatar, itemid = this row id). Admins create these by duplicating a built-in preset or importing a bundle; applying a profile snapshot-copies its values into the site config or a block instance.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Human-readable tutor name."/>
+        <FIELD NAME="shortname" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Stable machine name, unique; used in export bundles."/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Optional admin notes describing the tutor."/>
+        <FIELD NAME="settings" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="JSON map of registry key => value defining the tutor's persona and design."/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Display order in the management list."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Creation timestamp."/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Last-modified timestamp."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="shortname" UNIQUE="true" FIELDS="shortname" COMMENT="One profile per machine name."/>
+        <INDEX NAME="sortorder" UNIQUE="false" FIELDS="sortorder" COMMENT="Listing order."/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

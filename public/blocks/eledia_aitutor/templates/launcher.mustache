@@ -1,0 +1,221 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_eledia_aitutor/launcher
+
+    The chat shell for the eLeDia.ai Tutor block.
+
+    For the "embedded" display mode the panel is shown inline; for docked, modal
+    and fullscreen modes only the launch button is shown inline and the panel is
+    portalled to the document body when opened (see the chat AMD module), which
+    keeps it clear of any block-container overflow/z-index clipping.
+
+    Classes prefixed "eledia_aitutor-" so nothing leaks into surrounding markup.
+
+    Example context (json):
+    {
+        "uniqid": "eledia_aitutor_abc123",
+        "instanceid": 7,
+        "displaymode": "embedded",
+        "embedded": true,
+        "persona": "eLeDia.ai Tutor",
+        "welcome": "<p>Hi! How can I help?</p>",
+        "historyenabled": true,
+        "launchlabel": "Open the eLeDia.ai Tutor",
+        "consented": true
+    }
+}}
+{{#customcss}}
+    <style>{{{customcss}}}</style>
+{{/customcss}}
+<div class="eledia_aitutor-root" data-region="eledia_aitutor" id="{{uniqid}}"
+     data-mode="{{displaymode}}" style="{{brandvars}}">
+
+    <script type="application/json" data-region="eledia_aitutor-config">{{{configjson}}}</script>
+
+    {{^embedded}}
+        <button type="button"
+                class="btn btn-primary eledia_aitutor-launch eledia_aitutor-launch--{{launcherstyle}}"
+                data-action="launch" aria-haspopup="dialog" aria-expanded="false"
+                style="{{brandvars}}"
+                {{#launchfab}}aria-label="{{launchlabel}}" title="{{launchlabel}}"{{/launchfab}}>
+            <span class="eledia_aitutor-launch-icon" aria-hidden="true">
+                <img class="eledia_aitutor-launch-img" src="{{logourl}}" alt="" width="20" height="20">
+            </span>
+            {{^launchfab}}<span class="eledia_aitutor-launch-text">{{launchlabel}}</span>{{/launchfab}}
+        </button>
+    {{/embedded}}
+
+    <div class="eledia_aitutor-panel {{#embedded}}eledia_aitutor-embedded{{/embedded}}"
+         style="{{brandvars}}"
+         data-region="panel"
+         role="region"
+         aria-label="{{persona}}"
+         {{^embedded}}hidden{{/embedded}}>
+
+        <div class="eledia_aitutor-backdrop" data-action="close" hidden></div>
+
+        <div class="eledia_aitutor-window" role="document">
+            <header class="eledia_aitutor-header">
+                <div class="eledia_aitutor-identity">
+                    <a class="eledia_aitutor-avatar" href="https://eledia.ai"
+                       target="_blank" rel="noopener"
+                       title="{{#str}}eledialink, block_eledia_aitutor{{/str}}"
+                       aria-label="{{#str}}eledialink, block_eledia_aitutor{{/str}}">
+                        <img class="eledia_aitutor-avatar-img" src="{{logourl}}" alt="" width="34" height="34">
+                        <span class="eledia_aitutor-status-dot"></span>
+                    </a>
+                    <span class="eledia_aitutor-identity-text">
+                        <span class="eledia_aitutor-title">{{persona}}</span>
+                        <span class="eledia_aitutor-presence">{{#str}}online, block_eledia_aitutor{{/str}}</span>
+                    </span>
+                </div>
+                <div class="eledia_aitutor-actions">
+                    {{#historyenabled}}
+                        <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
+                                data-action="history" aria-label="{{#str}}history, block_eledia_aitutor{{/str}}"
+                                title="{{#str}}history, block_eledia_aitutor{{/str}}">
+                            <i class="fa fa-clock-o" aria-hidden="true"></i>
+                        </button>
+                    {{/historyenabled}}
+                    <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
+                            data-action="newconversation" aria-label="{{#str}}newconversation, block_eledia_aitutor{{/str}}"
+                            title="{{#str}}newconversation, block_eledia_aitutor{{/str}}">
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
+                            data-action="privacy" aria-label="{{#str}}privacyguidelines, block_eledia_aitutor{{/str}}"
+                            title="{{#str}}privacyguidelines, block_eledia_aitutor{{/str}}"
+                            aria-haspopup="dialog">
+                        <i class="fa fa-shield" aria-hidden="true"></i>
+                    </button>
+                    {{^embedded}}
+                        <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
+                                data-action="close" aria-label="{{#str}}close, block_eledia_aitutor{{/str}}"
+                                title="{{#str}}close, block_eledia_aitutor{{/str}}">
+                            <i class="fa fa-times" aria-hidden="true"></i>
+                        </button>
+                    {{/embedded}}
+                </div>
+            </header>
+
+            {{#llmonly}}
+                <div class="eledia_aitutor-modenote" role="note">
+                    <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
+                    {{#str}}llmonly_banner, block_eledia_aitutor{{/str}}
+                </div>
+            {{/llmonly}}
+
+            {{#historyenabled}}
+                <div class="eledia_aitutor-history" data-region="history" hidden
+                     role="region" aria-label="{{#str}}history, block_eledia_aitutor{{/str}}">
+                    <div class="eledia_aitutor-history-empty" data-region="history-empty">
+                        {{#str}}nohistory, block_eledia_aitutor{{/str}}
+                    </div>
+                    <ul class="eledia_aitutor-history-list" data-region="history-list"
+                        aria-label="{{#str}}history, block_eledia_aitutor{{/str}}"></ul>
+                </div>
+            {{/historyenabled}}
+
+            <div class="eledia_aitutor-log" data-region="log"
+                 role="log" aria-live="polite" aria-atomic="false"
+                 aria-label="{{#str}}conversation, block_eledia_aitutor{{/str}}" tabindex="0">
+                <div class="eledia_aitutor-message eledia_aitutor-assistant eledia_aitutor-welcome">
+                    <div class="eledia_aitutor-meta">
+                        <span class="eledia_aitutor-msg-avatar" aria-hidden="true">
+                            <img class="eledia_aitutor-msg-avatar-img" src="{{avatarurl}}" alt="" width="20" height="20">
+                        </span>
+                        <span class="eledia_aitutor-sender">{{persona}}</span>
+                    </div>
+                    <div class="eledia_aitutor-bubble">{{{welcome}}}</div>
+                </div>
+                {{#hasstarters}}
+                    <div class="eledia_aitutor-starters" data-region="starters" role="group"
+                         aria-label="{{#str}}starters_label, block_eledia_aitutor{{/str}}">
+                        {{#starters}}
+                            <button type="button" class="eledia_aitutor-starter"
+                                    data-action="starter">{{.}}</button>
+                        {{/starters}}
+                    </div>
+                {{/hasstarters}}
+            </div>
+
+            <div class="eledia_aitutor-status" data-region="status" role="status" aria-live="polite"></div>
+
+            {{^consented}}
+                <div class="eledia_aitutor-consent" data-region="consent">
+                    <p class="eledia_aitutor-consent-text">
+                        <i class="fa fa-shield" aria-hidden="true"></i>
+                        {{#str}}consent_intro, block_eledia_aitutor{{/str}}
+                    </p>
+                    <button type="button" class="btn btn-link p-0 eledia_aitutor-consent-link" data-action="privacy">
+                        {{#str}}privacyguidelines, block_eledia_aitutor{{/str}}
+                    </button>
+                    <div class="form-check eledia_aitutor-consent-check">
+                        <input type="checkbox" class="form-check-input" id="{{uniqid}}_consent"
+                               data-region="consent-checkbox">
+                        <label class="form-check-label" for="{{uniqid}}_consent">
+                            {{#str}}consent_checkbox, block_eledia_aitutor{{/str}}
+                        </label>
+                    </div>
+                    <button type="button" class="btn btn-primary eledia_aitutor-consent-accept"
+                            data-action="consent-accept" disabled>
+                        {{#str}}consent_accept, block_eledia_aitutor{{/str}}
+                    </button>
+                </div>
+            {{/consented}}
+
+            {{#stylechoice}}
+                <div class="eledia_aitutor-styles" data-region="styles" role="radiogroup"
+                     aria-label="{{#str}}answerstyle, block_eledia_aitutor{{/str}}">
+                    {{#styles}}
+                        <button type="button" class="eledia_aitutor-stylechip{{#active}} eledia_aitutor-stylechip-active{{/active}}"
+                                role="radio" aria-checked="{{#active}}true{{/active}}{{^active}}false{{/active}}"
+                                data-action="style" data-style="{{key}}">{{label}}</button>
+                    {{/styles}}
+                </div>
+            {{/stylechoice}}
+            {{#stylelocked}}
+                <div class="eledia_aitutor-styles">
+                    <span class="eledia_aitutor-stylechip eledia_aitutor-stylechip-locked"
+                          title="{{#str}}answerstyle, block_eledia_aitutor{{/str}}">
+                        <i class="fa fa-lock" aria-hidden="true"></i> {{lockedlabel}}
+                    </span>
+                </div>
+            {{/stylelocked}}
+
+            <form class="eledia_aitutor-composer" data-region="composer"
+                  aria-label="{{#str}}messagelabel, block_eledia_aitutor{{/str}}">
+                <label class="sr-only" for="{{uniqid}}_input">
+                    {{#str}}messagelabel, block_eledia_aitutor{{/str}}
+                </label>
+                <textarea id="{{uniqid}}_input" class="eledia_aitutor-input" data-region="input"
+                          rows="1" autocomplete="off" {{^consented}}disabled{{/consented}}
+                          placeholder="{{#str}}inputplaceholder, block_eledia_aitutor{{/str}}"></textarea>
+                <button type="submit" class="eledia_aitutor-send" data-action="send"
+                        {{^consented}}disabled{{/consented}}
+                        aria-label="{{#str}}send, block_eledia_aitutor{{/str}}">
+                    <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                </button>
+            </form>
+
+            {{#showfooter}}
+                <div class="eledia_aitutor-footer">{{footertext}}</div>
+            {{/showfooter}}
+        </div>
+    </div>
+</div>
