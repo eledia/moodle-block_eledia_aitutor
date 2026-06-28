@@ -85,6 +85,7 @@ class get_history extends external_api {
         if ($owned === null) {
             throw new moodle_exception('error_conversation_not_found', 'block_eledia_aitutor');
         }
+        helper::require_course_tutor_enabled((int) ($owned->courseid ?? 0));
 
         $historytool = security::history_tool_name();
         if ($historytool === '') {

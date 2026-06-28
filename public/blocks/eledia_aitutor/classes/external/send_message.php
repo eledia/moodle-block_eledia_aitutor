@@ -102,6 +102,7 @@ class send_message extends external_api {
             }
             $course = get_course($params['courseid']);
             require_login($course, false);
+            helper::require_course_tutor_enabled((int) $params['courseid']);
         } else {
             if (!security::global_chat_enabled()) {
                 throw new moodle_exception('error_global_chat_disabled', 'block_eledia_aitutor');

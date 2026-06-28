@@ -76,6 +76,9 @@ $PAGE->set_url(new moodle_url(
 ));
 $PAGE->set_context($context);
 $PAGE->set_pagelayout($embedded ? 'embedded' : 'standard');
+if (!$embedded) {
+    $PAGE->blocks->show_only_fake_blocks(true);
+}
 $PAGE->set_title(get_string('default_persona', 'block_eledia_aitutor'));
 if ($courseid > 0) {
     $PAGE->set_heading(format_string($course->fullname));

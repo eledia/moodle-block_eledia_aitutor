@@ -88,7 +88,7 @@ if ($hassiteconfig) {
         }
     }
 
-    // Shell-friendly configuration overview for LernHive installations.
+                // Shell-friendly configuration overview.
     $ADMIN->add('blocksettings', new admin_externalpage(
         'block_eledia_aitutor_configuration',
         get_string('configuration', 'block_eledia_aitutor'),

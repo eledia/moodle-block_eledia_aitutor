@@ -68,6 +68,7 @@ class get_conversations extends external_api {
         require_capability('block/eledia_aitutor:viewhistory', $context);
 
         $filter = $params['courseid'] > 0 ? $params['courseid'] : null;
+        helper::require_course_tutor_enabled((int) ($filter ?? 0));
         $records = conversation_repository::list_for_user((int) $USER->id, $filter);
 
         $conversations = array_map(static fn($r) => [

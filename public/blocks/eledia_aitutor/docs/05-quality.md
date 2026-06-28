@@ -186,20 +186,16 @@ Der Help-Link ist damit die einzige Stelle, die nicht dem ansonsten
 durchgaengigen Guard-Muster folgt.
 
 **Erwartet**
-Der Help-Link wird nur gerendert, wenn `local_lernhive` vorhanden ist (Guard via
-`core_component::get_plugin_directory('local', 'lernhive')` analog zu den
-uebrigen Integrationen), oder zeigt auf einen blockeigenen Fallback. `helpurl`
-bleibt leer, wenn kein Ziel verfuegbar ist, sodass das Template das
-Fragezeichen weglaesst.
+Der Help-Link zeigt auf eine plugin-eigene Hilfeseite. LernHive darf dieselbe
+Dokumentation optional in seinem Support-Hub darstellen, darf aber keine
+Runtime-Voraussetzung fuer den Tutor sein.
 
-**Fix 2026-06-27**
-`plugin_shell::action_slots()` setzt `helpurl` nur noch, wenn
-`core_component::get_plugin_directory('local', 'lernhive')` nicht `null` ist,
-sonst bleibt `helpurl` leer. Das Template (`{{#helpurl}}`) laesst das
-Fragezeichen dann weg. `helpurl` und `settingsurl` rendern im Template
-unabhaengig voneinander, daher kein Regressionsrisiko fuer Nutzer ohne
-`moodle/site:config`. `php -l` gruen; keine weitere hartkodierte
-`local/lernhive`-Referenz ausserhalb des Guards.
+**Fix 2026-06-27/28**
+`plugin_shell::action_slots()` setzt `helpurl` immer auf
+`/blocks/eledia_aitutor/help.php`. Die neue `help.php` rendert die vorhandene
+Plugin-Dokumentation aus `docs/02-user-doc*.md` in der Plugin-Shell. Damit ist
+die Hilfe auch ohne `local_lernhive` erreichbar; das LernHive-Support-Hub bleibt
+rein optional.
 
 ### bug10 Settings-Shell-Fallback ist zu fragil
 

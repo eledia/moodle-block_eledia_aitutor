@@ -38,11 +38,12 @@ require_capability('moodle/site:config', $context);
 $PAGE->set_context($context);
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('standard');
+$PAGE->blocks->show_only_fake_blocks(true);
 $PAGE->set_title(get_string('configuration', 'block_eledia_aitutor'));
 $PAGE->set_heading(shell::is_available() ? '' : get_string('configuration', 'block_eledia_aitutor'));
 shell::require_css();
 
-$adminsettingsurl = new moodle_url('/admin/settings.php', ['section' => 'blocksettingeledia_aitutor']);
+$adminsettingsurl = new moodle_url('/blocks/eledia_aitutor/operator_settings.php');
 $mcpurl = new moodle_url('/webservice/elediamcp/configuration.php');
 $literagurl = new moodle_url('/admin/settings.php', ['section' => 'local_literag'], 'settings-connection');
 $ragingesturl = new moodle_url('/admin/settings.php', ['section' => 'local_ragingest_settings']);
@@ -188,6 +189,9 @@ $checkllmhealth = static function (bool $literagavailable): array {
 $llmhealth = $checkllmhealth($literagavailable);
 
 $settingurl = static function (string $section, string $anchor): moodle_url {
+    if ($section === 'blocksettingeledia_aitutor') {
+        return new moodle_url('/blocks/eledia_aitutor/operator_settings.php', [], 'admin-' . $anchor);
+    }
     return new moodle_url('/admin/settings.php', ['section' => $section], 'admin-' . $anchor);
 };
 $settingshellurl = static function (string $section, string $hash): moodle_url {
@@ -353,12 +357,6 @@ $wizardstep = static function (
         }
         $taskhtml .= html_writer::end_tag('ol');
     }
-    $missingnotice = $installed ? '' : html_writer::tag(
-        'p',
-        get_string('configuration_wizard_missing_body', 'block_eledia_aitutor'),
-        ['class' => 'eat-setup-step__missing']
-    );
-
     return html_writer::tag(
         'section',
         html_writer::div(
@@ -371,7 +369,6 @@ $wizardstep = static function (
         ) .
         html_writer::tag('h3', $title, ['class' => 'eat-setup-step__title']) .
         html_writer::tag('p', $body, ['class' => 'eat-setup-step__body']) .
-        $missingnotice .
         $taskhtml,
         ['class' => $installed ? 'eat-setup-step' : 'eat-setup-step eat-setup-step--missing']
     );
@@ -409,6 +406,20 @@ if ($ragingestpending > 0) {
         ['class' => 'eat-setup-callout eat-setup-callout--warning']
     );
 }
+$missingpluginsnotice = (!$literagavailable || !$ragingestavailable || !$mcpavailable)
+    ? html_writer::tag(
+        'div',
+        html_writer::tag(
+            'strong',
+            get_string('configuration_wizard_missing_title', 'block_eledia_aitutor')
+        ) .
+        html_writer::tag(
+            'p',
+            get_string('configuration_wizard_missing_body', 'block_eledia_aitutor')
+        ),
+        ['class' => 'eat-setup-callout eat-setup-callout--warning']
+    )
+    : '';
 
 echo html_writer::tag(
     'section',
@@ -424,6 +435,7 @@ echo html_writer::tag(
             get_string('configuration_wizard_desc', 'block_eledia_aitutor'),
             ['class' => 'eat-setup-wizard__intro']
         ) .
+        $missingpluginsnotice .
         $ragingestcta,
         ['class' => 'eat-setup-wizard__head']
     ) .

@@ -59,15 +59,9 @@ final class plugin_shell {
             }
         }
 
-        // The help target lives in local_lernhive. Only offer it when that plugin
-        // is actually installed; otherwise leave helpurl empty so the template
-        // omits the help action rather than linking to a dead page.
-        $helpurl = '';
-        if (\core_component::get_plugin_directory('local', 'lernhive') !== null) {
-            $helpurl = self::url_to_string(
-                new moodle_url('/local/lernhive/support.php', ['component' => $component])
-            );
-        }
+        // Keep help owned by this plugin. LernHive may render the same docs in
+        // its support hub, but the tutor must not depend on that plugin.
+        $helpurl = self::url_to_string(new moodle_url('/blocks/eledia_aitutor/help.php'));
 
         return [
             'hasactions' => $resolvedsettingsurl !== '',

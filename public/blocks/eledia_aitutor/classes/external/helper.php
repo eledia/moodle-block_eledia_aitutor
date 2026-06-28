@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace block_eledia_aitutor\external;
 
 use context;
+use block_eledia_aitutor\local\widget;
 use moodle_exception;
 
 /**
@@ -79,5 +80,22 @@ class helper {
         }
         $config = unserialize_object(base64_decode($instance->configdata));
         return $config instanceof \stdClass ? $config : new \stdClass();
+    }
+
+    /**
+     * Enforce the course-level tutor opt-in signal.
+     *
+     * A teacher opts a course into the tutor by adding the block to the course.
+     * Standalone UI entry points already honour that rule; external functions
+     * use this helper so direct AJAX calls follow the same contract.
+     *
+     * @param int $courseid Course id, or 0 for non-course/global chat.
+     * @return void
+     * @throws moodle_exception When the course has no tutor block.
+     */
+    public static function require_course_tutor_enabled(int $courseid): void {
+        if ($courseid > 0 && !widget::course_has_tutor($courseid)) {
+            throw new moodle_exception('notenabledincourse', 'block_eledia_aitutor');
+        }
     }
 }

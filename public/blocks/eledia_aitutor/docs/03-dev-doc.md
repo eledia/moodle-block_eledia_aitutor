@@ -48,8 +48,9 @@ den Tutor und MCP-Client gegen Moodle.
 - `webservice_elediamcp` fuer echte Moodle-MCP-Token-Provisionierung.
 - RAG-/Tutor-MCP-Server mit Streamable HTTP und mindestens einem Chat-Tool.
 
-`local_lernhive` ist keine harte Runtime-Abhaengigkeit. Die Plugin-Shell rendert
-den LernHive-Support-Link nur, wenn das Plugin installiert ist.
+`local_lernhive` ist keine Runtime-Abhaengigkeit. Die Plugin-Shell verlinkt auf
+die plugin-eigene `help.php`; LernHive kann dieselbe Dokumentation optional in
+seinem Support-Hub rendern.
 
 ---
 

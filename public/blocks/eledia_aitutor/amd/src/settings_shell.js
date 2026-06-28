@@ -1,7 +1,7 @@
 // This file is part of Moodle - http://moodle.org/
 
 /**
- * Wrap the Moodle admin settings form in the LernHive Plugin Shell.
+ * Wrap the Moodle admin settings form in the plugin shell.
  *
  * @module     block_eledia_aitutor/settings_shell
  * @copyright  2026 eLeDia GmbH, Berlin
@@ -398,7 +398,7 @@ define([], function() {
             document.body.classList.remove('eat-admin-settings-pending');
             return;
         }
-        if (!config || !config.headerHtml) {
+        if (!config || (!config.inShell && !config.headerHtml)) {
             document.body.classList.add('eat-admin-settings-ready');
             document.body.classList.remove('eat-admin-settings-pending');
             return;
@@ -406,15 +406,24 @@ define([], function() {
         form.dataset.eatShellWrapped = '1';
         document.body.classList.add('path-block-eledia_aitutor', 'eat-admin-settings-shell-page');
 
-        const shell = document.createElement('div');
-        shell.className = 'lh-plugin-shell eat-admin-settings-shell';
-        shell.innerHTML = config.headerHtml;
+        let content = form.parentNode;
+        if (!config.inShell) {
+            const shell = document.createElement('div');
+            shell.className = 'lh-plugin-shell eat-admin-settings-shell';
+            shell.innerHTML = config.headerHtml;
 
-        const content = document.createElement('div');
-        content.className = 'lh-plugin-content-area eat-admin-settings-content';
-        form.parentNode.insertBefore(shell, form);
-        shell.appendChild(content);
-        content.appendChild(form);
+            content = document.createElement('div');
+            content.className = 'lh-plugin-content-area eat-admin-settings-content';
+            form.parentNode.insertBefore(shell, form);
+            shell.appendChild(content);
+            content.appendChild(form);
+        } else if (content && content.classList) {
+            content.classList.add('eat-admin-settings-content');
+            const shell = content.closest('.lh-plugin-shell');
+            if (shell) {
+                shell.classList.add('eat-admin-settings-shell');
+            }
+        }
 
         const fieldset = form.querySelector('fieldset');
         if (!fieldset) {

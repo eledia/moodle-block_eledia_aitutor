@@ -151,11 +151,11 @@ Der Projekt-Root und der Plugin-`docs/`-Ordner bleiben frei von parallelen Guide
     CSP-Bypass).
   - `bug15`/`bug16`/`bug17` (S3/S4): Fokusring History-Button, Heading-Outline
     im Privacy-Modal, fragiles Triple-Mustache-Muster in `appendFailure`.
-- `bug09` (2026-06-27) gefixt: Der Help-Link der Plugin-Shell wird nur noch bei
-  installiertem `local_lernhive` gerendert (Guard via
-  `core_component::get_plugin_directory`). Das Plugin hat damit **keine harte
-  Laufzeit-Abhaengigkeit** mehr auf `local_lernhive`; alle uebrigen
-  Integrationen waren bereits per `class_exists`/`get_plugin_directory`
+- `bug09` (2026-06-27/28) gefixt: Der Help-Link der Plugin-Shell zeigt auf die
+  plugin-eigene `help.php`. LernHive kann dieselbe Dokumentation optional im
+  Support-Hub rendern, ist aber kein Ziel der Tutor-Shell mehr. Das Plugin hat
+  damit **keine harte Laufzeit-Abhaengigkeit** auf `local_lernhive`; alle
+  uebrigen Integrationen sind per `class_exists`/`get_plugin_directory`
   abgesichert.
 - Weiterhin offen aus der UX-Runde: `bug10` (Settings-Shell-Fallback),
   `bug11` (Fokus-/A11y-Details inkl. `role="alert"` in `privacy_info.mustache`).

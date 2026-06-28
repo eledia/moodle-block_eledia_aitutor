@@ -126,8 +126,8 @@ Settings-Shell und Tutor-Oberflaechen uebertragen, ohne die Moodle-native
 Bedienbarkeit zu ueberstylen.
 
 **Review-Schwerpunkte**
-- Kein toter Help-Link auf `/local/lernhive/support.php`, wenn `local_lernhive`
-  nicht installiert ist.
+- Kein Help-Link auf `/local/lernhive/support.php`; die Tutor-Shell muss ihre
+  Hilfe plugin-eigen bereitstellen.
 - Settings-Shell robust gegen fehlende `headerHtml`-Konfiguration machen.
 - Fokus- und Tastaturbedienung fuer zentrale Controls sichtbar halten.
 - Fallback-CSS fuer im Template angebotene `lh-*`-Slots vollstaendig machen.
@@ -140,10 +140,10 @@ Bedienbarkeit zu ueberstylen.
 - Override-Checkboxen in der Settings-Shell wieder Moodle-schlicht gestaltet:
   kein Spezial-Pill fuer `Standard: Ja/Nein`, keine fette
   `Ueberschreiben erlauben`-Beschriftung.
-- `bug09` (2026-06-27): Help-Link der Plugin-Shell mit
-  `core_component::get_plugin_directory('local', 'lernhive')` abgesichert. Ohne
-  `local_lernhive` wird kein toter Help-Link mehr gerendert. Das Plugin ist
-  damit frei von harten Laufzeit-Abhaengigkeiten auf `local_lernhive`.
+- `bug09` (2026-06-27/28): Help-Link der Plugin-Shell zeigt auf
+  `/blocks/eledia_aitutor/help.php`. Die Seite rendert die plugin-eigene
+  Dokumentation aus `docs/02-user-doc*.md`; `local_lernhive` ist fuer Hilfe
+  nicht erforderlich.
 
 **Offen**
 - Keine offenen Code-Findings aus task05.
@@ -222,3 +222,27 @@ Security-/Korrektheitsbefunde).
 
 **Hinweis**
 Die `amd/build/*.min.js` wurden nicht neu gebaut; CodeChecker betrifft nur PHP.
+
+### task08 Behat-Abdeckung fuer Plugin-Shell und Kurskontext erweitern
+Status:    done
+Feature:   feat01 / feat03
+Prioritaet: P1
+Linked:    test06
+
+**Ziel**
+Die nach dem UX-Umbau zentralen Admin-Flows nicht nur per PHPUnit, sondern auch
+als Browser-Journeys absichern.
+
+**Umgesetzt 2026-06-28**
+- `plugin_shell.feature`: Dashboard, Tutorenverwaltung und Vorschau werden in
+  der Plugin-Shell geprueft; die Moodle-Blockleiste darf auf diesen Shell-Seiten
+  nicht erscheinen.
+- Dashboard-Test fuer fehlende Zusatzplugins: ein einziger Hinweis oberhalb des
+  Wizards plus `Plugin missing`-Status.
+- Tutorenverwaltung: Action-Icons fuer `Create tutor` und `Import`.
+- `course_context.feature`: Kursbezogene Standalone-Seite bleibt ohne Tutor-
+  Block gesperrt und oeffnet erst, wenn der Block im Kurs vorhanden ist.
+
+**Ausstehend**
+- In CI mit voll initialisiertem Behat-Profil ausfuehren:
+  `vendor/bin/behat --tags @block_eledia_aitutor`.

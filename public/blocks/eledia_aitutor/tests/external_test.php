@@ -98,6 +98,9 @@ final class external_test extends \advanced_testcase {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
+        $this->getDataGenerator()->create_block('eledia_aitutor', [
+            'parentcontextid' => \core\context\course::instance($course->id)->id,
+        ]);
         conversation_repository::upsert((int) $student->id, 'c-1', (int) $course->id, 'hi');
 
         $this->setUser($student);
@@ -109,6 +112,21 @@ final class external_test extends \advanced_testcase {
         $usercontext = \context_user::instance((int) $student->id);
         $this->expectException(\moodle_exception::class);
         get_conversations::execute($usercontext->id, 0);
+    }
+
+    /**
+     * Course-scoped AJAX requests honour the teacher's opt-in signal.
+     */
+    public function test_course_context_requires_tutor_block(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
+        conversation_repository::upsert((int) $student->id, 'c-1', (int) $course->id, 'hi');
+
+        $this->setUser($student);
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('notenabledincourse', 'block_eledia_aitutor'));
+        get_conversations::execute(\core\context\course::instance($course->id)->id, (int) $course->id);
     }
 
     /**

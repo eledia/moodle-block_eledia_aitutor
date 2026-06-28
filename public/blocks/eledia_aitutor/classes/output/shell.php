@@ -79,7 +79,7 @@ final class shell {
             return [];
         }
 
-        $url = new moodle_url('/blocks/eledia_aitutor/configuration.php');
+        $settingsurl = new moodle_url('/blocks/eledia_aitutor/operator_settings.php');
         $canconfigure = has_capability('moodle/site:config', \core\context\system::instance());
         $tagline = match ($active) {
             self::ACTIVE_SETTINGS => get_string('nav_settings', 'block_eledia_aitutor'),
@@ -97,7 +97,7 @@ final class shell {
         ] + plugin_shell::action_slots(
             'block_eledia_aitutor',
             $canconfigure,
-            $url,
+            $settingsurl,
             get_string('shell_help_label', 'block_eledia_aitutor'),
             get_string('shell_settings_label', 'block_eledia_aitutor'),
             $settingsiscurrent
@@ -122,7 +122,7 @@ final class shell {
                 'key' => self::ACTIVE_SETTINGS,
                 'icon' => 'fa-sliders',
                 'label' => get_string('nav_settings', 'block_eledia_aitutor'),
-                'url' => new moodle_url('/admin/settings.php', ['section' => 'blocksettingeledia_aitutor']),
+                'url' => new moodle_url('/blocks/eledia_aitutor/operator_settings.php'),
             ],
             [
                 'key' => self::ACTIVE_TUTORS,

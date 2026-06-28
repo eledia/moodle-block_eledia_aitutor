@@ -50,6 +50,7 @@ $baseurl = new moodle_url('/blocks/eledia_aitutor/manage_tutors.php');
 $PAGE->set_context($context);
 $PAGE->set_url($baseurl);
 $PAGE->set_pagelayout('standard');
+$PAGE->blocks->show_only_fake_blocks(true);
 $PAGE->set_title(get_string('managetutors', 'block_eledia_aitutor'));
 $PAGE->set_heading(shell::is_available() ? '' : get_string('managetutors', 'block_eledia_aitutor'));
 shell::require_css();
