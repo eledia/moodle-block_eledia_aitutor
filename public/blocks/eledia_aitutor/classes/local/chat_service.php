@@ -82,8 +82,6 @@ class chat_service {
             usage::assert_within_limit($userid, $dailylimit);
         }
 
-        token_provider::require_available();
-
         \block_eledia_aitutor\event\message_sent::create([
             'context' => $context,
             'userid' => $userid,
@@ -102,7 +100,7 @@ class chat_service {
         $userlang = current_language();
 
         try {
-            $token = token_provider::get_token($userid);
+            $token = self::moodle_token_for_user($userid);
             $result = $client->chat(
                 $systemurl,
                 $token,
@@ -119,9 +117,11 @@ class chat_service {
         } catch (rag_exception $e) {
             // The cached token may have been revoked/expired server-side: drop it,
             // mint a fresh one and retry exactly once before giving up.
-            token_provider::forget_cached_token($userid);
+            if (security::mcp_enabled()) {
+                token_provider::forget_cached_token($userid);
+            }
             try {
-                $token = token_provider::get_token($userid);
+                $token = self::moodle_token_for_user($userid);
                 $result = $client->chat(
                     $systemurl,
                     $token,
@@ -201,6 +201,21 @@ class chat_service {
             'sources' => $result['sources'],
             'iserror' => $result['iserror'],
         ];
+    }
+
+    /**
+     * Return the Moodle-MCP token for this user, or an empty string when MCP is
+     * deliberately disabled.
+     *
+     * @param int $userid The user id.
+     * @return string
+     * @throws \moodle_exception When MCP is enabled but unavailable.
+     */
+    private static function moodle_token_for_user(int $userid): string {
+        if (!security::mcp_enabled()) {
+            return '';
+        }
+        return token_provider::get_token($userid);
     }
 
     /**

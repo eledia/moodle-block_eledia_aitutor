@@ -8,13 +8,15 @@ A polished, Moodle-native chatbot block that connects **server-side** to an
 external RAG/Tutor MCP server. The block is a chat **frontend and secure
 connector** only — it does not implement retrieval-augmented generation itself.
 
-It pairs with [`webservice_elediamcp`](../../webservice/elediamcp), which turns
-Moodle into an MCP server and provides the internal PHP API used here to mint
-user-scoped MCP tokens.
+It can pair with [`webservice_elediamcp`](../../webservice/elediamcp), which
+turns Moodle into an MCP server and provides the internal PHP API used here to
+mint user-scoped MCP tokens. This is optional: without it, the tutor still works
+as a plain LLM/RAG chat, but Moodle tools, memory sync and remote deletion are
+not available.
 
 - **Maturity:** Beta (`0.14.1`)
 - **Requires:** Moodle 4.2+ (tested against 5.1), PHP 8.1+
-- **Hard runtime dependency:** `webservice_elediamcp` (degrades gracefully if absent)
+- **Optional runtime integration:** `webservice_elediamcp` for Moodle MCP tools
 - **License:** GNU GPL v3 or later
 - **Author:** Christopher Reimann · © 2026 eLeDia GmbH, Berlin
 
@@ -28,7 +30,7 @@ user-scoped MCP tokens.
    ▼
  block_eledia_aitutor external functions  ──►  chat_service
    │                                            │
-   │  webservice_elediamcp\api::create_token    │  rag_client (MCP Streamable HTTP, tools/call)
+   │  optional webservice_elediamcp token        │  rag_client (MCP Streamable HTTP, tools/call)
    ▼                                            ▼
  user-scoped Moodle MCP token  ───────────►  External RAG / Tutor MCP server
                                                 │
@@ -57,7 +59,8 @@ See the consolidated documentation:
 
 1. Copy this directory to `blocks/eledia_aitutor` in your Moodle tree (the path
    must be exactly `eledia_aitutor`).
-2. Ensure `webservice_elediamcp` is installed and **enabled**.
+2. Optional: install and enable `webservice_elediamcp` when the tutor should use
+   Moodle MCP tools.
 3. Visit **Site administration ▸ Notifications** to run the install.
 4. Build the front-end (only needed if you change `amd/src`):
    ```bash
@@ -77,7 +80,7 @@ At **Site administration ▸ Plugins ▸ Blocks ▸ eLeDia.ai Tutor**:
 | RAG authorization method / token | if your server needs it | `Bearer` + token |
 | Chat tool name | ✅ (default ok) | `tutor_chat` |
 | History tool name | optional | `tutor_get_history` |
-| MCP external service | ✅ | one of the services configured in `webservice_elediamcp` |
+| Enable MCP / MCP external service | optional | one of the services configured in `webservice_elediamcp` |
 | Token lifetime | ✅ (default ok) | `3600` |
 
 Then add the **eLeDia.ai Tutor** block to a course or the Dashboard.

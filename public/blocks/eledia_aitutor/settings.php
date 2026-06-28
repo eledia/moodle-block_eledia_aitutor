@@ -450,6 +450,13 @@ if ($hassiteconfig) {
         get_string('setting_header_token_desc', 'block_eledia_aitutor')
     ));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'block_eledia_aitutor/enablemcp',
+        get_string('setting_enablemcp', 'block_eledia_aitutor'),
+        get_string('setting_enablemcp_desc', 'block_eledia_aitutor'),
+        0
+    ));
+
     $settings->add(new admin_setting_configselect(
         'block_eledia_aitutor/mcpserviceid',
         get_string('setting_mcpserviceid', 'block_eledia_aitutor'),

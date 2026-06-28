@@ -13,7 +13,7 @@ LLM-Zugriff und Tool-Ausführung liegen in den angebundenen Zusatzdiensten.
 
 - **Reifegrad:** Beta (`0.14.1`)
 - **Voraussetzung:** Moodle 4.2+ (getestet mit 5.1), PHP 8.1+
-- **Laufzeit-Abhängigkeit:** `webservice_elediamcp`
+- **Optionale Laufzeit-Integration:** `webservice_elediamcp` für Moodle-MCP-Werkzeuge
 - **Lizenz:** GNU GPL v3 oder später
 - **Autor:** Christopher Reimann · © 2026 eLeDia GmbH, Berlin
 
@@ -27,7 +27,7 @@ Browser (AMD chat.js)
   ▼
 block_eledia_aitutor external functions  ──►  chat_service
   │                                            │
-  │  webservice_elediamcp\api::create_token    │  rag_client (MCP Streamable HTTP, tools/call)
+  │  optionales webservice_elediamcp-Token     │  rag_client (MCP Streamable HTTP, tools/call)
   ▼                                            ▼
 nutzerbezogenes Moodle-MCP-Token  ───────►  externer RAG-/Tutor-MCP-Server
                                                │
@@ -42,7 +42,8 @@ RAG-Server-URL bleiben serverseitig in Moodle.
 
 1. Dieses Verzeichnis nach `blocks/eledia_aitutor` in die Moodle-Installation
    kopieren. Der Verzeichnisname muss exakt `eledia_aitutor` lauten.
-2. `webservice_elediamcp` installieren und aktivieren.
+2. Optional: `webservice_elediamcp` installieren und aktivieren, wenn der Tutor
+   Moodle-MCP-Werkzeuge nutzen soll.
 3. In Moodle **Website-Administration ▸ Mitteilungen** aufrufen, um die
    Installation bzw. Aktualisierung auszuführen.
 4. Nur bei Änderungen an `amd/src` die JavaScript-Dateien neu bauen:
@@ -68,7 +69,7 @@ Wichtige Einstellungen:
 | RAG-Authentifizierung / Token | falls benötigt | `Bearer` + Token |
 | Chat-Tool-Name | ja, Standard meist passend | `tutor_chat` |
 | History-Tool-Name | optional | `tutor_get_history` |
-| Externer MCP-Service | ja | Service aus `webservice_elediamcp` |
+| MCP freischalten / Externer MCP-Service | optional | Service aus `webservice_elediamcp` |
 | Token-Lebensdauer | ja, Standard meist passend | `3600` |
 
 Danach kann der Block in Kursen oder auf dem Dashboard hinzugefügt werden.
@@ -77,7 +78,7 @@ Danach kann der Block in Kursen oder auf dem Dashboard hinzugefügt werden.
 
 Für den vollständigen Betrieb werden üblicherweise diese Komponenten kombiniert:
 
-- **eLeDia MCP** (`webservice_elediamcp`) für Moodle-Werkzeuge und
+- **eLeDia MCP** (`webservice_elediamcp`, optional) für Moodle-Werkzeuge und
   nutzerbezogene MCP-Token.
 - **LiteRAG** als RAG-/Tutor-MCP-Backend.
 - **RAG-Ingest** zur Indexierung von Moodle-Kursinhalten.

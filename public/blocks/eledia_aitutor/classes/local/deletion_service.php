@@ -61,7 +61,8 @@ class deletion_service {
         $records = conversation_repository::list_for_user($userid, null, 0);
         $deleteusertool = security::delete_user_tool_name();
         $deletetool = security::delete_tool_name();
-        $externalsupported = token_provider::is_connector_available()
+        $externalsupported = security::mcp_enabled()
+            && token_provider::is_connector_available()
             && ($deleteusertool !== '' || $deletetool !== '');
         $externaldeleted = 0;
         $externalfailed = 0;

@@ -83,10 +83,13 @@ class recluster_service {
         try {
             $client ??= rag_client::create();
             if ($moodletoken === null) {
-                // Authenticate like every other tool call: mint a component
-                // token for the maintenance account (auto-created on first run).
-                token_provider::require_available();
-                $moodletoken = token_provider::get_token((int) service_user::get_or_create()->id);
+                $moodletoken = '';
+                if (security::mcp_enabled()) {
+                    // Authenticate like every other tool call: mint a component
+                    // token for the maintenance account (auto-created on first run).
+                    token_provider::require_available();
+                    $moodletoken = token_provider::get_token((int) service_user::get_or_create()->id);
+                }
             }
         } catch (\moodle_exception $e) {
             debugging(

@@ -92,8 +92,7 @@ class get_history extends external_api {
             return ['messages' => [], 'available' => false];
         }
 
-        token_provider::require_available();
-        $token = token_provider::get_token((int) $USER->id);
+        $token = security::mcp_enabled() ? token_provider::get_token((int) $USER->id) : '';
         $client = rag_client::create();
         $messages = $client->get_history($CFG->wwwroot, $token, $params['conversationid'], $historytool);
 

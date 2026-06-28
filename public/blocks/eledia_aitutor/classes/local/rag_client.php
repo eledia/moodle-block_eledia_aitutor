@@ -158,9 +158,11 @@ class rag_client {
     ): array {
         $arguments = [
             'system_url' => $systemurl,
-            'moodle_token' => $moodletoken,
             'user_message' => $usermessage,
         ];
+        if ($moodletoken !== '') {
+            $arguments['moodle_token'] = $moodletoken;
+        }
         if ($courseid !== null && $courseid !== '') {
             $arguments['course_id'] = $courseid;
         }
@@ -206,11 +208,15 @@ class rag_client {
         string $conversationid,
         string $toolname
     ): array {
-        $result = $this->call_tool($toolname, [
+        $arguments = [
             'system_url' => $systemurl,
-            'moodle_token' => $moodletoken,
             'conversation_id' => $conversationid,
-        ]);
+        ];
+        if ($moodletoken !== '') {
+            $arguments['moodle_token'] = $moodletoken;
+        }
+
+        $result = $this->call_tool($toolname, $arguments);
 
         $structured = $result['structuredContent'] ?? null;
         $messages = [];

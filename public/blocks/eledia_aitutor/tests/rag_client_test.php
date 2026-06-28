@@ -87,6 +87,29 @@ final class rag_client_test extends \advanced_testcase {
     }
 
     /**
+     * Plain LLM/RAG mode does not transmit a Moodle MCP token.
+     */
+    public function test_chat_omits_empty_moodle_token(): void {
+        $this->resetAfterTest();
+        $transport = fake_transport::json_result([
+            'structuredContent' => ['answer' => 'Hello'],
+        ]);
+
+        $this->client($transport)->chat(
+            'https://moodle.example.com',
+            '',
+            'Hi there',
+            null,
+            null,
+            'tutor_chat'
+        );
+
+        $args = $transport->last_payload()['params']['arguments'];
+        $this->assertArrayNotHasKey('moodle_token', $args);
+        $this->assertSame('Hi there', $args['user_message']);
+    }
+
+    /**
      * Structured content is normalised into answer/conversation/sources.
      */
     public function test_chat_normalises_structured_content(): void {

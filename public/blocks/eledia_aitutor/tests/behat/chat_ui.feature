@@ -46,6 +46,7 @@ Feature: eLeDia.ai Tutor chat block UI
 
   Scenario: A misconfigured connector shows an admin-facing error to managers
     Given the following config values are set as admin:
+      | enablemcp    | 1 | block_eledia_aitutor |
       | mcpserviceid | 0 | block_eledia_aitutor |
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on

@@ -15,9 +15,10 @@ Browser / AMD chat.js
   -> RAG/Tutor MCP endpoint via server-side HTTP
 ```
 
-Der Browser spricht nur mit Moodle. RAG-URL, RAG-Auth und Moodle-MCP-Token
-bleiben serverseitig. Der externe RAG-/Tutor-Dienst ist zugleich MCP-Server fuer
-den Tutor und MCP-Client gegen Moodle.
+Der Browser spricht nur mit Moodle. RAG-URL, RAG-Auth und ein optionales
+Moodle-MCP-Token bleiben serverseitig. Der externe RAG-/Tutor-Dienst ist
+MCP-Server fuer den Tutor; Moodle-MCP-Callbacks werden nur genutzt, wenn MCP
+freigeschaltet ist.
 
 ---
 
@@ -45,7 +46,7 @@ den Tutor und MCP-Client gegen Moodle.
 
 - Moodle 4.2+ laut Plugin-Metadaten, getestet gegen Moodle 5.x.
 - PHP 8.1+.
-- `webservice_elediamcp` fuer echte Moodle-MCP-Token-Provisionierung.
+- Optional `webservice_elediamcp` fuer echte Moodle-MCP-Token-Provisionierung.
 - RAG-/Tutor-MCP-Server mit Streamable HTTP und mindestens einem Chat-Tool.
 
 `local_lernhive` ist keine Runtime-Abhaengigkeit. Die Plugin-Shell verlinkt auf
@@ -80,7 +81,7 @@ Beispiel:
     "name": "tutor_chat",
     "arguments": {
       "system_url": "https://moodle.example.com",
-      "moodle_token": "USER_SCOPED_MOODLE_MCP_TOKEN",
+      "moodle_token": "USER_SCOPED_MOODLE_MCP_TOKEN_IF_MCP_IS_ENABLED",
       "user_message": "What do I need to do this week?",
       "course_id": "42",
       "conversation_id": "optional-existing-id",
@@ -97,7 +98,7 @@ Beispiel:
 | Feld | Bedeutung |
 |---|---|
 | `system_url` | Moodle-`wwwroot` fuer Callbacks. |
-| `moodle_token` | Nutzerbezogenes Moodle-MCP-Token; geheim behandeln. |
+| `moodle_token` | Optionales nutzerbezogenes Moodle-MCP-Token; geheim behandeln. Fehlt, wenn MCP im Tutor deaktiviert ist. |
 | `user_message` | Validierte Nutzerfrage. |
 | `course_id` | Optionaler Kurskontext. |
 | `conversation_id` | Optional; fehlt bei neuer Unterhaltung. |
@@ -166,7 +167,7 @@ mindestens gesetzt sein:
 
 - RAG MCP server URL.
 - Chat tool name.
-- MCP external service.
+- Enable MCP / MCP external service, falls Moodle-MCP-Tools genutzt werden.
 - Lokale HTTP/private-host Opt-ins, falls ein lokaler Docker-Endpunkt verwendet
   wird.
 

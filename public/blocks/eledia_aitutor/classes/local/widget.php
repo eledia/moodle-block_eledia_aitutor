@@ -40,11 +40,13 @@ class widget {
      * @return string|null Null when configuration is healthy.
      */
     public static function config_error(): ?string {
-        if (!token_provider::is_connector_available()) {
-            return get_string('error_connector_missing', 'block_eledia_aitutor');
-        }
-        if (security::mcp_service_id() <= 0) {
-            return get_string('error_service_not_configured', 'block_eledia_aitutor');
+        if (security::mcp_enabled()) {
+            if (!token_provider::is_connector_available()) {
+                return get_string('error_connector_missing', 'block_eledia_aitutor');
+            }
+            if (security::mcp_service_id() <= 0) {
+                return get_string('error_service_not_configured', 'block_eledia_aitutor');
+            }
         }
         if (security::rag_server_url() === '') {
             return get_string('error_rag_url_missing', 'block_eledia_aitutor');

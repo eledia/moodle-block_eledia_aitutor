@@ -9,12 +9,12 @@
 
 - **Name:** eLeDia.ai Tutor (`block_eledia_aitutor`)
 - **Ziel:** Moodle-nativer AI-Tutor-Block, der serverseitig mit einem externen
-  RAG/Tutor-MCP-Server spricht und Moodle-Nutzerkontext ueber kurzlebige,
-  nutzerbezogene MCP-Tokens bereitstellt.
+  RAG/Tutor-MCP-Server spricht. Moodle-MCP-Token fuer Moodle-Werkzeuge sind
+  optional und werden nur bereitgestellt, wenn MCP freigeschaltet ist.
 - **Kurzbeschreibung:** Chat-Frontend und sicherer Connector fuer Moodle.
   Der Block rendert die Tutor-UI, erzwingt Consent/Capabilities/Limits,
-  provisioniert Moodle-MCP-Tokens ueber `webservice_elediamcp` und leitet
-  Chat-Anfragen an einen RAG/Tutor-MCP-Endpunkt weiter.
+  leitet Chat-Anfragen an einen RAG/Tutor-MCP-Endpunkt weiter und provisioniert
+  bei aktivem MCP Moodle-MCP-Tokens ueber `webservice_elediamcp`.
 - **Tech Stack:** Moodle Plugin, PHP, AMD JavaScript, Mustache, Moodle Web
   Services, MCP Streamable HTTP, PHPUnit/Behat/PHPCS.
 - **Plugin-Pfad:** `public/blocks/eledia_aitutor`

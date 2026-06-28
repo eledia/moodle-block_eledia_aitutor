@@ -86,6 +86,7 @@ class clear_conversation extends external_api {
         $deletetool = security::delete_tool_name();
         if (
             $deletetool !== '' && !empty($record->conversationid)
+                && security::mcp_enabled()
                 && token_provider::is_connector_available()
         ) {
             try {

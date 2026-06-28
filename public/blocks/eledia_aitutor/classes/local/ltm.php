@@ -96,7 +96,7 @@ class ltm {
         }
 
         $toolname = security::memory_optin_tool_name();
-        if ($toolname === '' || !token_provider::is_connector_available()) {
+        if ($toolname === '' || !security::mcp_enabled() || !token_provider::is_connector_available()) {
             // Memory not supported/configured: nothing to communicate.
             return false;
         }

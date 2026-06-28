@@ -27,6 +27,7 @@ require_once(__DIR__ . '/classes/local/premium.php');
 require_once(__DIR__ . '/classes/output/shell.php');
 
 use block_eledia_aitutor\local\premium;
+use block_eledia_aitutor\local\security;
 use block_eledia_aitutor\output\shell;
 
 $context = \core\context\system::instance();
@@ -52,6 +53,7 @@ $managetutorsurl = new moodle_url('/blocks/eledia_aitutor/manage_tutors.php');
 $previewurl = new moodle_url('/blocks/eledia_aitutor/view.php');
 
 $ragserverurl = trim((string) get_config('block_eledia_aitutor', 'ragserverurl'));
+$mcpenabled = security::mcp_enabled();
 $mcpserviceid = (int) get_config('block_eledia_aitutor', 'mcpserviceid');
 $privacyguidelinestext = trim((string) get_config('block_eledia_aitutor', 'privacyguidelinestext'));
 $enablecoursechat = !empty(get_config('block_eledia_aitutor', 'enablecoursechat'));
@@ -208,9 +210,11 @@ $statusrows = [
     ],
     [
         'label' => get_string('configuration_status_mcp', 'block_eledia_aitutor'),
-        'value' => $mcpserviceid > 0
+        'value' => !$mcpenabled
+            ? get_string('disabled', 'block_eledia_aitutor')
+            : ($mcpserviceid > 0
             ? get_string('configuration_status_configured', 'block_eledia_aitutor')
-            : get_string('configuration_status_missing', 'block_eledia_aitutor'),
+            : get_string('configuration_status_missing', 'block_eledia_aitutor')),
     ],
     [
         'label' => get_string('configuration_status_llm', 'block_eledia_aitutor'),
@@ -406,7 +410,7 @@ if ($ragingestpending > 0) {
         ['class' => 'eat-setup-callout eat-setup-callout--warning']
     );
 }
-$missingpluginsnotice = (!$literagavailable || !$ragingestavailable || !$mcpavailable)
+$missingpluginsnotice = (!$literagavailable || !$ragingestavailable || ($mcpenabled && !$mcpavailable))
     ? html_writer::tag(
         'div',
         html_writer::tag(
@@ -420,6 +424,19 @@ $missingpluginsnotice = (!$literagavailable || !$ragingestavailable || !$mcpavai
         ['class' => 'eat-setup-callout eat-setup-callout--warning']
     )
     : '';
+$mcpservicesurl = $mcpenabled
+    ? $mcpconfigurl('id_serviceshdr')
+    : $settingurl('blocksettingeledia_aitutor', 'enablemcp');
+$mcplimitsurl = $mcpenabled
+    ? $mcpconfigurl('id_rate_limit_per_minute')
+    : $settingurl('blocksettingeledia_aitutor', 'enablemcp');
+$mcpsecurityurl = $mcpenabled
+    ? $mcpconfigurl('id_allowed_origins')
+    : $settingurl('blocksettingeledia_aitutor', 'enablemcp');
+$operatormcpurl = $settingurl(
+    'blocksettingeledia_aitutor',
+    $mcpenabled ? 'mcpserviceid' : 'enablemcp'
+);
 
 echo html_writer::tag(
     'section',
@@ -506,28 +523,28 @@ echo html_writer::tag(
             get_string('configuration_wizard_mcp_desc', 'block_eledia_aitutor'),
             $mcpurl,
             get_string('configuration_wizard_mcp_link', 'block_eledia_aitutor'),
-            $mcpavailable,
+            !$mcpenabled || $mcpavailable,
             [
                 [
                     'title' => get_string('configuration_wizard_task_mcp_services_title', 'block_eledia_aitutor'),
                     'body' => get_string('configuration_wizard_task_mcp_services_body', 'block_eledia_aitutor'),
-                    'url' => $mcpconfigurl('id_serviceshdr'),
-                    'ready' => $mcpavailable,
+                    'url' => $mcpservicesurl,
+                    'ready' => !$mcpenabled || $mcpavailable,
                 ],
                 [
                     'title' => get_string('configuration_wizard_task_mcp_limits_title', 'block_eledia_aitutor'),
                     'body' => get_string('configuration_wizard_task_mcp_limits_body', 'block_eledia_aitutor'),
-                    'url' => $mcpconfigurl('id_rate_limit_per_minute'),
-                    'ready' => $mcpavailable,
+                    'url' => $mcplimitsurl,
+                    'ready' => !$mcpenabled || $mcpavailable,
                 ],
                 [
                     'title' => get_string('configuration_wizard_task_mcp_security_title', 'block_eledia_aitutor'),
                     'body' => get_string('configuration_wizard_task_mcp_security_body', 'block_eledia_aitutor'),
-                    'url' => $mcpconfigurl('id_allowed_origins'),
-                    'ready' => $mcpavailable,
+                    'url' => $mcpsecurityurl,
+                    'ready' => !$mcpenabled || $mcpavailable,
                 ],
             ],
-            $mcpavailable
+            !$mcpenabled || $mcpavailable
         ) .
         $wizardstep(
             4,
@@ -536,7 +553,7 @@ echo html_writer::tag(
             get_string('configuration_wizard_operator_desc', 'block_eledia_aitutor'),
             $adminsettingsurl,
             get_string('configuration_admin_settings_link', 'block_eledia_aitutor'),
-            $ragserverurl !== '' && $mcpserviceid > 0,
+            $ragserverurl !== '' && (!$mcpenabled || $mcpserviceid > 0),
             [
                 [
                     'title' => get_string('configuration_wizard_task_operator_rag_title', 'block_eledia_aitutor'),
@@ -547,8 +564,8 @@ echo html_writer::tag(
                 [
                     'title' => get_string('configuration_wizard_task_operator_mcp_title', 'block_eledia_aitutor'),
                     'body' => get_string('configuration_wizard_task_operator_mcp_body', 'block_eledia_aitutor'),
-                    'url' => $settingurl('blocksettingeledia_aitutor', 'mcpserviceid'),
-                    'ready' => $mcpserviceid > 0,
+                    'url' => $operatormcpurl,
+                    'ready' => !$mcpenabled || $mcpserviceid > 0,
                 ],
                 [
                     'title' => get_string('configuration_wizard_task_operator_privacy_title', 'block_eledia_aitutor'),
@@ -594,13 +611,13 @@ echo html_writer::tag(
             get_string('configuration_wizard_preview_desc', 'block_eledia_aitutor'),
             $previewurl,
             get_string('configuration_preview_link', 'block_eledia_aitutor'),
-            $ragserverurl !== '' && $mcpserviceid > 0,
+            $ragserverurl !== '' && (!$mcpenabled || $mcpserviceid > 0),
             [
                 [
                     'title' => get_string('configuration_wizard_task_preview_open_title', 'block_eledia_aitutor'),
                     'body' => get_string('configuration_wizard_task_preview_open_body', 'block_eledia_aitutor'),
                     'url' => $previewurl,
-                    'ready' => $ragserverurl !== '' && $mcpserviceid > 0 && $llmhealth['healthy'],
+                    'ready' => $ragserverurl !== '' && (!$mcpenabled || $mcpserviceid > 0) && $llmhealth['healthy'],
                 ],
                 [
                     'title' => get_string('configuration_wizard_task_preview_course_title', 'block_eledia_aitutor'),

@@ -149,6 +149,19 @@ class security {
     }
 
     /**
+     * Whether Moodle-MCP tools should be used for chat requests.
+     *
+     * When disabled, the tutor still sends regular chat/RAG requests but does
+     * not mint or transmit user-scoped Moodle MCP tokens. This allows a pure
+     * LLM/RAG setup without the optional webservice_elediamcp connector.
+     *
+     * @return bool
+     */
+    public static function mcp_enabled(): bool {
+        return (int) self::get_config('enablemcp', 0) === 1;
+    }
+
+    /**
      * Outgoing HTTP timeout in seconds for RAG calls.
      *
      * @return int

@@ -210,5 +210,15 @@ function xmldb_block_eledia_aitutor_upgrade(int $oldversion): bool {
         upgrade_block_savepoint(true, 2026061330, 'eledia_aitutor');
     }
 
+    if ($oldversion < 2026061602) {
+        // MCP is now optional. Preserve existing installations that had already
+        // selected a Moodle-MCP service by enabling the new switch for them.
+        if ((int) get_config('block_eledia_aitutor', 'mcpserviceid') > 0) {
+            set_config('enablemcp', 1, 'block_eledia_aitutor');
+        }
+
+        upgrade_block_savepoint(true, 2026061602, 'eledia_aitutor');
+    }
+
     return true;
 }

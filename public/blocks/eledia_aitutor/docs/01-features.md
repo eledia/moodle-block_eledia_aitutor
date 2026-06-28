@@ -15,8 +15,8 @@ Kontextquelle.
 ## Kernkonzepte
 
 - **Tutor-Block:** Moodle UI, Consent, Limits und Chat-Frontend.
-- **Moodle MCP Connector:** `webservice_elediamcp` erstellt nutzerbezogene
-  Tokens fuer Moodle-MCP-Zugriffe.
+- **Moodle MCP Connector:** Optional. `webservice_elediamcp` erstellt
+  nutzerbezogene Tokens fuer Moodle-MCP-Zugriffe, wenn MCP freigeschaltet ist.
 - **RAG/Tutor-MCP-Server:** Externer Dienst, der `tools/call` verarbeitet und
   Antworten erzeugt.
 - **Tutor Profile:** Konfigurierbare Persona, Branding- und UI-Vorgaben.
@@ -53,15 +53,20 @@ Tools zugreifen.
 **Akzeptanzkriterien**
 
 - feat02.AC01
-  Given: `webservice_elediamcp` ist installiert und ein MCP-externer Dienst ist
-  ausgewaehlt
+  Given: MCP ist freigeschaltet, `webservice_elediamcp` ist installiert und ein
+  MCP-externer Dienst ist ausgewaehlt
   When: Eine Chat-Nachricht verarbeitet wird
   Then: Der Block provisioniert ein nutzerbezogenes MCP-Token fuer diesen Dienst
 
 - feat02.AC02
-  Given: Kein MCP-externer Dienst ist ausgewaehlt
+  Given: MCP ist freigeschaltet, aber kein MCP-externer Dienst ist ausgewaehlt
   When: Die Chat-UI geladen wird
   Then: Der Nutzer sieht eine klare Konfigurationsmeldung
+
+- feat02.AC03
+  Given: MCP ist nicht freigeschaltet
+  When: Eine Chat-Nachricht verarbeitet wird
+  Then: Der Block ruft den Tutor ohne Moodle-MCP-Token auf
 
 ### feat03 Tutor configuration and profiles
 

@@ -41,6 +41,17 @@ final class security_test extends \advanced_testcase {
     }
 
     /**
+     * MCP starts disabled so the tutor can run as a plain LLM/RAG chat.
+     */
+    public function test_mcp_is_optional_by_default(): void {
+        $this->resetAfterTest();
+        $this->assertFalse(security::mcp_enabled());
+
+        set_config('enablemcp', 1, 'block_eledia_aitutor');
+        $this->assertTrue(security::mcp_enabled());
+    }
+
+    /**
      * A missing RAG URL throws.
      */
     public function test_validated_rag_url_missing_throws(): void {

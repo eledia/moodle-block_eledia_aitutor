@@ -109,11 +109,12 @@ Bloecke > eLeDia.ai Tutor** und in der Plugin-Shell des Tutors.
 
 ### Moodle-MCP-Token
 
-Der Tutor nutzt `webservice_elediamcp`, um nutzerbezogene Moodle-MCP-Tokens fuer
-den konfigurierten externen Dienst zu erzeugen. Ohne ausgewaehlten MCP-Dienst
-kann der Tutor keine Moodle-bezogenen AI-Funktionen ausfuehren. Tokens werden
-serverseitig provisioniert, kurzzeitig im Applikationscache gehalten und nie an
-den Browser gesendet.
+Wenn **MCP freischalten** aktiviert ist, nutzt der Tutor `webservice_elediamcp`,
+um nutzerbezogene Moodle-MCP-Tokens fuer den konfigurierten externen Dienst zu
+erzeugen. Ohne aktiviertes MCP funktioniert der Tutor als LLM-/RAG-Chat weiter,
+kann aber keine Moodle-bezogenen AI-Werkzeuge, Memory-Sync oder Fernloeschung
+ausfuehren. Tokens werden serverseitig provisioniert, kurzzeitig im
+Applikationscache gehalten und nie an den Browser gesendet.
 
 ### Verhalten und Limits
 
@@ -159,7 +160,7 @@ Einschreibung, Capabilities, Consent und Limits gelten wie im Web.
 
 | Symptom | Wahrscheinliche Ursache | Loesung |
 |---|---|---|
-| Konfigurationsproblem im Block | RAG-URL, MCP-Service oder Connector fehlt | Blockeinstellungen pruefen und MCP-Service auswaehlen. |
+| Konfigurationsproblem im Block | RAG-URL fehlt oder MCP ist aktiviert, aber MCP-Service/Connector fehlt | Einstellungen pruefen; MCP nur freischalten, wenn der Connector installiert und konfiguriert ist. |
 | Tutor-Dienst nicht verfuegbar | Transportfehler, falsche URL oder Serverfehler | URL aus Sicht des Moodle-Servers testen; HTTP-Security/Curl-Helper pruefen. |
 | Unerwartete Tutor-Antwort | RAG-Server liefert nicht das erwartete MCP-Format | Serververtrag in `03-dev-doc.md` pruefen. |
 | Wiederholte Auth-Fehler | Moodle-MCP-Token ungueltig oder Dienst deaktiviert | MCP-Service, Capabilities und Token-Lifetime pruefen. |
