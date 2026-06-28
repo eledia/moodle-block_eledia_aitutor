@@ -1,5 +1,7 @@
 # eLeDia.ai Tutor (block_eledia_aitutor)
 
+[Deutsche README](README.de.md)
+
 A polished, Moodle-native chatbot block that connects **server-side** to an
 external RAG/Tutor MCP server. The block is a chat **frontend and secure
 connector** only — it does not implement retrieval-augmented generation itself.
