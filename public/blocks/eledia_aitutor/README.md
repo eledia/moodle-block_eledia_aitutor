@@ -2,6 +2,8 @@
 
 [Deutsche README](README.de.md)
 
+[Documentation](docs/02-user-doc.md) · [Privacy](docs/privacy.md) · [Security](docs/security.md)
+
 A polished, Moodle-native chatbot block that connects **server-side** to an
 external RAG/Tutor MCP server. The block is a chat **frontend and secure
 connector** only — it does not implement retrieval-augmented generation itself.

@@ -2,6 +2,8 @@
 
 [English README](README.md)
 
+[Dokumentation](docs/02-user-doc.md) · [Datenschutz](docs/privacy.md) · [Sicherheit](docs/security.md)
+
 Der **eLeDia.ai Tutor** ist ein Moodle-nativer Chatbot-Block. Er verbindet
 Moodle serverseitig mit einem externen RAG-/Tutor-MCP-Server und stellt die
 Chat-Oberfläche, sichere Token-Übergabe und Moodle-Integration bereit.
