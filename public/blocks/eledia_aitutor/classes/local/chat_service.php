@@ -88,7 +88,12 @@ class chat_service {
             'other' => ['length' => \core_text::strlen($message), 'courseid' => (int) ($courseid ?: 0)],
         ])->trigger();
 
-        $client ??= rag_client::create();
+        try {
+            $client ??= rag_client::create();
+        } catch (\moodle_exception $e) {
+            self::log_failure($userid, $context, self::failure_phase($e), $e, $courseid);
+            throw $e;
+        }
         $toolname = security::chat_tool_name();
         $systemurl = $CFG->wwwroot;
         $courseparam = $courseid ? (string) $courseid : null;
@@ -136,9 +141,26 @@ class chat_service {
                     $persona
                 );
             } catch (rag_exception $retry) {
-                self::log_failure($userid, $context, 'rag_error');
+                self::log_failure($userid, $context, 'rag_error', $retry, $courseid);
+                throw $retry;
+            } catch (\moodle_exception $retry) {
+                self::log_failure($userid, $context, self::failure_phase($retry), $retry, $courseid);
                 throw $retry;
             }
+        } catch (\moodle_exception $e) {
+            self::log_failure($userid, $context, self::failure_phase($e), $e, $courseid);
+            throw $e;
+        }
+
+        if (!empty($result['iserror'])) {
+            self::log_failure(
+                $userid,
+                $context,
+                'tool_error',
+                null,
+                $courseid,
+                'Tutor tool returned an error result.'
+            );
         }
 
         // In LLM-only mode no retrieval happened (or must be treated as if it
@@ -251,13 +273,47 @@ class chat_service {
      * @param int $userid The acting user id.
      * @param context $context The context.
      * @param string $reason Short non-sensitive reason code.
+     * @param \Throwable|null $exception Optional exception with non-sensitive debug info.
+     * @param int|null $courseid Course id, if known.
+     * @param string|null $detail Optional non-sensitive detail.
      * @return void
      */
-    private static function log_failure(int $userid, context $context, string $reason): void {
+    private static function log_failure(
+        int $userid,
+        context $context,
+        string $reason,
+        ?\Throwable $exception = null,
+        ?int $courseid = null,
+        ?string $detail = null
+    ): void {
         \block_eledia_aitutor\event\rag_request_failed::create([
             'context' => $context,
             'userid' => $userid,
             'other' => ['reason' => $reason],
         ])->trigger();
+
+        diagnostics::record($userid, $context, $reason, $exception, $courseid, $detail);
+    }
+
+    /**
+     * Classify an exception into a short admin-facing phase.
+     *
+     * @param \Throwable $exception The exception.
+     * @return string
+     */
+    private static function failure_phase(\Throwable $exception): string {
+        if ($exception instanceof rag_exception) {
+            return 'rag';
+        }
+        if ($exception instanceof \moodle_exception) {
+            $errorcode = (string) ($exception->errorcode ?? '');
+            if (str_contains($errorcode, 'service') || str_contains($errorcode, 'token')) {
+                return 'mcp';
+            }
+            if (str_contains($errorcode, 'config') || str_contains($errorcode, 'url')) {
+                return 'configuration';
+            }
+        }
+        return 'chat';
     }
 }

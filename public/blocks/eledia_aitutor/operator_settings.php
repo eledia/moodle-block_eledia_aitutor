@@ -34,7 +34,13 @@ use block_eledia_aitutor\output\shell;
 $section = 'blocksettingeledia_aitutor';
 $return = optional_param('return', '', PARAM_ALPHA);
 $context = \core\context\system::instance();
-$url = new moodle_url('/blocks/eledia_aitutor/operator_settings.php');
+$url = new moodle_url('/blocks/eledia_aitutor/operator_settings.php', ['section' => $section]);
+
+// Moodle admin settings are populated in many plugins based on the current
+// "section" request parameter. This shell page owns only one section, so expose
+// it before admin_get_root() loads settings.php files.
+$_GET['section'] = $_GET['section'] ?? $section;
+$_REQUEST['section'] = $_REQUEST['section'] ?? $section;
 
 require_login(0, false);
 require_capability('moodle/site:config', $context);

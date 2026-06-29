@@ -41,13 +41,13 @@ final class feature_provider implements feature_provider_contract {
                 id: 'tutor',
                 component: 'block_eledia_aitutor',
                 name: get_string('pluginname', 'block_eledia_aitutor'),
-                description: get_string('feature_tutor_desc', 'local_lernhive_ai'),
+                description: get_string('suite_feature_desc', 'block_eledia_aitutor'),
                 launchurl: new moodle_url('/blocks/eledia_aitutor/view.php'),
                 icon: 'graduation-cap',
                 capability: null,
                 configurl: new moodle_url('/blocks/eledia_aitutor/configuration.php'),
                 comingsoon: false,
-                detaildescription: get_string('feature_tutor_detail', 'local_lernhive_ai'),
+                detaildescription: get_string('suite_feature_detail', 'block_eledia_aitutor'),
             ),
         ];
     }

@@ -220,5 +220,28 @@ function xmldb_block_eledia_aitutor_upgrade(int $oldversion): bool {
         upgrade_block_savepoint(true, 2026061602, 'eledia_aitutor');
     }
 
+    if ($oldversion < 2026062901) {
+        // Lightweight admin diagnostics for failed tutor calls.
+        $table = new xmldb_table('block_eledia_aitutor_diag');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('contextid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('phase', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL);
+        $table->add_field('errorcode', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $table->add_field('detail', XMLDB_TYPE_CHAR, '255');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+        $table->add_index('timecreated', XMLDB_INDEX_NOTUNIQUE, ['timecreated']);
+        $table->add_index('userid-timecreated', XMLDB_INDEX_NOTUNIQUE, ['userid', 'timecreated']);
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_block_savepoint(true, 2026062901, 'eledia_aitutor');
+    }
+
     return true;
 }

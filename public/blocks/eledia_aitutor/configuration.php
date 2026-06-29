@@ -659,6 +659,76 @@ echo html_writer::tag(
     ['class' => 'lh-plugin-card']
 );
 
+$diagnostics = \block_eledia_aitutor\local\diagnostics::latest(5);
+$diagnosticsbody = html_writer::tag(
+    'p',
+    get_string('configuration_diagnostics_intro', 'block_eledia_aitutor'),
+    ['class' => 'text-muted mb-3']
+);
+if (empty($diagnostics)) {
+    $diagnosticsbody .= html_writer::tag(
+        'p',
+        get_string('configuration_diagnostics_empty', 'block_eledia_aitutor'),
+        ['class' => 'mb-0']
+    );
+} else {
+    $headers = [
+        get_string('configuration_diagnostics_time', 'block_eledia_aitutor'),
+        get_string('configuration_diagnostics_phase', 'block_eledia_aitutor'),
+        get_string('configuration_diagnostics_error', 'block_eledia_aitutor'),
+        get_string('configuration_diagnostics_detail', 'block_eledia_aitutor'),
+    ];
+    $rows = [];
+    foreach ($diagnostics as $entry) {
+        $rows[] = html_writer::tag(
+            'tr',
+            html_writer::tag('td', s(userdate((int) $entry->timecreated, get_string('strftimedatetimeshort', 'langconfig')))) .
+            html_writer::tag('td', s((string) $entry->phase)) .
+            html_writer::tag('td', s((string) $entry->errorcode)) .
+            html_writer::tag('td', s((string) ($entry->detail ?? '')))
+        );
+    }
+    $diagnosticsbody .= html_writer::tag(
+        'div',
+        html_writer::tag(
+            'table',
+            html_writer::tag(
+                'thead',
+                html_writer::tag(
+                    'tr',
+                    implode('', array_map(static fn(string $header): string => html_writer::tag('th', $header), $headers))
+                )
+            ) .
+            html_writer::tag('tbody', implode('', $rows)),
+            ['class' => 'generaltable table-sm mb-0']
+        ),
+        ['class' => 'table-responsive']
+    );
+}
+
+echo html_writer::tag(
+    'section',
+    html_writer::tag(
+        'div',
+        html_writer::span(
+            html_writer::tag('i', '', ['class' => 'fa fa-exclamation-triangle', 'aria-hidden' => 'true']),
+            'lh-plugin-card__icon lh-plugin-card__icon--generic'
+        ) .
+        html_writer::tag(
+            'div',
+            html_writer::tag(
+                'div',
+                get_string('configuration_diagnostics_title', 'block_eledia_aitutor'),
+                ['class' => 'lh-plugin-card__title']
+            ),
+            ['class' => 'lh-plugin-card__meta']
+        ),
+        ['class' => 'lh-plugin-card__top']
+    ) .
+    html_writer::tag('div', $diagnosticsbody, ['class' => 'lh-plugin-card__body']),
+    ['class' => 'lh-plugin-card mt-3']
+);
+
 echo html_writer::end_div();
 
 shell::close();

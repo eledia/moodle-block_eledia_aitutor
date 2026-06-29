@@ -43,7 +43,8 @@ if ($hassiteconfig) {
     require_once(__DIR__ . '/classes/output/shell.php');
 
     $currentsection = optional_param('section', '', PARAM_ALPHANUMEXT);
-    if ($ADMIN->fulltree && $currentsection === 'blocksettingeledia_aitutor') {
+    $decoratecoresettingspage = $PAGE->url->get_path() === '/' . $CFG->admin . '/settings.php';
+    if ($ADMIN->fulltree && $currentsection === 'blocksettingeledia_aitutor' && $decoratecoresettingspage) {
         global $OUTPUT, $PAGE;
         shell::require_css();
 

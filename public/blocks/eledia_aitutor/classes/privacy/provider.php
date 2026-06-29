@@ -92,6 +92,17 @@ class provider implements
             'messagecount' => 'privacy:metadata:block_eledia_aitutor_usage:messagecount',
         ], 'privacy:metadata:block_eledia_aitutor_usage');
 
+        // Short admin diagnostics for failed tutor calls; no prompts or answers.
+        $collection->add_database_table('block_eledia_aitutor_diag', [
+            'userid' => 'privacy:metadata:block_eledia_aitutor_diag:userid',
+            'courseid' => 'privacy:metadata:block_eledia_aitutor_diag:courseid',
+            'contextid' => 'privacy:metadata:block_eledia_aitutor_diag:contextid',
+            'phase' => 'privacy:metadata:block_eledia_aitutor_diag:phase',
+            'errorcode' => 'privacy:metadata:block_eledia_aitutor_diag:errorcode',
+            'detail' => 'privacy:metadata:block_eledia_aitutor_diag:detail',
+            'timecreated' => 'privacy:metadata:block_eledia_aitutor_diag:timecreated',
+        ], 'privacy:metadata:block_eledia_aitutor_diag');
+
         // Documented first-use acknowledgement of the privacy guidelines.
         $collection->add_database_table('block_eledia_aitutor_consent', [
             'userid' => 'privacy:metadata:block_eledia_aitutor_consent:userid',
@@ -154,6 +165,7 @@ class provider implements
         $userlist->add_from_sql('userid', 'SELECT userid FROM {block_eledia_aitutor_qlog}', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {block_eledia_aitutor_consent}', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {block_eledia_aitutor_usage}', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {block_eledia_aitutor_diag}', []);
     }
 
     /**
@@ -224,6 +236,25 @@ class provider implements
             );
         }
 
+        $diagnostics = $DB->get_records('block_eledia_aitutor_diag', ['userid' => $userid], 'timecreated ASC');
+        if (!empty($diagnostics)) {
+            $data = [];
+            foreach ($diagnostics as $record) {
+                $data[] = (object) [
+                    'courseid' => (int) $record->courseid,
+                    'contextid' => (int) $record->contextid,
+                    'phase' => $record->phase,
+                    'errorcode' => $record->errorcode,
+                    'detail' => $record->detail,
+                    'timecreated' => transform::datetime($record->timecreated),
+                ];
+            }
+            writer::with_context(\core\context\system::instance())->export_data(
+                [get_string('privacy:diagnostics', 'block_eledia_aitutor')],
+                (object) ['diagnostics' => $data]
+            );
+        }
+
         $consenttime = \block_eledia_aitutor\local\consent::time_consented((int) $userid);
         if ($consenttime !== null) {
             writer::with_context(\core\context\system::instance())->export_data(
@@ -248,6 +279,7 @@ class provider implements
         $DB->delete_records('block_eledia_aitutor_qlog');
         $DB->delete_records('block_eledia_aitutor_consent');
         $DB->delete_records('block_eledia_aitutor_usage');
+        $DB->delete_records('block_eledia_aitutor_diag');
     }
 
     /**
@@ -265,6 +297,7 @@ class provider implements
         $DB->delete_records('block_eledia_aitutor_qlog', ['userid' => (int) $contextlist->get_user()->id]);
         $DB->delete_records('block_eledia_aitutor_consent', ['userid' => (int) $contextlist->get_user()->id]);
         $DB->delete_records('block_eledia_aitutor_usage', ['userid' => (int) $contextlist->get_user()->id]);
+        $DB->delete_records('block_eledia_aitutor_diag', ['userid' => (int) $contextlist->get_user()->id]);
     }
 
     /**
@@ -287,6 +320,7 @@ class provider implements
         $DB->delete_records_select('block_eledia_aitutor_qlog', "userid $insql", $params);
         $DB->delete_records_select('block_eledia_aitutor_consent', "userid $insql", $params);
         $DB->delete_records_select('block_eledia_aitutor_usage', "userid $insql", $params);
+        $DB->delete_records_select('block_eledia_aitutor_diag', "userid $insql", $params);
     }
 
     /**
@@ -300,7 +334,8 @@ class provider implements
         return $DB->record_exists('block_eledia_aitutor_conv', ['userid' => $userid])
             || $DB->record_exists('block_eledia_aitutor_qlog', ['userid' => $userid])
             || $DB->record_exists('block_eledia_aitutor_consent', ['userid' => $userid])
-            || $DB->record_exists('block_eledia_aitutor_usage', ['userid' => $userid]);
+            || $DB->record_exists('block_eledia_aitutor_usage', ['userid' => $userid])
+            || $DB->record_exists('block_eledia_aitutor_diag', ['userid' => $userid]);
     }
 
     /**
