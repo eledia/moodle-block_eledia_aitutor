@@ -87,6 +87,16 @@
                     </span>
                 </div>
                 <div class="eledia_aitutor-actions">
+                    {{#showexpand}}
+                        <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
+                                data-action="expand" aria-label="{{expandlabel}}"
+                                title="{{expandlabel}}"
+                                data-label-expand="{{expandlabel}}"
+                                data-label-collapse="{{collapselabel}}"
+                                aria-pressed="false">
+                            <i class="fa fa-expand" aria-hidden="true"></i>
+                        </button>
+                    {{/showexpand}}
                     {{#historyenabled}}
                         <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
                                 data-action="history" aria-label="{{#str}}history, block_eledia_aitutor{{/str}}"

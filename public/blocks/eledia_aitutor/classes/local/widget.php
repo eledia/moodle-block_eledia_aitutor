@@ -125,6 +125,19 @@ class widget {
     }
 
     /**
+     * Return a component string when installed, otherwise use a stable fallback.
+     *
+     * @param string $identifier String identifier.
+     * @param string $fallback Fallback text.
+     * @return string
+     */
+    private static function string_or_fallback(string $identifier, string $fallback): string {
+        return get_string_manager()->string_exists($identifier, 'block_eledia_aitutor')
+            ? get_string($identifier, 'block_eledia_aitutor')
+            : $fallback;
+    }
+
+    /**
      * Render the tutor widget for a given context.
      *
      * @param \context $context The context the widget is shown in.
@@ -234,6 +247,9 @@ class widget {
             'avatarurl' => $avatarurl,
             'welcome' => format_text($welcome, FORMAT_MOODLE, ['context' => $context, 'filter' => false]),
             'historyenabled' => $historyenabled,
+            'showexpand' => premium::has_feature(premium::FEATURE_CHAT_EXPAND),
+            'expandlabel' => self::string_or_fallback('expandchat', 'Enlarge chat'),
+            'collapselabel' => self::string_or_fallback('collapsechat', 'Shrink chat'),
             'launchlabel' => $brand['launchlabel'],
             'launcherstyle' => $brand['launcherstyle'],
             'launchfab' => $brand['launcherstyle'] === 'fab',

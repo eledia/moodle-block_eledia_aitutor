@@ -36,6 +36,9 @@ class premium {
     /** @var string Feature id for footer white-label/customisation. */
     public const FEATURE_FOOTER_BRANDING = 'footerbranding';
 
+    /** @var string Feature id for the larger centered chat view. */
+    public const FEATURE_CHAT_EXPAND = 'chat_expand';
+
     /** @var string Expected component name of the optional premium add-on. */
     private const PREMIUM_COMPONENT = 'local_elediaai_tutor_premium';
 

@@ -1197,6 +1197,32 @@ a.eledia_aitutor-avatar:focus-visible {
     z-index: 1;
 }
 
+/* --- Overlay: expanded chat. ------------------------------------------ */
+.eledia_aitutor-expanded {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    max-width: none !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    z-index: var(--eat-z);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: clamp(0.75rem, 3vw, 2rem) !important; /* stylelint-disable-line csstree/validator */
+    transform: none !important;
+}
+
+.eledia_aitutor-expanded .eledia_aitutor-window {
+    width: min(920px, calc(100vw - clamp(1.5rem, 6vw, 4rem))) !important; /* stylelint-disable-line csstree/validator */
+    max-width: 100% !important;
+    height: min(88vh, 820px) !important; /* stylelint-disable-line csstree/validator */
+    height: min(88dvh, 820px) !important; /* stylelint-disable-line csstree/validator */
+    position: relative;
+    z-index: 1;
+}
+
 .eledia_aitutor-backdrop {
     position: fixed;
     inset: 0;
@@ -1256,6 +1282,16 @@ body.eledia_aitutor-noscroll {
     }
 
     .eledia_aitutor-modal .eledia_aitutor-window {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+    }
+
+    .eledia_aitutor-expanded {
+        padding: 0;
+    }
+
+    .eledia_aitutor-expanded .eledia_aitutor-window {
         width: 100%;
         height: 100%;
         border-radius: 0;

@@ -86,6 +86,9 @@ class TutorChat {
         this.lastUserMessage = '';
         this.previousFocus = null;
         this.historyLoaded = false;
+        this.expanded = false;
+        this.expandHome = null;
+        this.expandPlaceholder = null;
 
         this.panel = root.querySelector('[data-region="panel"]');
         this.window = root.querySelector('.eledia_aitutor-window');
@@ -95,6 +98,7 @@ class TutorChat {
         this.composer = root.querySelector('[data-region="composer"]');
         this.backdrop = root.querySelector('.eledia_aitutor-backdrop');
         this.historyPanel = root.querySelector('[data-region="history"]');
+        this.expandButton = root.querySelector('[data-action="expand"]');
 
         this.bind();
         this.restoreStyle();
@@ -259,9 +263,11 @@ class TutorChat {
         // Escape closes overlay modes and Tab is trapped while open. Bound to the
         // panel so it keeps working after the panel is portalled out of the root.
         this.panel.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.isOverlay() && !this.isHidden()) {
+            if (e.key === 'Escape' && this.expanded && !this.isHidden()) {
+                this.shrink();
+            } else if (e.key === 'Escape' && this.isOverlay() && !this.isHidden()) {
                 this.close();
-            } else if (e.key === 'Tab' && this.isOverlay() && !this.isHidden()) {
+            } else if (e.key === 'Tab' && (this.isOverlay() || this.expanded) && !this.isHidden()) {
                 this.trapFocus(e);
             }
         });
@@ -277,7 +283,8 @@ class TutorChat {
     handleAction(action, el) {
         switch (action) {
             case 'launch': this.open(); break;
-            case 'close': this.close(); break;
+            case 'close': this.expanded ? this.shrink() : this.close(); break;
+            case 'expand': this.toggleExpanded(); break;
             case 'send': this.send(); break;
             case 'newconversation': this.newConversation(); break;
             case 'style': this.setStyle(el); break;
@@ -305,6 +312,97 @@ class TutorChat {
      */
     isHidden() {
         return this.panel.hasAttribute('hidden');
+    }
+
+    /**
+     * Toggle the larger centered chat view.
+     *
+     * @return {void}
+     */
+    toggleExpanded() {
+        if (this.expanded) {
+            this.shrink();
+        } else {
+            this.expand();
+        }
+    }
+
+    /**
+     * Move the panel into a centered, larger viewport overlay.
+     *
+     * @return {void}
+     */
+    expand() {
+        this.previousFocus = document.activeElement;
+        if (!this.expandPlaceholder && this.panel.parentNode !== document.body) {
+            this.expandHome = {
+                parent: this.panel.parentNode,
+                next: this.panel.nextSibling
+            };
+            this.expandPlaceholder = document.createComment('eledia_aitutor-expanded-home');
+            this.expandHome.parent.insertBefore(this.expandPlaceholder, this.panel);
+            document.body.appendChild(this.panel);
+        }
+        this.panel.classList.add('eledia_aitutor-expanded');
+        this.panel.removeAttribute('hidden');
+        if (this.backdrop) {
+            this.backdrop.removeAttribute('hidden');
+        }
+        document.body.classList.add('eledia_aitutor-noscroll', 'eledia_aitutor-expanded-open');
+        this.expanded = true;
+        this.updateExpandButton();
+        window.setTimeout(() => this.input && this.input.focus(), 50);
+    }
+
+    /**
+     * Restore the panel to its previous size and DOM position.
+     *
+     * @return {void}
+     */
+    shrink() {
+        this.panel.classList.remove('eledia_aitutor-expanded');
+        if (this.backdrop && this.config.displaymode !== 'modal') {
+            this.backdrop.setAttribute('hidden', 'hidden');
+        }
+        if (!this.isOverlay()) {
+            document.body.classList.remove('eledia_aitutor-noscroll', 'eledia_aitutor-expanded-open');
+        } else {
+            document.body.classList.remove('eledia_aitutor-expanded-open');
+            document.body.classList.toggle('eledia_aitutor-noscroll',
+                this.config.displaymode === 'fullscreen' || this.config.displaymode === 'modal');
+        }
+        if (this.expandHome && this.expandHome.parent) {
+            this.expandHome.parent.insertBefore(this.panel, this.expandHome.next);
+        }
+        if (this.expandPlaceholder && this.expandPlaceholder.parentNode) {
+            this.expandPlaceholder.parentNode.removeChild(this.expandPlaceholder);
+        }
+        this.expandHome = null;
+        this.expandPlaceholder = null;
+        this.expanded = false;
+        this.updateExpandButton();
+    }
+
+    /**
+     * Keep the expand button icon and accessibility state in sync.
+     *
+     * @return {void}
+     */
+    updateExpandButton() {
+        if (!this.expandButton) {
+            return;
+        }
+        const icon = this.expandButton.querySelector('i');
+        const label = this.expanded ? this.expandButton.dataset.labelCollapse : this.expandButton.dataset.labelExpand;
+        this.expandButton.setAttribute('aria-pressed', this.expanded ? 'true' : 'false');
+        if (label) {
+            this.expandButton.setAttribute('aria-label', label);
+            this.expandButton.setAttribute('title', label);
+        }
+        if (icon) {
+            icon.classList.toggle('fa-expand', !this.expanded);
+            icon.classList.toggle('fa-compress', this.expanded);
+        }
     }
 
     /**
@@ -342,6 +440,9 @@ class TutorChat {
     close() {
         if (!this.isOverlay()) {
             return;
+        }
+        if (this.expanded) {
+            this.shrink();
         }
         this.panel.setAttribute('hidden', 'hidden');
         if (this.backdrop) {
