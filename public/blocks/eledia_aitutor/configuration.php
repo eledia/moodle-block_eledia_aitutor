@@ -424,19 +424,12 @@ $missingpluginsnotice = (!$literagavailable || !$ragingestavailable || ($mcpenab
         ['class' => 'eat-setup-callout eat-setup-callout--warning']
     )
     : '';
-$mcpservicesurl = $mcpenabled
-    ? $mcpconfigurl('id_serviceshdr')
-    : $settingurl('blocksettingeledia_aitutor', 'enablemcp');
-$mcplimitsurl = $mcpenabled
-    ? $mcpconfigurl('id_rate_limit_per_minute')
-    : $settingurl('blocksettingeledia_aitutor', 'enablemcp');
-$mcpsecurityurl = $mcpenabled
-    ? $mcpconfigurl('id_allowed_origins')
-    : $settingurl('blocksettingeledia_aitutor', 'enablemcp');
-$operatormcpurl = $settingurl(
-    'blocksettingeledia_aitutor',
-    $mcpenabled ? 'mcpserviceid' : 'enablemcp'
-);
+// Moodle MCP is mandatory (no admin off switch), so these always point at the
+// MCP connector's own configuration anchors.
+$mcpservicesurl = $mcpconfigurl('id_serviceshdr');
+$mcplimitsurl = $mcpconfigurl('id_rate_limit_per_minute');
+$mcpsecurityurl = $mcpconfigurl('id_allowed_origins');
+$operatormcpurl = $settingurl('blocksettingeledia_aitutor', 'mcpserviceid');
 
 echo html_writer::tag(
     'section',

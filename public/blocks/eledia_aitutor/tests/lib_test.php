@@ -18,17 +18,18 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversFunction;
 use navigation_node;
 
 /**
  * Unit tests for the plugin callbacks in lib.php.
  *
  * @package     block_eledia_aitutor
- * @covers      ::block_eledia_aitutor_extend_navigation_course
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversFunction('block_eledia_aitutor_extend_navigation_course')]
 final class lib_test extends \advanced_testcase {
     /**
      * Load the plugin lib.

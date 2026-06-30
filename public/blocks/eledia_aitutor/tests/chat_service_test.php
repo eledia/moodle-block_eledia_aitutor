@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\chat_service;
 use block_eledia_aitutor\local\consent;
 use block_eledia_aitutor\local\conversation_repository;
@@ -29,12 +30,12 @@ use moodle_url;
  * provisioning through webservice_elediamcp.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\chat_service
- * @covers      \block_eledia_aitutor\local\token_provider
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\chat_service::class)]
+#[CoversClass(\block_eledia_aitutor\local\token_provider::class)]
 final class chat_service_test extends \advanced_testcase {
     /**
      * Load the fake transport.

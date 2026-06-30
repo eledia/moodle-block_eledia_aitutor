@@ -11,9 +11,10 @@ Chat-Oberfläche, sichere Token-Übergabe und Moodle-Integration bereit.
 Der Block ist bewusst **kein eigener RAG-Server**. Kursinhalte, Retrieval,
 LLM-Zugriff und Tool-Ausführung liegen in den angebundenen Zusatzdiensten.
 
-- **Reifegrad:** Beta (`0.14.1`)
+- **Reifegrad:** Beta (`0.15.0`)
 - **Voraussetzung:** Moodle 4.2+ (getestet mit 5.1), PHP 8.1+
-- **Optionale Laufzeit-Integration:** `webservice_elediamcp` für Moodle-MCP-Werkzeuge
+- **Erforderliche Laufzeit-Integration:** `webservice_elediamcp` für den
+  nutzerbezogenen Moodle-MCP-Rückruf (verpflichtend, keine Abschaltung möglich)
 - **Lizenz:** GNU GPL v3 oder später
 - **Autor:** Christopher Reimann · © 2026 eLeDia GmbH, Berlin
 
@@ -27,7 +28,7 @@ Browser (AMD chat.js)
   ▼
 block_eledia_aitutor external functions  ──►  chat_service
   │                                            │
-  │  optionales webservice_elediamcp-Token     │  rag_client (MCP Streamable HTTP, tools/call)
+  │  webservice_elediamcp-Token (verpflichtend) │  rag_client (MCP Streamable HTTP, tools/call)
   ▼                                            ▼
 nutzerbezogenes Moodle-MCP-Token  ───────►  externer RAG-/Tutor-MCP-Server
                                                │
@@ -69,7 +70,7 @@ Wichtige Einstellungen:
 | RAG-Authentifizierung / Token | falls benötigt | `Bearer` + Token |
 | Chat-Tool-Name | ja, Standard meist passend | `tutor_chat` |
 | History-Tool-Name | optional | `tutor_get_history` |
-| MCP freischalten / Externer MCP-Service | optional | Service aus `webservice_elediamcp` |
+| Externer MCP-Service | ja (verpflichtend) | Service aus `webservice_elediamcp` |
 | Token-Lebensdauer | ja, Standard meist passend | `3600` |
 
 Danach kann der Block in Kursen oder auf dem Dashboard hinzugefügt werden.

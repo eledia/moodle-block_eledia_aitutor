@@ -46,7 +46,6 @@ Feature: eLeDia.ai Tutor chat block UI
 
   Scenario: A misconfigured connector shows an admin-facing error to managers
     Given the following config values are set as admin:
-      | enablemcp    | 1 | block_eledia_aitutor |
       | mcpserviceid | 0 | block_eledia_aitutor |
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
@@ -66,7 +65,9 @@ Feature: eLeDia.ai Tutor chat block UI
     When I click on "[data-action=launch]" "css_element"
     Then ".eledia_aitutor-modal" "css_element" should be visible
     And "textarea[data-region=input]" "css_element" should be visible
-    When I click on "[data-action=close]" "css_element"
+    # Use the header close button: the backdrop (also data-action=close) is overlapped
+    # by the first-use consent panel and is not reliably clickable.
+    When I click on "button[data-action=close]" "css_element"
     Then ".eledia_aitutor-modal" "css_element" should not be visible
 
   @javascript

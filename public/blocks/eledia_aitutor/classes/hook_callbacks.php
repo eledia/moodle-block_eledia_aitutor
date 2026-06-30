@@ -24,6 +24,7 @@
 
 namespace block_eledia_aitutor;
 
+use core\hook\output\before_http_headers;
 use core\hook\output\before_standard_top_of_body_html_generation;
 use moodle_url;
 
@@ -70,5 +71,80 @@ final class hook_callbacks {
                 '</a>' .
             '</div>'
         );
+    }
+
+    /**
+     * Send the block's "Configure" action to the Plugin Shell instead of Moodle's
+     * generic block edit form — the shell is the suitable settings UI for this tutor.
+     *
+     * Site admins land on the full admin settings hub; teachers (block managers) land
+     * on the per-instance shell. Appending {@code &eatfullform=1} to the configure URL
+     * still reaches the standard form (e.g. for the "where this block appears"
+     * placement/visibility options).
+     *
+     * @param before_http_headers $hook Unused; the trigger fires before any output.
+     */
+    public static function redirect_block_config(before_http_headers $hook): void {
+        global $DB;
+
+        // No-JS fallback. With JavaScript on, the block "Configure" control opens a
+        // dynamic-form modal (core_block/edit) and never navigates with bui_editid, so
+        // the redirect is handled client-side by the configure_redirect AMD module
+        // ({@see self::configure_block_in_shell()}). Without JS, the control falls back
+        // to a bui_editid page load, which this intercepts.
+        // Only the initial "Configure" click — a GET carrying bui_editid. The save POST
+        // and an explicit request for the full Moodle form (eatfullform=1) are left alone.
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+            return;
+        }
+        $editid = optional_param('bui_editid', 0, PARAM_INT);
+        if ($editid <= 0 || optional_param('eatfullform', 0, PARAM_BOOL)) {
+            return;
+        }
+        if (!isloggedin() || isguestuser()) {
+            return;
+        }
+
+        // Intercept only our own block; every other block's config is untouched.
+        $instance = $DB->get_record('block_instances', ['id' => $editid, 'blockname' => 'eledia_aitutor']);
+        if (!$instance) {
+            return;
+        }
+        $blockcontext = \core\context\block::instance($editid);
+        if (!has_capability('block/eledia_aitutor:manage', $blockcontext)) {
+            // Not manageable by this user: leave the core flow to handle access control.
+            return;
+        }
+
+        // The per-instance shell reflects this specific block (admins reach the site-wide
+        // settings via a link inside it).
+        redirect(new moodle_url('/blocks/eledia_aitutor/edit_instance.php', ['blockid' => $editid]));
+    }
+
+    /**
+     * In editing mode, load the client-side helper that sends this block's "Configure"
+     * control to the per-instance Plugin Shell (the suitable settings UI, reflecting the
+     * specific block) instead of opening Moodle's block-config modal. Site admins reach
+     * the site-wide settings via a link inside that shell.
+     * {@see self::redirect_block_config()} covers the no-JavaScript fallback.
+     *
+     * @param before_standard_top_of_body_html_generation $hook Unused.
+     */
+    public static function configure_block_in_shell(before_standard_top_of_body_html_generation $hook): void {
+        global $PAGE;
+
+        if (!isloggedin() || isguestuser() || !$PAGE->user_is_editing()) {
+            // The block action controls (Configure) only appear in editing mode.
+            return;
+        }
+
+        $config = [
+            // __ID__ is substituted with the clicked block's instance id in JS.
+            'instanceUrl' => (new moodle_url(
+                '/blocks/eledia_aitutor/edit_instance.php',
+                ['blockid' => '__ID__']
+            ))->out(false),
+        ];
+        $PAGE->requires->js_call_amd('block_eledia_aitutor/configure_redirect', 'init', [$config]);
     }
 }

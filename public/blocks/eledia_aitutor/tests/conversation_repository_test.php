@@ -18,17 +18,18 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\conversation_repository;
 
 /**
  * Unit tests for the conversation repository.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\conversation_repository
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\conversation_repository::class)]
 final class conversation_repository_test extends \advanced_testcase {
     /**
      * Upsert creates once and updates thereafter (idempotent on the server id).

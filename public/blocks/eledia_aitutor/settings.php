@@ -74,7 +74,12 @@ if ($hassiteconfig) {
                 'block_eledia_aitutor/plugin_shell_header',
                 shell::context(shell::ACTIVE_SETTINGS, true)
             );
-            $PAGE->requires->js_call_amd('block_eledia_aitutor/settings_shell', 'init', [[
+            // The shell config carries a rendered header template (~2 KB), which exceeds the
+            // 1024-char budget js_call_amd warns about (and dev debugging escalates to a fatal).
+            // Invoke the same module via an inline require() instead, so the payload travels in
+            // an inline <script> rather than the AMD argument string. The init() contract is
+            // unchanged. JSON_HEX_TAG keeps any markup in headerHtml from breaking the script.
+            $shellconfig = [
                 'headerHtml' => $headerhtml,
                 'sectionCards' => $sectioncards,
                 'pluginTitle' => get_string('pluginname', 'block_eledia_aitutor'),
@@ -85,7 +90,16 @@ if ($hassiteconfig) {
                 'exposeLabel' => get_string('settings_expose_inline_label', 'block_eledia_aitutor'),
                 'cancelLabel' => get_string('cancel'),
                 'cancelUrl' => (new moodle_url('/blocks/eledia_aitutor/configuration.php'))->out(false),
-            ]]);
+            ];
+            $encodedconfig = json_encode(
+                $shellconfig,
+                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+            );
+            $PAGE->requires->js_amd_inline(
+                "require(['block_eledia_aitutor/settings_shell'], function(shell) {"
+                . "shell.init({$encodedconfig});"
+                . "});"
+            );
         }
     }
 
@@ -449,13 +463,6 @@ if ($hassiteconfig) {
         'block_eledia_aitutor/headertoken',
         get_string('setting_header_token', 'block_eledia_aitutor'),
         get_string('setting_header_token_desc', 'block_eledia_aitutor')
-    ));
-
-    $settings->add(new admin_setting_configcheckbox(
-        'block_eledia_aitutor/enablemcp',
-        get_string('setting_enablemcp', 'block_eledia_aitutor'),
-        get_string('setting_enablemcp_desc', 'block_eledia_aitutor'),
-        0
     ));
 
     $settings->add(new admin_setting_configselect(

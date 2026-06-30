@@ -25,7 +25,7 @@ Feature: eLeDia.ai Tutor course context gate
   @javascript
   Scenario: Course-scoped standalone chat is blocked until the tutor block is present
     Given I log in as "student1"
-    When I visit "/blocks/eledia_aitutor/view.php?courseid=2"
+    When I am on the "C1" "block_eledia_aitutor > coursechat" page
     Then I should see "The tutor is not enabled in this course."
     And ".eledia_aitutor-page" "css_element" should not exist
 
@@ -36,6 +36,6 @@ Feature: eLeDia.ai Tutor course context gate
     And I add the "eLeDia.ai Tutor" block
     And I log out
     And I log in as "student1"
-    When I visit "/blocks/eledia_aitutor/view.php?courseid=2"
+    When I am on the "C1" "block_eledia_aitutor > coursechat" page
     Then I should see "Before you use the tutor for the first time"
     And ".eledia_aitutor-page" "css_element" should exist

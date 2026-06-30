@@ -17,8 +17,9 @@ Feature: Privacy guidelines, long-term memory opt-in and data deletion
       | student1 | C1     | student        |
       | teacher1 | C1     | editingteacher |
     And the following config values are set as admin:
-      | ragserverurl | https://rag.example.com/mcp | block_eledia_aitutor |
-      | mcpserviceid | 1                           | block_eledia_aitutor |
+      | ragserverurl       | https://rag.example.com/mcp | block_eledia_aitutor |
+      | mcpserviceid       | 1                           | block_eledia_aitutor |
+      | defaultdisplaymode | embedded                    | block_eledia_aitutor |
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
     And I add the "eLeDia.ai Tutor" block

@@ -18,7 +18,9 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\branding;
+use block_eledia_aitutor\local\premium;
 use block_eledia_aitutor\local\registry;
 use block_eledia_aitutor\local\tutor_profile;
 
@@ -26,11 +28,11 @@ use block_eledia_aitutor\local\tutor_profile;
  * Unit tests for the setting registry.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\registry
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license      http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\registry::class)]
 final class registry_test extends \advanced_testcase {
     /**
      * Every descriptor is well-formed: known type and group, tokens look like
@@ -93,16 +95,17 @@ final class registry_test extends \advanced_testcase {
         $this->assertTrue(registry::is_exposed('brandaccent'));
         $this->assertTrue(registry::is_exposed('tok_surface'));
         $this->assertTrue(registry::is_exposed('tok_ink'));
-        // Footer is instanceable in the registry but locked without premium.
+        // Footer is instanceable in the registry but availability is gated on the
+        // premium add-on (present or not in this install).
+        $footeravailable = premium::has_feature(premium::FEATURE_FOOTER_BRANDING);
         $this->assertTrue(registry::get('footermode')['instanceable']);
-        $this->assertFalse(registry::is_available('footermode'));
-        $this->assertFalse(registry::is_exposed('footermode'));
+        $this->assertSame($footeravailable, registry::is_available('footermode'));
 
-        // Admin checkboxes still work for available keys, but cannot unlock premium keys.
+        // Admin checkboxes work for available keys; footer exposure follows availability.
         set_config('expose_tok_surface', 0, 'block_eledia_aitutor');
         set_config('expose_footermode', 1, 'block_eledia_aitutor');
         $this->assertFalse(registry::is_exposed('tok_surface'));
-        $this->assertFalse(registry::is_exposed('footermode'));
+        $this->assertSame($footeravailable, registry::is_exposed('footermode'));
     }
 
     /**
@@ -174,7 +177,14 @@ final class registry_test extends \advanced_testcase {
         ]);
 
         $this->assertSame('#abcdef', $settings['brandaccent']);
-        $this->assertArrayNotHasKey('footermode', $settings);
-        $this->assertArrayNotHasKey('footertext', $settings);
+        if (premium::has_feature(premium::FEATURE_FOOTER_BRANDING)) {
+            // Premium present: footer values are valid and kept.
+            $this->assertSame(branding::FOOTER_NONE, $settings['footermode']);
+            $this->assertSame('Hidden credit', $settings['footertext']);
+        } else {
+            // Free block: premium-only footer values are dropped.
+            $this->assertArrayNotHasKey('footermode', $settings);
+            $this->assertArrayNotHasKey('footertext', $settings);
+        }
     }
 }

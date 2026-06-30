@@ -18,17 +18,18 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\security;
 
 /**
  * Unit tests for the security/configuration helper.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\security
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\security::class)]
 final class security_test extends \advanced_testcase {
     /**
      * A valid HTTPS RAG URL is accepted.
@@ -41,13 +42,15 @@ final class security_test extends \advanced_testcase {
     }
 
     /**
-     * MCP starts disabled so the tutor can run as a plain LLM/RAG chat.
+     * MCP is mandatory: the RAG server learns the learner's identity and courses
+     * by calling back into Moodle, so there is no admin off switch.
      */
-    public function test_mcp_is_optional_by_default(): void {
+    public function test_mcp_is_mandatory(): void {
         $this->resetAfterTest();
-        $this->assertFalse(security::mcp_enabled());
+        $this->assertTrue(security::mcp_enabled());
 
-        set_config('enablemcp', 1, 'block_eledia_aitutor');
+        // No configuration can turn it off.
+        set_config('enablemcp', 0, 'block_eledia_aitutor');
         $this->assertTrue(security::mcp_enabled());
     }
 

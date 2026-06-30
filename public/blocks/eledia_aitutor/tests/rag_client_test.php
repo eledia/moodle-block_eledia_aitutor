@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\rag_client;
 use block_eledia_aitutor\local\rag_exception;
 use moodle_url;
@@ -26,11 +27,11 @@ use moodle_url;
  * Unit tests for the RAG MCP client.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\rag_client
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\rag_client::class)]
 final class rag_client_test extends \advanced_testcase {
     /**
      * Load the test transport helper.

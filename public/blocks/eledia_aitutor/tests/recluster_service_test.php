@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\question_log;
 use block_eledia_aitutor\local\rag_client;
 use block_eledia_aitutor\local\recluster_service;
@@ -32,13 +33,13 @@ use moodle_url;
  * minting test requires the connector (and skips without it).
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\recluster_service
- * @covers      \block_eledia_aitutor\local\service_user
- * @covers      \block_eledia_aitutor\task\recluster_questions
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\recluster_service::class)]
+#[CoversClass(\block_eledia_aitutor\local\service_user::class)]
+#[CoversClass(\block_eledia_aitutor\task\recluster_questions::class)]
 final class recluster_service_test extends \advanced_testcase {
     /**
      * Load the fake transport helper.

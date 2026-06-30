@@ -152,6 +152,7 @@
                         {{/starters}}
                     </div>
                 {{/hasstarters}}
+                {{#preview}}{{{previewmessages}}}{{/preview}}
             </div>
 
             <div class="eledia_aitutor-status" data-region="status" role="status" aria-live="polite"></div>
@@ -204,10 +205,10 @@
                     {{#str}}messagelabel, block_eledia_aitutor{{/str}}
                 </label>
                 <textarea id="{{uniqid}}_input" class="eledia_aitutor-input" data-region="input"
-                          rows="1" autocomplete="off" {{^consented}}disabled{{/consented}}
+                          rows="1" autocomplete="off" {{^consented}}disabled{{/consented}}{{#preview}} disabled{{/preview}}
                           placeholder="{{#str}}inputplaceholder, block_eledia_aitutor{{/str}}"></textarea>
                 <button type="submit" class="eledia_aitutor-send" data-action="send"
-                        {{^consented}}disabled{{/consented}}
+                        {{^consented}}disabled{{/consented}}{{#preview}} disabled{{/preview}}
                         aria-label="{{#str}}send, block_eledia_aitutor{{/str}}">
                     <i class="fa fa-paper-plane" aria-hidden="true"></i>
                 </button>

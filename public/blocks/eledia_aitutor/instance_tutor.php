@@ -63,8 +63,9 @@ if ($parent && $parent->contextlevel == CONTEXT_COURSE) {
     $PAGE->set_pagelayout('standard');
 }
 $PAGE->set_title(get_string('instancetutor_title', 'block_eledia_aitutor'));
-$PAGE->set_heading($parent ? $parent->get_context_name(false)
-    : get_string('instancetutor_title', 'block_eledia_aitutor'));
+// Empty: the instance shell renders its own header ("eLeDia.ai Tutor | Tutor (course)"),
+// so a separate course-name page heading above it would be redundant.
+$PAGE->set_heading('');
 shell::require_css();
 
 // Export streams a file and must run before any output.
@@ -112,7 +113,7 @@ if ($action === 'importdo') {
 }
 
 echo $OUTPUT->header();
-shell::open(shell::ACTIVE_TUTORS);
+shell::open_instance($blockid, shell::ACTIVE_INSTANCE_TUTOR);
 echo $OUTPUT->heading(get_string('instancetutor_title', 'block_eledia_aitutor'));
 
 echo html_writer::start_div('eat-admin');

@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\external\clear_conversation;
 use block_eledia_aitutor\external\delete_my_data;
 use block_eledia_aitutor\external\get_conversations;
@@ -31,15 +32,15 @@ use block_eledia_aitutor\local\ltm;
  * enforcement, and ownership scoping.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\external\send_message
- * @covers      \block_eledia_aitutor\external\get_conversations
- * @covers      \block_eledia_aitutor\external\clear_conversation
- * @covers      \block_eledia_aitutor\external\set_ltm
- * @covers      \block_eledia_aitutor\external\delete_my_data
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\external\send_message::class)]
+#[CoversClass(\block_eledia_aitutor\external\get_conversations::class)]
+#[CoversClass(\block_eledia_aitutor\external\clear_conversation::class)]
+#[CoversClass(\block_eledia_aitutor\external\set_ltm::class)]
+#[CoversClass(\block_eledia_aitutor\external\delete_my_data::class)]
 final class external_test extends \advanced_testcase {
     /**
      * An invalid context id is rejected.

@@ -149,16 +149,19 @@ class security {
     }
 
     /**
-     * Whether Moodle-MCP tools should be used for chat requests.
+     * Whether Moodle-MCP tools are used for chat requests.
      *
-     * When disabled, the tutor still sends regular chat/RAG requests but does
-     * not mint or transmit user-scoped Moodle MCP tokens. This allows a pure
-     * LLM/RAG setup without the optional webservice_elediamcp connector.
+     * Moodle MCP is mandatory: the tutor's core design is that the RAG/Tutor
+     * server learns the learner's identity and courses by calling back into
+     * Moodle with a user-scoped MCP token, so there is deliberately no admin
+     * off switch. When the webservice_elediamcp connector is not installed (or
+     * no external service is configured) the tutor surfaces a configuration
+     * error rather than silently degrading — see {@see widget::config_error()}.
      *
-     * @return bool
+     * @return bool Always true.
      */
     public static function mcp_enabled(): bool {
-        return (int) self::get_config('enablemcp', 0) === 1;
+        return true;
     }
 
     /**

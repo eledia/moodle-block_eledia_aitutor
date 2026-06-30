@@ -167,7 +167,8 @@ mindestens gesetzt sein:
 
 - RAG MCP server URL.
 - Chat tool name.
-- Enable MCP / MCP external service, falls Moodle-MCP-Tools genutzt werden.
+- MCP external service (verpflichtend): der externe Dienst aus
+  `webservice_elediamcp`, auf den die nutzerbezogenen Tokens beschraenkt sind.
 - Lokale HTTP/private-host Opt-ins, falls ein lokaler Docker-Endpunkt verwendet
   wird.
 

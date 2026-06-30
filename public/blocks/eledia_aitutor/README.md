@@ -8,15 +8,18 @@ A polished, Moodle-native chatbot block that connects **server-side** to an
 external RAG/Tutor MCP server. The block is a chat **frontend and secure
 connector** only — it does not implement retrieval-augmented generation itself.
 
-It can pair with [`webservice_elediamcp`](../../webservice/elediamcp), which
-turns Moodle into an MCP server and provides the internal PHP API used here to
-mint user-scoped MCP tokens. This is optional: without it, the tutor still works
-as a plain LLM/RAG chat, but Moodle tools, memory sync and remote deletion are
-not available.
+It pairs with [`webservice_elediamcp`](../../webservice/elediamcp), which turns
+Moodle into an MCP server and provides the internal PHP API used here to mint
+user-scoped MCP tokens. This is **required**: the tutor's design is that the
+RAG/Tutor server learns the learner's identity and courses by calling back into
+Moodle with that token, so Moodle MCP is mandatory (there is no off switch).
+When the connector is not installed or no external service is configured, the
+tutor shows administrators a configuration error instead of operating.
 
-- **Maturity:** Beta (`0.14.1`)
+- **Maturity:** Beta (`0.15.0`)
 - **Requires:** Moodle 4.2+ (tested against 5.1), PHP 8.1+
-- **Optional runtime integration:** `webservice_elediamcp` for Moodle MCP tools
+- **Required runtime integration:** `webservice_elediamcp` for the user-scoped
+  Moodle MCP callback (mandatory)
 - **License:** GNU GPL v3 or later
 - **Author:** Christopher Reimann · © 2026 eLeDia GmbH, Berlin
 
@@ -30,7 +33,7 @@ not available.
    ▼
  block_eledia_aitutor external functions  ──►  chat_service
    │                                            │
-   │  optional webservice_elediamcp token        │  rag_client (MCP Streamable HTTP, tools/call)
+   │  webservice_elediamcp token (mandatory)     │  rag_client (MCP Streamable HTTP, tools/call)
    ▼                                            ▼
  user-scoped Moodle MCP token  ───────────►  External RAG / Tutor MCP server
                                                 │
@@ -80,29 +83,37 @@ At **Site administration ▸ Plugins ▸ Blocks ▸ eLeDia.ai Tutor**:
 | RAG authorization method / token | if your server needs it | `Bearer` + token |
 | Chat tool name | ✅ (default ok) | `tutor_chat` |
 | History tool name | optional | `tutor_get_history` |
-| Enable MCP / MCP external service | optional | one of the services configured in `webservice_elediamcp` |
+| MCP external service | ✅ (mandatory) | one of the services configured in `webservice_elediamcp` |
 | Token lifetime | ✅ (default ok) | `3600` |
 
 Then add the **eLeDia.ai Tutor** block to a course or the Dashboard.
 
 ## Quick test commands
 
+Paths assume the Moodle 5.1 layout where the code lives under `public/`. Run from the
+Moodle root. The PHPUnit suite (112 tests) and Behat suite (14 scenarios) pass on
+Moodle 5.1 / PHP 8.3 / PHPUnit 11; test metadata uses PHP attributes (`#[CoversClass]`),
+the Moodle 5.1 convention.
+
 ```bash
-# From the Moodle root.
-# PHPUnit
-php admin/tool/phpunit/cli/init.php
-vendor/bin/phpunit --filter block_eledia_aitutor
+# PHPUnit — initialise once (re-run after any version bump), then run the component suite.
+php public/admin/tool/phpunit/cli/init.php
+vendor/bin/phpunit --testsuite block_eledia_aitutor_testsuite
 
-# A single suite
-vendor/bin/phpunit blocks/eledia_aitutor/tests/rag_client_test.php
+# A single test file
+vendor/bin/phpunit public/blocks/eledia_aitutor/tests/rag_client_test.php
 
-# Behat
-php admin/tool/behat/cli/init.php
-vendor/bin/behat --tags @block_eledia_aitutor
+# Behat — initialise once, then run this plugin's tagged scenarios (needs Selenium).
+php public/admin/tool/behat/cli/init.php
+vendor/bin/behat --config "$(php public/admin/tool/behat/cli/util.php --behatdir 2>/dev/null || echo behatdata/behatrun)/behat/behat.yml" --tags @block_eledia_aitutor
 
-# Code style
-vendor/bin/phpcs --standard=moodle blocks/eledia_aitutor
+# Code style (requires moodlehq/moodle-cs installed via composer)
+vendor/bin/phpcs --standard=moodle public/blocks/eledia_aitutor
 ```
+
+> Note: the footer-branding tests assert the free-block behaviour only when the optional
+> `local_elediaai_tutor_premium` add-on is **absent**; when it is installed they verify the
+> unlocked behaviour instead, so the suite is green with or without the add-on.
 
 ## Continuous integration & publishing
 
