@@ -149,14 +149,20 @@ class security {
     }
 
     /**
-     * Whether Moodle-MCP tools are used for chat requests.
+     * Whether the Moodle-MCP integration is part of this block.
      *
-     * Moodle MCP is mandatory: the tutor's core design is that the RAG/Tutor
-     * server learns the learner's identity and courses by calling back into
-     * Moodle with a user-scoped MCP token, so there is deliberately no admin
-     * off switch. When the webservice_elediamcp connector is not installed (or
-     * no external service is configured) the tutor surfaces a configuration
-     * error rather than silently degrading — see {@see widget::config_error()}.
+     * Always true: there is deliberately no admin off switch. This is a
+     * provisioning statement — in a grounded answer the block always mints a
+     * user-scoped MCP token so the RAG/Tutor server can call back into Moodle to
+     * learn the learner's identity and courses. Grounded mode therefore requires
+     * the webservice_elediamcp connector and a configured external service; when
+     * either is missing the tutor surfaces a configuration error to managers
+     * rather than silently degrading — see {@see widget::config_error()}.
+     *
+     * It is NOT a usage statement: LLM-only mode never calls back, so it mints no
+     * token and needs no connector (the tutor runs standalone in LLM-only). And
+     * whether a grounded backend actually USES the call-back is the backend's
+     * choice (e.g. local_literag's enable_mcp_tools), not controlled here.
      *
      * @return bool Always true.
      */

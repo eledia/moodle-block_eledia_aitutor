@@ -101,7 +101,19 @@ class block_eledia_aitutor_edit_form extends block_edit_form {
         // choice: LLM-only allowed site-wide AND the course has a knowledge base.
         $grounding = \block_eledia_aitutor\local\chat_mode::ingestion_available($this->effective_courseid());
         $llmallowed = \block_eledia_aitutor\local\chat_mode::is_llm_allowed();
-        if ($llmallowed && $grounding) {
+        // Grounded answers call back into Moodle, so they require the MCP connector:
+        // never offer the grounded option when webservice_elediamcp is absent.
+        $connector = \block_eledia_aitutor\local\token_provider::is_connector_available();
+        if ($grounding && !$connector) {
+            // Course is indexed (grounding is possible) but the connector is missing,
+            // so grounded mode cannot be offered — explain why instead.
+            $mform->addElement(
+                'static',
+                'ragmode_note',
+                get_string('config_ragmode', 'block_eledia_aitutor'),
+                get_string('error_connector_missing', 'block_eledia_aitutor')
+            );
+        } else if ($llmallowed && $grounding) {
             $mform->addElement(
                 'select',
                 'config_ragmode',

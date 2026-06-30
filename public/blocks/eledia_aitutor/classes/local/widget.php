@@ -37,19 +37,33 @@ class widget {
     /**
      * Detect a fatal configuration problem, returning an admin-facing message.
      *
+     * The connector requirement is mode-aware. A grounded answer calls back into
+     * Moodle with a user-scoped MCP token, so grounded mode requires the
+     * webservice_elediamcp connector and a configured external service. LLM-only
+     * mode never calls back, so it needs neither — only the RAG/Tutor server URL,
+     * which every mode talks to. UNAVAILABLE is not a config error (handled by
+     * render()'s own branch).
+     *
+     * @param int $courseid The course the widget is shown in (0 for global chat).
+     * @param array $instance Per-instance config (its 'ragmode' is honoured).
      * @return string|null Null when configuration is healthy.
      */
-    public static function config_error(): ?string {
-        // The MCP connector plugin (webservice_elediamcp) is an optional integration:
-        // its absence is surfaced on the dashboard (missing add-ons notice) and handled
-        // at call time by token_provider, so it must not block the chat shell here.
-        // Only a genuinely unusable configuration is treated as a fatal, render-blocking
-        // error: no MCP service selected (when MCP is enabled), or no RAG/Tutor URL.
-        if (security::mcp_enabled() && security::mcp_service_id() <= 0) {
-            return get_string('error_service_not_configured', 'block_eledia_aitutor');
-        }
+    public static function config_error(int $courseid, array $instance = []): ?string {
+        // The RAG/Tutor server URL is required in every mode.
         if (security::rag_server_url() === '') {
             return get_string('error_rag_url_missing', 'block_eledia_aitutor');
+        }
+        // Only grounded mode calls back into Moodle, so only it requires the
+        // connector + a selected external service. (Whether the chosen service
+        // actually exists is verified at call time by token_provider.)
+        $blockconfig = (object) ['ragmode' => (string) ($instance['ragmode'] ?? chat_mode::MODE_GROUNDED)];
+        if (chat_mode::resolve($courseid, $blockconfig) === chat_mode::MODE_GROUNDED) {
+            if (!token_provider::is_connector_available()) {
+                return get_string('error_connector_missing', 'block_eledia_aitutor');
+            }
+            if (security::mcp_service_id() <= 0) {
+                return get_string('error_service_not_configured', 'block_eledia_aitutor');
+            }
         }
         return null;
     }

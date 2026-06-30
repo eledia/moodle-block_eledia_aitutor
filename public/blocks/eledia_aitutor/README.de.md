@@ -11,10 +11,24 @@ Chat-Oberfläche, sichere Token-Übergabe und Moodle-Integration bereit.
 Der Block ist bewusst **kein eigener RAG-Server**. Kursinhalte, Retrieval,
 LLM-Zugriff und Tool-Ausführung liegen in den angebundenen Zusatzdiensten.
 
+Der **vollständige geerdete Tutor** benötigt `local_ragingest` (für die
+kursbezogene Wissensbasis) und `webservice_elediamcp` (für den MCP-Rückruf): Im
+geerdeten Modus prägt der Block immer ein nutzerbezogenes Token, damit das
+RAG-/Tutor-Backend im Namen der lernenden Person in Moodle zurückrufen kann –
+hierfür gibt es **keinen Abschalter**. Dieses "kein Abschalter" bezieht sich auf
+die Provisionierung des geerdeten Rückrufs im Block, **nicht** auf eine
+Installationsvoraussetzung und **nicht** darauf, ob ein Backend den Rückruf
+tatsächlich *nutzt* (z. B. `enable_mcp_tools` in literag, was das Backend
+entscheidet). Der **reine LLM-Chat läuft eigenständig** – ohne Token, ohne
+Connector und ohne `webservice_elediamcp`. Der Block deklariert **keine harten
+Plugin-Abhängigkeiten** in `version.php`: Er installiert und aktualisiert sich
+unabhängig, fehlende Begleitplugins degradieren kontrolliert.
+
 - **Reifegrad:** Beta (`0.15.0`)
 - **Voraussetzung:** Moodle 4.2+ (getestet mit 5.1), PHP 8.1+
-- **Erforderliche Laufzeit-Integration:** `webservice_elediamcp` für den
-  nutzerbezogenen Moodle-MCP-Rückruf (verpflichtend, keine Abschaltung möglich)
+- **Erforderliche Laufzeit-Integration (geerdete Antworten):**
+  `webservice_elediamcp` für den nutzerbezogenen Moodle-MCP-Rückruf, dazu
+  `local_ragingest` für die Wissensbasis; der reine LLM-Chat läuft eigenständig
 - **Lizenz:** GNU GPL v3 oder später
 - **Autor:** Christopher Reimann · © 2026 eLeDia GmbH, Berlin
 
@@ -77,15 +91,17 @@ Danach kann der Block in Kursen oder auf dem Dashboard hinzugefügt werden.
 
 ## Zusatzplugins
 
-Für den vollständigen Betrieb werden üblicherweise diese Komponenten kombiniert:
+Für den vollständigen geerdeten Betrieb werden diese Komponenten kombiniert:
 
-- **eLeDia MCP** (`webservice_elediamcp`, optional) für Moodle-Werkzeuge und
-  nutzerbezogene MCP-Token.
-- **LiteRAG** als RAG-/Tutor-MCP-Backend.
-- **RAG-Ingest** zur Indexierung von Moodle-Kursinhalten.
+- **eLeDia MCP** (`webservice_elediamcp`) für den nutzerbezogenen MCP-Rückruf und
+  Moodle-Werkzeuge – im geerdeten Modus erforderlich.
+- **RAG-Ingest** (`local_ragingest`) zur Indexierung von Moodle-Kursinhalten in
+  die Wissensbasis – im geerdeten Modus erforderlich.
+- **LiteRAG** als RAG-/Tutor-MCP-Backend (alternativ ein externes Backend).
 
-Sind diese Zusatzplugins nicht installiert oder deaktiviert, zeigt das Dashboard
-entsprechende Hinweise an.
+Der reine LLM-Chat läuft ohne diese Zusatzplugins. Sind sie für einen geerdeten
+Betrieb nicht installiert oder deaktiviert, zeigt das Dashboard entsprechende
+Hinweise an.
 
 ## Tests
 

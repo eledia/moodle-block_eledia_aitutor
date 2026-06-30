@@ -69,6 +69,13 @@ class chat_service {
     ): array {
         global $CFG;
 
+        // A turn is "grounded" (retrieval + the Moodle MCP call-back) unless the
+        // caller explicitly disabled it. Only grounded turns mint/refresh the
+        // user-scoped MCP token; LLM-only turns ($ragenabled === false) never call
+        // back, so they need no token and no connector. Legacy callers that omit
+        // the flag (null) keep the historical grounded behaviour.
+        $grounded = ($ragenabled !== false);
+
         // First-use consent gate: no message ever leaves Moodle before the user
         // has acknowledged the privacy guidelines (documented acknowledgement).
         consent::require_consent($userid);
@@ -105,7 +112,7 @@ class chat_service {
         $userlang = current_language();
 
         try {
-            $token = self::moodle_token_for_user($userid);
+            $token = self::moodle_token_for_user($userid, $grounded);
             $result = $client->chat(
                 $systemurl,
                 $token,
@@ -121,12 +128,13 @@ class chat_service {
             );
         } catch (rag_exception $e) {
             // The cached token may have been revoked/expired server-side: drop it,
-            // mint a fresh one and retry exactly once before giving up.
-            if (security::mcp_enabled()) {
+            // mint a fresh one and retry exactly once before giving up. Only a
+            // grounded turn ever used a token, so only it needs to forget one.
+            if ($grounded) {
                 token_provider::forget_cached_token($userid);
             }
             try {
-                $token = self::moodle_token_for_user($userid);
+                $token = self::moodle_token_for_user($userid, $grounded);
                 $result = $client->chat(
                     $systemurl,
                     $token,
@@ -226,15 +234,22 @@ class chat_service {
     }
 
     /**
-     * Return the Moodle-MCP token for this user, or an empty string when MCP is
-     * deliberately disabled.
+     * Return the Moodle-MCP token for this user, or an empty string for an
+     * LLM-only turn.
+     *
+     * Only a grounded turn calls back into Moodle, so only it mints a user-scoped
+     * MCP token (which requires the webservice_elediamcp connector). An LLM-only
+     * turn never calls back, so it needs no token and the connector is not
+     * required — this is what lets the tutor answer in LLM-only mode without the
+     * MCP plugin installed.
      *
      * @param int $userid The user id.
-     * @return string
-     * @throws \moodle_exception When MCP is enabled but unavailable.
+     * @param bool $grounded Whether this turn uses retrieval + the Moodle call-back.
+     * @return string The token, or '' for an LLM-only turn.
+     * @throws \moodle_exception When grounded but the connector/service is unavailable.
      */
-    private static function moodle_token_for_user(int $userid): string {
-        if (!security::mcp_enabled()) {
+    private static function moodle_token_for_user(int $userid, bool $grounded): string {
+        if (!$grounded) {
             return '';
         }
         return token_provider::get_token($userid);

@@ -44,13 +44,36 @@ Feature: eLeDia.ai Tutor chat block UI
     And I should see "Hints only" in the ".eledia_aitutor-styles" "css_element"
     And I should see "Quiz me" in the ".eledia_aitutor-styles" "css_element"
 
-  Scenario: A misconfigured connector shows an admin-facing error to managers
+  Scenario: A missing RAG server URL shows an admin-facing error to managers
     Given the following config values are set as admin:
-      | mcpserviceid | 0 | block_eledia_aitutor |
+      | ragserverurl |  | block_eledia_aitutor |
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
     When I add the "eLeDia.ai Tutor" block
     Then I should see "configuration problem" in the ".eledia_aitutor-unavailable" "css_element"
+
+  Scenario: LLM-only chat renders the shell when there is no knowledge base
+    Given the following config values are set as admin:
+      | allowllmonly | 1 | block_eledia_aitutor |
+    And I log in as "teacher1"
+    And I am on "Course 1" course homepage with editing mode on
+    When I add the "eLeDia.ai Tutor" block
+    And I log out
+    And I log in as "student1"
+    And I am on "Course 1" course homepage
+    Then "form[data-region=composer]" "css_element" should exist
+    And ".eledia_aitutor-unavailable" "css_element" should not exist
+
+  Scenario: With LLM-only disallowed and no knowledge base the tutor is unavailable
+    Given the following config values are set as admin:
+      | allowllmonly | 0 | block_eledia_aitutor |
+    And I log in as "teacher1"
+    And I am on "Course 1" course homepage with editing mode on
+    When I add the "eLeDia.ai Tutor" block
+    And I log out
+    And I log in as "student1"
+    And I am on "Course 1" course homepage
+    Then I should see "no knowledge base" in the ".eledia_aitutor-unavailable" "css_element"
 
   @javascript
   Scenario: The chat can be opened as a modal and closed again

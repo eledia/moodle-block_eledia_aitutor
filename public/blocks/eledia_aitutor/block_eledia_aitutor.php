@@ -113,10 +113,19 @@ class block_eledia_aitutor extends block_base {
             return $this->content;
         }
 
+        // The block contributes its per-instance configuration as a registry-key =>
+        // value map (the stored config keys already match the registry keys). It is
+        // assembled up front because config_error() is mode-aware and needs the
+        // resolved course id and the instance ragmode to decide whether grounded
+        // mode (and therefore the MCP connector) is required.
+        $courseid = $this->resolve_course_id();
+        $instance = (array) ($this->config ?? new stdClass());
+        $instance['instanceid'] = (int) $this->instance->id;
+
         // Surface configuration problems to those who can fix them; everyone else
         // gets a friendly unavailable notice instead of a broken widget.
         $canmanage = has_capability('block/eledia_aitutor:manage', $context);
-        $configerror = widget::config_error();
+        $configerror = widget::config_error($courseid, $instance);
         if ($configerror !== null) {
             $this->content->text = $OUTPUT->render_from_template('block_eledia_aitutor/unavailable', [
                 'isadmin' => $canmanage,
@@ -130,14 +139,10 @@ class block_eledia_aitutor extends block_base {
             return $this->content;
         }
 
-        // The shared widget builder assembles the shell + AMD init; the block
-        // contributes its per-instance configuration as a registry-key => value
-        // map (the stored config keys already match the registry keys). The
-        // widget resolves every setting instance-over-site through the registry.
-        // The standalone page (view.php, App embedding) renders the same widget.
-        $instance = (array) ($this->config ?? new stdClass());
-        $instance['instanceid'] = (int) $this->instance->id;
-        $this->content->text = widget::render($context, $this->resolve_course_id(), $instance);
+        // The shared widget builder assembles the shell + AMD init; the widget
+        // resolves every setting instance-over-site through the registry. The
+        // standalone page (view.php, App embedding) renders the same widget.
+        $this->content->text = widget::render($context, $courseid, $instance);
 
         // Teachers reach the question-analytics report via the course
         // navigation; see block_eledia_aitutor_extend_navigation_course().

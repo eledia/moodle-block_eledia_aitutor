@@ -81,10 +81,12 @@ Für einen funktionsfähigen Tutor müssen mindestens diese Punkte stimmen:
 |---|---|
 | RAG-MCP-Server-URL | Endpunkt des Tutor-/RAG-Servers, zum Beispiel LiteRAG. |
 | Chat-Tool-Name | MCP-Tool, das Chatantworten liefert, meist `tutor_chat`. |
-| Externer MCP-Service | Service aus MCP, über den nutzerbezogene Moodle-Tokens erzeugt werden. |
+| Externer MCP-Service | Service aus MCP, über den nutzerbezogene Moodle-Tokens erzeugt werden. Nur für geerdete Antworten mit Wissensbasis erforderlich. |
 | Token-Lebensdauer | Gültigkeitsdauer der serverseitigen Moodle-MCP-Tokens. |
 | Datenschutztext | Hinweis, den Nutzer/innen vor dem ersten Chat bestätigen. |
 | Globaler Chat / Kurs-Chat | Legt fest, ob allgemeine und kursbezogene Gespräche erlaubt sind. |
+
+Der reine LLM-Modus (Antworten ohne Retrieval und ohne Rückruf in Moodle) benötigt keinen externen MCP-Connector; er kommt zum Einsatz, wenn ein Kurs keine Wissensbasis hat.
 
 Der Dashboard-Status sollte erst dann als bereit gelten, wenn die Verbindung zum LLM/RAG-Backend funktioniert und die erforderlichen Zusatzplugins verfügbar sind.
 

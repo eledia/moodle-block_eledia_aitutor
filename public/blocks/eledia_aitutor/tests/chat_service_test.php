@@ -155,6 +155,44 @@ final class chat_service_test extends \advanced_testcase {
     }
 
     /**
+     * An LLM-only turn needs no MCP connector or service: it mints no token (so it
+     * never calls token_provider, which would require webservice_elediamcp) and
+     * still answers. This is what lets the tutor run in LLM-only mode without the
+     * connector configured.
+     */
+    public function test_send_llmonly_needs_no_connector(): void {
+        $this->resetAfterTest();
+        // Deliberately configure NO MCP service (no token source). Only the RAG URL.
+        set_config('ragserverurl', 'https://rag.example.com/mcp', 'block_eledia_aitutor');
+        set_config('chattoolname', 'tutor_chat', 'block_eledia_aitutor');
+        $user = $this->create_consented_user();
+
+        $transport = fake_transport::json_result([
+            'structuredContent' => ['answer' => 'general knowledge answer'],
+        ]);
+        $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
+
+        // LLM-only ($ragenabled = false) must succeed even with no MCP service set.
+        $result = chat_service::send(
+            (int) $user->id,
+            'Explain recursion',
+            0,
+            null,
+            \core\context\system::instance(),
+            $client,
+            null,
+            null,
+            false
+        );
+
+        $this->assertFalse($result['iserror']);
+        $args = $transport->last_payload()['params']['arguments'];
+        // No user-scoped token was minted or sent (no connector/service needed).
+        $this->assertArrayNotHasKey('moodle_token', $args);
+        $this->assertFalse($args['rag_enabled']);
+    }
+
+    /**
      * The daily quota blocks the turn at the limit; only successful turns
      * consume quota.
      */

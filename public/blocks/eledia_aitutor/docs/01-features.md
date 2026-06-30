@@ -15,11 +15,21 @@ Kontextquelle.
 ## Kernkonzepte
 
 - **Tutor-Block:** Moodle UI, Consent, Limits und Chat-Frontend.
-- **Moodle MCP Connector:** Optional. `webservice_elediamcp` erstellt
-  nutzerbezogene Tokens fuer Moodle-MCP-Zugriffe, wenn MCP freigeschaltet ist.
+- **Moodle MCP Connector:** Fuer geerdete Antworten erforderlich.
+  `webservice_elediamcp` erstellt das nutzerbezogene Token, mit dem der
+  RAG/Tutor-Server in Moodle zurueckrufen kann. Im reinen LLM-Modus (kein
+  Retrieval, kein Rueckruf) wird kein Token gemuenzt und der Connector wird
+  nicht benoetigt.
 - **RAG/Tutor-MCP-Server:** Externer Dienst, der `tools/call` verarbeitet und
   Antworten erzeugt.
 - **Tutor Profile:** Konfigurierbare Persona, Branding- und UI-Vorgaben.
+
+> **Zwei-Schichten-Modell:** Der Block *provisioniert* den geerdeten Rueckruf
+> immer (im geerdeten Modus wird ein nutzerbezogenes Token gepraegt; es gibt
+> keinen Abschalter im Block). Ob der Rueckruf tatsaechlich *genutzt* wird,
+> entscheidet das Backend (z. B. `enable_mcp_tools` in `local_literag`). Beides
+> ist getrennt: "kein Abschalter" ist eine Aussage zur Provisionierung im Block,
+> kein Verbot, das Backend-seitige Tool-Nutzungsschalter umzulegen.
 
 ---
 
@@ -53,20 +63,24 @@ Tools zugreifen.
 **Akzeptanzkriterien**
 
 - feat02.AC01
-  Given: MCP ist freigeschaltet, `webservice_elediamcp` ist installiert und ein
-  MCP-externer Dienst ist ausgewaehlt
+  Given: Der Kurs wird im geerdeten Modus beantwortet, `webservice_elediamcp` ist
+  installiert und ein MCP-externer Dienst ist ausgewaehlt
   When: Eine Chat-Nachricht verarbeitet wird
   Then: Der Block provisioniert ein nutzerbezogenes MCP-Token fuer diesen Dienst
 
 - feat02.AC02
-  Given: MCP ist freigeschaltet, aber kein MCP-externer Dienst ist ausgewaehlt
+  Given: Der Kurs wird im geerdeten Modus beantwortet, aber kein MCP-externer
+  Dienst (bzw. der Connector) ist verfuegbar
   When: Die Chat-UI geladen wird
-  Then: Der Nutzer sieht eine klare Konfigurationsmeldung
+  Then: Manager sehen eine klare Konfigurationsmeldung; der Tutor degradiert
+  nicht stillschweigend
 
 - feat02.AC03
-  Given: MCP ist nicht freigeschaltet
+  Given: Der Kurs wird im reinen LLM-Modus beantwortet (kein Retrieval,
+  kein Rueckruf)
   When: Eine Chat-Nachricht verarbeitet wird
-  Then: Der Block ruft den Tutor ohne Moodle-MCP-Token auf
+  Then: Der Block ruft den Tutor ohne Moodle-MCP-Token auf; der Connector wird
+  dafuer nicht benoetigt
 
 ### feat03 Tutor configuration and profiles
 

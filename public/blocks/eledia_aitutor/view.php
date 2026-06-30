@@ -145,22 +145,10 @@ if ($courseid > 0 && !widget::course_has_tutor($courseid)) {
     die;
 }
 
-$configerror = widget::config_error();
-if ($configerror !== null) {
-    $canmanage = has_capability('block/eledia_aitutor:manage', $context);
-    echo $OUTPUT->render_from_template('block_eledia_aitutor/unavailable', [
-        'isadmin' => $canmanage,
-        'message' => $canmanage ? $configerror : get_string('unavailable_user', 'block_eledia_aitutor'),
-    ]);
-    if ($anyshell) {
-        shell::close();
-    }
-    echo $OUTPUT->footer();
-    die;
-}
-
 // Always the inline (embedded display mode) panel: on a dedicated page the
-// launcher/overlay modes make no sense.
+// launcher/overlay modes make no sense. Assembled before config_error() because
+// that check is mode-aware — it needs the resolved course id and the instance
+// ragmode to decide whether grounded mode (and the MCP connector) is required.
 $rendercontext = $context;
 $instancecfg = ['displaymode' => 'embedded'];
 if ($useinstanceshell) {
@@ -173,6 +161,20 @@ if ($useinstanceshell) {
     $instancecfg['instanceid'] = (int) $blockid;
     $instancecfg['displaymode'] = 'embedded';
     $rendercontext = \core\context\block::instance($blockid);
+}
+
+$configerror = widget::config_error($courseid, $instancecfg);
+if ($configerror !== null) {
+    $canmanage = has_capability('block/eledia_aitutor:manage', $context);
+    echo $OUTPUT->render_from_template('block_eledia_aitutor/unavailable', [
+        'isadmin' => $canmanage,
+        'message' => $canmanage ? $configerror : get_string('unavailable_user', 'block_eledia_aitutor'),
+    ]);
+    if ($anyshell) {
+        shell::close();
+    }
+    echo $OUTPUT->footer();
+    die;
 }
 echo html_writer::div(
     widget::render($rendercontext, $courseid, $instancecfg),

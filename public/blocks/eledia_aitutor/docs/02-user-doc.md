@@ -105,10 +105,18 @@ Blocks > eLeDia.ai Tutor** and in the tutor's plugin shell.
 
 ### Moodle MCP token
 
-When **Enable MCP** is turned on, the tutor uses `webservice_elediamcp` to
-generate user-scoped Moodle MCP tokens for the configured external service.
-Without MCP enabled, the tutor continues to work as an LLM/RAG chat, but cannot
-run Moodle-related AI tools, memory sync or remote deletion. Tokens are
+For grounded answers the MCP call-back is **always on** — there is no off
+switch. Whenever a course is answered in grounded mode, the block uses
+`webservice_elediamcp` to mint a user-scoped Moodle MCP token for the configured
+external service, so the RAG/Tutor backend can call back into Moodle as that
+learner to fetch their courses, run Moodle AI tools, sync memory or run remote
+deletion. Grounded answers therefore require both the connector and a selected
+external service.
+
+LLM-only mode is how the tutor answers **without** calling back: it performs no
+retrieval, mints no token and needs neither the connector nor a selected
+service. It is the separate answer mode used (per the `allowllmonly` admin gate
+and the per-instance ragmode) when a course has no knowledge base. Tokens are
 provisioned server-side, held briefly in the application cache and never sent to
 the browser.
 
@@ -156,7 +164,7 @@ capabilities, consent and limits apply just as they do on the web.
 
 | Symptom | Likely cause | Solution |
 |---|---|---|
-| Configuration problem in the block | RAG URL missing or MCP enabled but MCP service/connector missing | Check the settings; only enable MCP when the connector is installed and configured. |
+| Configuration problem in the block | RAG URL missing, or the course resolves to grounded mode but the connector / MCP external service is missing | Set the RAG URL; for grounded answers install `webservice_elediamcp` and select an MCP external service. (LLM-only courses need neither.) |
 | Tutor service unavailable | Transport error, wrong URL or server error | Test the URL from the Moodle server's perspective; check HTTP security/curl helper. |
 | Unexpected tutor response | RAG server does not return the expected MCP format | Check the server contract in `03-dev-doc.md`. |
 | Repeated auth errors | Moodle MCP token invalid or service disabled | Check the MCP service, capabilities and token lifetime. |

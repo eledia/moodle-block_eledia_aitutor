@@ -10,16 +10,25 @@ connector** only — it does not implement retrieval-augmented generation itself
 
 It pairs with [`webservice_elediamcp`](../../webservice/elediamcp), which turns
 Moodle into an MCP server and provides the internal PHP API used here to mint
-user-scoped MCP tokens. This is **required**: the tutor's design is that the
-RAG/Tutor server learns the learner's identity and courses by calling back into
-Moodle with that token, so Moodle MCP is mandatory (there is no off switch).
-When the connector is not installed or no external service is configured, the
-tutor shows administrators a configuration error instead of operating.
+user-scoped MCP tokens. The **full grounded tutor** requires `local_ragingest`
+(to build the per-course knowledge base) and `webservice_elediamcp` (for the
+MCP call-back): in grounded mode the block always mints a user-scoped token so
+the RAG/Tutor backend can call back into Moodle as the learner — there is **no
+off switch** for this. That "no off switch" refers to the block's grounded-mode
+*provisioning*, not to an install-time requirement and not to whether a backend
+*uses* the call-back (e.g. literag's `enable_mcp_tools`, decided backend-side).
+When a course resolves to grounded but the connector or external service is
+missing, the block shows managers a configuration error instead of silently
+degrading. **LLM-only chat runs standalone** — it mints no token, needs no
+connector and works without `webservice_elediamcp`. The block declares **no
+hard plugin dependencies** in `version.php`: it installs and upgrades
+independently, and missing companions degrade gracefully.
 
 - **Maturity:** Beta (`0.15.0`)
 - **Requires:** Moodle 4.2+ (tested against 5.1), PHP 8.1+
-- **Required runtime integration:** `webservice_elediamcp` for the user-scoped
-  Moodle MCP callback (mandatory)
+- **Required runtime integration (grounded answers):** `webservice_elediamcp`
+  for the user-scoped Moodle MCP call-back, plus `local_ragingest` for the
+  knowledge base; LLM-only chat runs standalone
 - **License:** GNU GPL v3 or later
 - **Author:** Christopher Reimann · © 2026 eLeDia GmbH, Berlin
 

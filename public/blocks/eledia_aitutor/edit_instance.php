@@ -33,6 +33,7 @@ use block_eledia_aitutor\local\chat_mode;
 use block_eledia_aitutor\local\formhelper;
 use block_eledia_aitutor\local\registry;
 use block_eledia_aitutor\local\security;
+use block_eledia_aitutor\local\token_provider;
 use block_eledia_aitutor\local\widget;
 use block_eledia_aitutor\output\shell;
 
@@ -107,7 +108,19 @@ class block_eledia_aitutor_instance_shell_form extends moodleform {
 
         $grounding = chat_mode::ingestion_available($this->effective_courseid());
         $llmallowed = chat_mode::is_llm_allowed();
-        if ($llmallowed && $grounding) {
+        // Grounded answers call back into Moodle, so they require the MCP connector:
+        // never offer the grounded option when webservice_elediamcp is absent.
+        $connector = token_provider::is_connector_available();
+        if ($grounding && !$connector) {
+            // The course is indexed (grounding is possible) but the connector is
+            // missing, so grounded mode cannot be offered — explain why instead.
+            $mform->addElement(
+                'static',
+                'ragmode_note',
+                get_string('config_ragmode', 'block_eledia_aitutor'),
+                get_string('error_connector_missing', 'block_eledia_aitutor')
+            );
+        } else if ($llmallowed && $grounding) {
             $mform->addElement(
                 'select',
                 'config_ragmode',
