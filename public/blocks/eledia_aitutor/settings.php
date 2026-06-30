@@ -43,7 +43,12 @@ if ($hassiteconfig) {
     require_once(__DIR__ . '/classes/output/shell.php');
 
     $currentsection = optional_param('section', '', PARAM_ALPHANUMEXT);
-    $decoratecoresettingspage = $PAGE->url->get_path() === '/' . $CFG->admin . '/settings.php';
+    // Guard the $PAGE->url read: while the admin tree is built during install/upgrade
+    // (admin_apply_default_settings) no URL is set yet, and reading it would emit a
+    // "did not call $PAGE->set_url()" debugging notice — which moodle-plugin-ci treats
+    // as a failure. has_set_url() is false there, so we simply skip the decoration.
+    $decoratecoresettingspage = $PAGE->has_set_url()
+        && $PAGE->url->get_path() === '/' . $CFG->admin . '/settings.php';
     if ($ADMIN->fulltree && $currentsection === 'blocksettingeledia_aitutor' && $decoratecoresettingspage) {
         global $OUTPUT, $PAGE;
         shell::require_css();
