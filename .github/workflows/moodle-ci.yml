@@ -50,9 +50,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.2', '8.3', '8.4']
+        php-version: ['8.3', '8.4']
         database: ['pgsql', 'mariadb']
-        moodle-branch: ['MOODLE_501_STABLE']
+        moodle-branch: ['MOODLE_502_STABLE']
 
     steps:
       - name: Checkout repository

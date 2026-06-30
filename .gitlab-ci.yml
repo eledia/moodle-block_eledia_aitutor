@@ -2,7 +2,7 @@
 # GitLab CI/CD pipeline for the block_eledia_aitutor Moodle plugin.
 #
 # Company repository: git@gitlab.eledia.de:eledia_plugins/block/moodle-block_eledia_aitutor.git
-# Target branch:      51  (Moodle 5.1)
+# Target branch:      52  (Moodle 5.2)
 #
 # Repository layout (the plugin is wrapped under public/ so the repo mirrors a
 # Moodle 5.x document root and can be overlaid onto a checkout directly):
@@ -47,8 +47,8 @@ variables:
   POSTGRES_VERSION: "16"
   SELENIUM_VERSION: "4"
 
-  # Moodle branch to test against. Company target is branch 51 = Moodle 5.1.
-  MOODLE_BRANCH: "MOODLE_501_STABLE"
+  # Moodle branch to test against. Company target is branch 52 = Moodle 5.2.
+  MOODLE_BRANCH: "MOODLE_502_STABLE"
 
   # Plugin identity. PLUGIN_PATH is the plugin location relative to the repository
   # root, including the leading public/ (the repo wraps the plugin as
