@@ -639,9 +639,10 @@ class TutorChat {
         if (!text) {
             return;
         }
-        const done = () => this.setStatus(strings.copied);
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(done).catch(() => done());
+            navigator.clipboard.writeText(text)
+                .then(() => this.setStatus(strings.copied))
+                .catch(() => this.setStatus(strings.copied));
         } else {
             const ta = document.createElement('textarea');
             ta.value = text;
@@ -652,7 +653,7 @@ class TutorChat {
             } finally {
                 ta.remove();
             }
-            done();
+            this.setStatus(strings.copied);
         }
     }
 
@@ -959,11 +960,12 @@ class TutorChat {
                 list.innerHTML = '';
                 return null;
             }
-            return Templates.render('block_eledia_aitutor/conversation_list', {conversations: conversations})
-                .then((html) => {
-                    list.innerHTML = html;
-                    return null;
-                });
+            return Templates.render('block_eledia_aitutor/conversation_list', {conversations: conversations});
+        }).then((html) => {
+            if (html) {
+                list.innerHTML = html;
+            }
+            return null;
         }).catch(Notification.exception);
     }
 

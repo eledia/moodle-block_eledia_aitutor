@@ -309,7 +309,7 @@ define([], function() {
         };
         bar.addEventListener('pointerdown', function(event) {
             if (event.target.closest('[data-action="eat-preview-toggle"]')) {
-                return;   // Let the minimise button work without starting a drag.
+                return; // Let the minimise button work without starting a drag.
             }
             const rect = panel.getBoundingClientRect();
             baseLeft = rect.left;
