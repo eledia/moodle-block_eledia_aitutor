@@ -56,7 +56,7 @@ class block_eledia_aitutor_instance_shell_form extends moodleform {
      * Constructor.
      *
      * @param moodle_url|string $action Form action.
-     * @param array<string, mixed> $customdata Custom form data.
+     * @param array<string,mixed> $customdata Custom form data.
      */
     public function __construct($action = null, $customdata = null) {
         $this->blockid = (int) ($customdata['blockid'] ?? 0);
@@ -173,7 +173,7 @@ class block_eledia_aitutor_instance_shell_form extends moodleform {
      *
      * @param MoodleQuickForm $mform Form object.
      * @param string $key Registry key.
-     * @param array<string, mixed> $entry Registry descriptor.
+     * @param array $entry Registry descriptor.
      * @return void
      */
     private function add_instance_field($mform, string $key, array $entry): void {
@@ -242,7 +242,7 @@ class block_eledia_aitutor_instance_shell_form extends moodleform {
      * Friendly field label.
      *
      * @param string $key Registry key.
-     * @param array<string, mixed> $entry Registry descriptor.
+     * @param array $entry Registry descriptor.
      * @return string
      */
     private function reglabel(string $key, array $entry): string {

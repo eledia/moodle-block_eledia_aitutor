@@ -48,7 +48,7 @@ final class plugin_page {
     /**
      * Open the shell wrapper and render the header.
      *
-     * @param array<string, mixed> $headerdata Template data.
+     * @param array $headerdata Template data.
      * @param string $modifier Width modifier.
      */
     public static function open(array $headerdata, string $modifier = self::MODIFIER_DEFAULT): void {

@@ -36,6 +36,8 @@
         "welcome": "<p>Hi! How can I help?</p>",
         "historyenabled": true,
         "launchlabel": "Open the eLeDia.ai Tutor",
+        "logourl": "https://example.com/pix/logo.svg",
+        "avatarurl": "https://example.com/pix/avatar.svg",
         "consented": true
     }
 }}
@@ -126,8 +128,7 @@
                     <div class="eledia_aitutor-history-empty" data-region="history-empty">
                         {{#str}}nohistory, block_eledia_aitutor{{/str}}
                     </div>
-                    <ul class="eledia_aitutor-history-list" data-region="history-list"
-                        aria-label="{{#str}}history, block_eledia_aitutor{{/str}}"></ul>
+                    <div class="eledia_aitutor-history-listwrap" data-region="history-list"></div>
                 </div>
             {{/historyenabled}}
 

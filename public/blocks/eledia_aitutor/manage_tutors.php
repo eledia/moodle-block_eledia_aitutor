@@ -59,7 +59,7 @@ shell::require_css();
  * Build the list of appliable/exportable sources: built-in presets then saved
  * profiles, as a select-friendly map of "type:id" => label.
  *
- * @return array<string, string>
+ * @return array<string,string>
  */
 function block_eledia_aitutor_source_menu(): array {
     $menu = [];
@@ -519,7 +519,7 @@ echo $OUTPUT->footer();
 /**
  * Resolve a colour from a settings map to a safe hex value, or a default.
  *
- * @param array<string, mixed> $settings Registry-key => value map.
+ * @param array $settings Registry-key => value map.
  * @param string $key Registry key of a colour token.
  * @param string $default Fallback hex.
  * @return string A safe `#rrggbb` value.
@@ -532,7 +532,7 @@ function block_eledia_aitutor_pcol(array $settings, string $key, string $default
 /**
  * A miniature chat mockup rendered from a tutor's own palette.
  *
- * @param array<string, mixed> $settings Registry-key => value map.
+ * @param array $settings Registry-key => value map.
  * @param string $name Header label (raw; escaped here).
  * @return string HTML.
  */
@@ -575,7 +575,7 @@ function block_eledia_aitutor_preview(array $settings, string $name): string {
  * @param string $name Display name (raw; escaped here).
  * @param string $typelabel Localised type label.
  * @param string $typeclass 'preset' or 'custom' (drives the badge colour).
- * @param array<string, mixed> $settings The tutor's settings (for the preview).
+ * @param array $settings The tutor's settings (for the preview).
  * @param bool $custom Whether it is an editable/deletable saved profile.
  * @param int $profileid Profile id (0 for presets).
  * @return string HTML.

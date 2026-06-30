@@ -301,7 +301,7 @@ class rag_client {
      * @param array $questions List of ['id' => int, 'text' => string] entries.
      * @param string $toolname Recluster tool name to invoke.
      * @param string|null $moodletoken Maintenance-account MCP token, if available.
-     * @return array<int, string> Map of question id => topic label.
+     * @return array<int,string> Map of question id => topic label.
      * @throws rag_exception On transport or protocol failure.
      */
     public function recluster_questions(
@@ -450,7 +450,7 @@ class rag_client {
     /**
      * Decode the response body, accepting either JSON or an SSE event stream.
      *
-     * @param array{status: int, headers: array, body: string, error: string} $response Transport response.
+     * @param array $response Transport response.
      * @return array Decoded JSON-RPC envelope.
      * @throws rag_exception When no decodable JSON-RPC message is present.
      */
@@ -619,7 +619,7 @@ class rag_client {
      * Normalise a heterogeneous sources array into {title, url, snippet} rows.
      *
      * @param array $raw Raw sources from the RAG server.
-     * @return array<int, array{title: string, url: string, snippet: string}>
+     * @return array<int,array{title: string,url: string,snippet: string}>
      */
     private function normalise_sources(array $raw): array {
         $sources = [];

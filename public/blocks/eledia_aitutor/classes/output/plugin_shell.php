@@ -39,7 +39,7 @@ final class plugin_shell {
      * @param string|null $helplabel Help label.
      * @param string|null $settingslabel Settings label.
      * @param bool $settingsiscurrent Mark settings as current.
-     * @return array<string, mixed>
+     * @return array<string,mixed>
      */
     public static function action_slots(
         string $component,

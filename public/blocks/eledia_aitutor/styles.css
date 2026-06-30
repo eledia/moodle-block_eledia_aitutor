@@ -42,7 +42,7 @@
     /* eLeDia brand orange — used sparingly (logo only). */
     --eat-brand: #ed7b2d;
     /* Neutral surfaces and hairlines. */
-    --eat-surface: #ffffff;
+    --eat-surface: #fff;
     --eat-body-bg: #f4f6f8;
     --eat-line: #e7ebef;
     /* Text. */
@@ -52,7 +52,7 @@
     /* Bubbles: warm peach for the learner, clean white card for the tutor. */
     --eat-user-bg: #fce9db;
     --eat-user-fg: #1e3f59;
-    --eat-bot-bg: #ffffff;
+    --eat-bot-bg: #fff;
     --eat-bot-fg: #1e3f59;
     /* Composer input text. */
     --eat-assistant-bg: #fff;
@@ -379,7 +379,7 @@
 }
 
 .eledia_aitutor-embedded .eledia_aitutor-window {
-    height: clamp(380px, 60vh, 620px);
+    height: clamp(380px, 60vh, 620px); /* stylelint-disable-line csstree/validator */
     box-shadow: none;
 }
 
@@ -793,8 +793,16 @@ a.eledia_aitutor-avatar:focus-visible {
 }
 
 @keyframes eledia_aitutor-bounce {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-    30% { transform: translateY(-4px); opacity: 0.9; }
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    30% {
+        transform: translateY(-4px);
+        opacity: 0.9;
+    }
 }
 
 /* --- Status live region. ----------------------------------------------- */
@@ -828,8 +836,8 @@ a.eledia_aitutor-avatar:focus-visible {
     border-radius: 12px;
     padding: 0.55rem 0.4rem;
     max-height: 160px;
-    line-height: 1.45;
     font: inherit;
+    line-height: 1.45;
     color: var(--eat-assistant-fg);
 }
 
@@ -916,7 +924,7 @@ a.eledia_aitutor-avatar:focus-visible {
 }
 
 .eledia_aitutor-page .eledia_aitutor-embedded .eledia_aitutor-window {
-    height: clamp(420px, 72vh, 860px);
+    height: clamp(420px, 72vh, 860px); /* stylelint-disable-line csstree/validator */
 }
 
 /* Inside the app/iframe (chrome-less embedded layout) fill the viewport. */
@@ -1168,7 +1176,7 @@ a.eledia_aitutor-avatar:focus-visible {
 }
 
 .eledia_aitutor-docked .eledia_aitutor-window {
-    height: min(70vh, 560px);
+    height: min(70vh, 560px); /* stylelint-disable-line csstree/validator */
 }
 
 /* --- Overlay: modal (centered + backdrop). ----------------------------- */
@@ -1183,8 +1191,8 @@ a.eledia_aitutor-avatar:focus-visible {
 }
 
 .eledia_aitutor-modal .eledia_aitutor-window {
-    width: min(640px, 100%);
-    height: min(80vh, 720px);
+    width: min(640px, 100%); /* stylelint-disable-line csstree/validator */
+    height: min(80vh, 720px); /* stylelint-disable-line csstree/validator */
     position: relative;
     z-index: 1;
 }
@@ -1214,8 +1222,8 @@ a.eledia_aitutor-avatar:focus-visible {
 .eledia_aitutor-fullscreen .eledia_aitutor-log,
 .eledia_aitutor-fullscreen .eledia_aitutor-composer,
 .eledia_aitutor-fullscreen .eledia_aitutor-status {
-    padding-left: max(1rem, calc(50% - 23rem));
-    padding-right: max(1rem, calc(50% - 23rem));
+    padding-left: max(1rem, calc(50% - 23rem)); /* stylelint-disable-line csstree/validator */
+    padding-right: max(1rem, calc(50% - 23rem)); /* stylelint-disable-line csstree/validator */
 }
 
 body.eledia_aitutor-noscroll {
@@ -1345,7 +1353,7 @@ body.eledia_aitutor-noscroll {
     --eat-a-line: var(--lh-border, #dbe7ee);
     --eat-a-line-light: var(--lh-border-light, #f0f0f0);
     --eat-a-muted: var(--lh-text-secondary, #5f6b77);
-    --eat-a-card: var(--lh-bg-white, #ffffff);
+    --eat-a-card: var(--lh-bg-white, #fff);
     --eat-a-surface: var(--lh-bg-soft, #f3f5f8);
     --eat-a-radius: var(--lh-radius-sm, 8px);
     --eat-a-shadow: var(--lh-shadow-card, 0 2px 8px rgba(15, 23, 42, 0.05));
@@ -1708,7 +1716,7 @@ body.eledia_aitutor-noscroll {
 .eat-instance-apply .lh-plugin-select-wrap {
     display: inline-flex;
     flex: 1 1 14rem;
-    min-width: min(18rem, 100%);
+    min-width: min(18rem, 100%); /* stylelint-disable-line csstree/validator */
     position: relative;
 }
 .eat-instance-apply .lh-plugin-select-wrap::after {
@@ -1725,7 +1733,7 @@ body.eledia_aitutor-noscroll {
 }
 .eat-instance-apply select {
     appearance: none;
-    background: var(--lh-bg-white, #ffffff);
+    background: var(--lh-bg-white, #fff);
     border: 1px solid var(--lh-border, #dbe7ee);
     border-radius: var(--lh-radius-sm, 8px);
     color: var(--lh-text, #1f2937);
@@ -1813,7 +1821,7 @@ body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-pending #a
 }
 #page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-ready #adminsettings {
     opacity: 1;
-    transition: opacity 0.08s ease;
+    transition: opacity 0.1s ease;
 }
 .eat-admin-settings-shell #adminsettings {
     max-width: none;
@@ -1831,7 +1839,7 @@ body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page
 body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page #block-region-side-pre,
 body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page .drawer-toggles .drawer-right-toggle,
 body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page #page .drawer-right-toggle {
-    display: none !important;
+    display: none !important; /* stylelint-disable-line declaration-no-important */
 }
 .eat-admin-settings-shell-page #region-main {
     background: transparent;
@@ -2004,7 +2012,7 @@ body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page
     padding: 0 0 0.45rem;
 }
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings h3.main[data-eat-major-heading="1"] {
-    display: none !important;
+    display: none !important; /* stylelint-disable-line declaration-no-important */
 }
 .eat-settings-group {
     background: #fff;
@@ -2138,12 +2146,12 @@ body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-expose-inline .form-setting {
     align-items: center;
     display: flex;
-    flex: 0 0 auto !important;
+    flex: 0 0 auto !important; /* stylelint-disable-line declaration-no-important */
     gap: 0.5rem;
-    max-width: none !important;
+    max-width: none !important; /* stylelint-disable-line declaration-no-important */
     padding: 0;
     white-space: nowrap;
-    width: auto !important;
+    width: auto !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-expose-inline input[type="checkbox"] {
     margin: 0;
@@ -2169,7 +2177,7 @@ body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page
     justify-self: stretch;
     max-width: none;
     padding-top: 0.2rem;
-    text-align: right !important;
+    text-align: right !important; /* stylelint-disable-line declaration-no-important */
     width: 100%;
 }
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-label label {
@@ -2190,16 +2198,16 @@ body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page
     min-width: 0;
 }
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-shortname {
-    color: var(--eat-settings-muted) !important;
+    color: var(--eat-settings-muted) !important; /* stylelint-disable-line declaration-no-important */
     display: block;
     font-size: 0.68rem;
     font-weight: 600;
     line-height: 1.35;
     margin-top: 0.3rem;
     max-width: none;
-    overflow-wrap: normal !important;
+    overflow-wrap: normal !important; /* stylelint-disable-line declaration-no-important */
     white-space: normal;
-    word-break: normal !important;
+    word-break: normal !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-control,
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .custom-select,
@@ -2219,7 +2227,7 @@ body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-defaultinfo {
     background: var(--eat-settings-primary-light);
     border-radius: 999px;
-    color: var(--eat-settings-muted) !important;
+    color: var(--eat-settings-muted) !important; /* stylelint-disable-line declaration-no-important */
     display: inline-block;
     font-size: 0.72rem;
     font-weight: 700;
@@ -2239,6 +2247,7 @@ body#page-admin-setting-blocksettingeledia_aitutor.eat-admin-settings-shell-page
     min-height: 1.1rem;
     min-width: 1.1rem;
 }
+
 @media (max-width: 700px) {
     #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item {
         display: block;
@@ -2265,7 +2274,7 @@ body:not(.theme-lernhive) {
     --lh-accent: #f98012;
     --lh-accent-dark: #c25b00;
     --lh-accent-light: #ffecdb;
-    --lh-bg-white: #ffffff;
+    --lh-bg-white: #fff;
     --lh-bg-soft: #f3f5f8;
     --lh-text: #1f2937;
     --lh-text-secondary: #5f6b77;
@@ -2305,7 +2314,7 @@ body:not(.theme-lernhive) .lh-plugin-shell--full {
 }
 
 .eat-admin-launcher-host[hidden] {
-    display: none !important;
+    display: none !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .eat-admin-launcher-host__link {
@@ -2586,6 +2595,7 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
     display: inline-flex;
     gap: 0.35rem;
 }
+
 @media (max-width: 720px) {
     body:not(.theme-lernhive) .lh-plugin-header__row {
         align-items: flex-start;
@@ -2606,7 +2616,7 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
 .path-block-eledia_aitutor .eat-setup-wizard {
-    background: var(--lh-bg-white, #ffffff);
+    background: var(--lh-bg-white, #fff);
     border: 1px solid var(--lh-border, #dbe7ee);
     border-radius: var(--lh-radius-sm, 8px);
     box-shadow: var(--lh-shadow-card, 0 2px 8px rgba(15, 23, 42, 0.05));
@@ -2819,7 +2829,7 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
     margin-top: 0.1rem;
 }
 .path-block-eledia_aitutor .lh-plugin-card {
-    background: var(--lh-bg-white, #ffffff);
+    background: var(--lh-bg-white, #fff);
     border: 1px solid var(--lh-border, #dbe7ee);
     border-radius: var(--lh-radius-sm, 8px);
     box-shadow: var(--lh-shadow-card, 0 2px 8px rgba(15, 23, 42, 0.05));
@@ -2919,7 +2929,7 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
 .path-block-eledia_aitutor .lh-btn,
 .path-block-eledia_aitutor .lh-btn--secondary {
     align-items: center;
-    background: #ffffff;
+    background: #fff;
     border: 1px solid var(--lh-border, #dbe7ee);
     border-radius: var(--lh-radius-btn, 8px);
     color: var(--lh-primary, #194866);
@@ -2981,7 +2991,7 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
     border-radius: 0;
     box-shadow: none;
     color: #555;
-    display: block !important;
+    display: block !important; /* stylelint-disable-line declaration-no-important */
     font-size: 0.875rem;
     line-height: 1.45;
     margin: 0;
@@ -2989,7 +2999,7 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
 }
 
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .formsettingheading[data-eat-info-hidden="1"] {
-    display: none !important;
+    display: none !important; /* stylelint-disable-line declaration-no-important */
 }
 
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .eat-settings-group {
@@ -3036,7 +3046,8 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
     row-gap: 0.55rem;
 }
 
-#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .eat-settings-expose-inline {
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings
+.form-item.eat-settings-item--has-expose > .eat-settings-expose-inline {
     align-items: center;
     background: transparent;
     border: 0;
@@ -3046,11 +3057,13 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
     padding: 0;
 }
 
-#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .form-label {
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings
+.form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .form-label {
     display: none;
 }
 
-#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .form-setting {
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings
+.form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .form-setting {
     align-items: center;
     display: inline-flex;
     gap: 0;
@@ -3059,17 +3072,19 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
     white-space: nowrap;
 }
 
-#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .eat-settings-expose-label {
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings
+.form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .eat-settings-expose-label {
     color: #222;
     font-size: 0.875rem;
     font-weight: 400;
     line-height: 1.2;
 }
 
-#page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .form-defaultinfo {
+#page-admin-setting-blocksettingeledia_aitutor #adminsettings
+.form-item.eat-settings-item--has-expose > .eat-settings-expose-inline .form-defaultinfo {
     background: transparent;
     border-radius: 0;
-    color: var(--lh-text-secondary, #5f6b77) !important;
+    color: var(--lh-text-secondary, #5f6b77) !important; /* stylelint-disable-line declaration-no-important */
     display: inline;
     font-size: 1rem;
     font-weight: 400;
@@ -3088,7 +3103,7 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
     justify-self: stretch;
     max-width: none;
     padding: 0;
-    text-align: right !important;
+    text-align: right !important; /* stylelint-disable-line declaration-no-important */
     width: auto;
 }
 
@@ -3104,14 +3119,14 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
 }
 
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-shortname {
-    color: #666 !important;
+    color: #666 !important; /* stylelint-disable-line declaration-no-important */
     display: block;
     font-size: 0.75rem;
     font-weight: 400;
     line-height: 1.35;
     margin-top: 0.15rem;
-    overflow-wrap: normal !important;
-    word-break: normal !important;
+    overflow-wrap: normal !important; /* stylelint-disable-line declaration-no-important */
+    word-break: normal !important; /* stylelint-disable-line declaration-no-important */
 }
 
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-setting {
@@ -3123,7 +3138,7 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
 #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-defaultinfo {
     background: transparent;
     border-radius: 0;
-    color: #666 !important;
+    color: #666 !important; /* stylelint-disable-line declaration-no-important */
     display: inline;
     font-size: 1rem;
     font-weight: 400;
@@ -3182,7 +3197,7 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
 
     #page-admin-setting-blocksettingeledia_aitutor #adminsettings .form-label {
         padding-bottom: 0.5rem;
-        text-align: left !important;
+        text-align: left !important; /* stylelint-disable-line declaration-no-important */
     }
 }
 
@@ -3524,12 +3539,13 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
 .eat-instance-shell .eat-preview-float .eledia_aitutor-embedded .eledia_aitutor-window {
     border: 0;
     border-radius: 0;
-    height: clamp(360px, 58vh, 560px);
+    height: clamp(360px, 58vh, 560px); /* stylelint-disable-line csstree/validator */
 }
 /* Never let the colour picker spill out of its row. */
 .eat-instance-shell .admin_colourpicker {
     max-width: 100%;
 }
+
 @media (max-width: 60rem) {
     .eat-instance-shell .eat-preview-float {
         width: calc(100vw - 2rem);

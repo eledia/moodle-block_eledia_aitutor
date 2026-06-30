@@ -45,7 +45,7 @@ class presets {
      * All presets: id => ['name' => lang key, 'tokens' => --eat-* map,
      * 'persona' => field => text].
      *
-     * @return array<string, array{name: string, tokens: array<string, string>, persona: array<string, string>}>
+     * @return array<string, array{name: string, tokens: array<string,string>, persona: array<string,string>}>
      */
     public static function all(): array {
         return [
@@ -156,7 +156,7 @@ class presets {
      * site config or a block instance.
      *
      * @param string $id Preset id.
-     * @return array<string, string> registry key => value (empty for unknown id).
+     * @return array<string,string> registry key => value (empty for unknown id).
      */
     public static function settings(string $id): array {
         $preset = self::all()[$id] ?? null;
@@ -196,7 +196,7 @@ class presets {
     /**
      * Preset id => translated name, for listings.
      *
-     * @return array<string, string>
+     * @return array<string,string>
      */
     public static function menu(): array {
         $menu = [];
@@ -210,8 +210,8 @@ class presets {
      * Complete light-palette baseline (dark text on light surfaces). Presets
      * merge their specifics on top; every required token has a sensible default.
      *
-     * @param array<string, string> $overrides Preset-specific tokens.
-     * @return array<string, string>
+     * @param array $overrides Preset-specific tokens.
+     * @return array<string,string>
      */
     private static function light(array $overrides): array {
         return array_merge([
@@ -243,8 +243,8 @@ class presets {
     /**
      * Complete dark-palette baseline (light text on dark surfaces).
      *
-     * @param array<string, string> $overrides Preset-specific tokens.
-     * @return array<string, string>
+     * @param array $overrides Preset-specific tokens.
+     * @return array<string,string>
      */
     private static function dark(array $overrides): array {
         return array_merge([

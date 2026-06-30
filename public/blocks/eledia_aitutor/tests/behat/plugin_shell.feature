@@ -24,17 +24,13 @@ Feature: eLeDia.ai Tutor plugin shell
     And "#block-region-side-pre" "css_element" should not exist
     And "#theme_boost-drawers-blocks" "css_element" should not exist
 
-  # Monorepo counterpart of the block-only "missing add-ons" scenario (see
-  # plugin_shell_blockonly.feature): when the integration plugins ARE installed
-  # the dashboard must NOT raise the missing-add-ons warning. Tagged _wp so the
-  # block-only GitLab CI (which mounts the block alone, add-ons absent) skips it;
-  # the in-tree run keeps it.
-  @eat_addons_present_wp
-  Scenario: No missing-add-on warning when the integration plugins are installed
+  # The plugin CI installs the block on its own (no sibling add-ons present), so
+  # the dashboard announces the missing integration plugins above the setup wizard.
+  Scenario: Missing add-on plugins are announced once above the setup wizard
     When I visit "/blocks/eledia_aitutor/configuration.php"
-    Then I should see "Setup wizard"
-    And I should not see "Add-on plugins missing"
-    And I should not see "Plugin missing"
+    Then I should see "Add-on plugins missing"
+    And I should see "Please install the missing add-on plugins eLeDia LiteRAG, eLeDia.ai RagIngest and eLeDia MCP."
+    And I should see "Plugin missing"
 
   Scenario: Operator settings open inside the plugin shell without Moodle block regions
     When I visit "/blocks/eledia_aitutor/operator_settings.php"

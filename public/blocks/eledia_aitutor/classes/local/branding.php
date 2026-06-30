@@ -76,9 +76,9 @@ class branding {
      * The effective branding kit, merging per-instance overrides over the site
      * defaults, driven entirely by the {@see registry}.
      *
-     * @param array<string, mixed> $instance Per-instance overrides keyed by
+     * @param array $instance Per-instance overrides keyed by
      *        registry key (e.g. 'brandaccent', 'launcherstyle', 'persona').
-     * @return array{tokens: array<string, string>, accent: string, bubble: string,
+     * @return array{tokens: array<string,string>, accent: string, bubble: string,
      *         botbubble: string, launchlabel: string, launcherstyle: string,
      *         footermode: string, footertext: string}
      */
@@ -132,8 +132,8 @@ class branding {
      * Returns only the populated sub-fields (name/role/tone/audience/instructions),
      * each resolved instance-over-site. Empty when nothing is configured.
      *
-     * @param array<string, mixed> $instance Per-instance overrides keyed by registry key.
-     * @return array<string, string>
+     * @param array $instance Per-instance overrides keyed by registry key.
+     * @return array<string,string>
      */
     public static function persona(array $instance = []): array {
         $out = [];
@@ -155,7 +155,7 @@ class branding {
      * precedence as the rest of the plugin.
      *
      * @param string $key Registry key.
-     * @param array<string, mixed> $instance Per-instance overrides keyed by registry key.
+     * @param array $instance Per-instance overrides keyed by registry key.
      * @return mixed
      */
     private static function effective_value(string $key, array $instance): mixed {
@@ -168,7 +168,7 @@ class branding {
      * Empty when nothing is branded, so the styles.css defaults stand. The caller
      * injects these as a scoped inline style on the widget root + panel + launcher.
      *
-     * @param array<string, mixed> $brand A kit from {@see resolve()}.
+     * @param array $brand A kit from {@see resolve()}.
      * @return string CSS declarations (may be empty).
      */
     public static function css_variables(array $brand): string {
@@ -268,7 +268,7 @@ class branding {
      * The configured footer mode, instance-over-site (when the admin has exposed
      * the footer for per-instance override).
      *
-     * @param array<string, mixed> $instance Per-instance overrides keyed by registry key.
+     * @param array $instance Per-instance overrides keyed by registry key.
      * @return string One of the FOOTER_* constants.
      */
     public static function footer_mode(array $instance = []): string {
@@ -281,7 +281,7 @@ class branding {
      * The effective footer text for the current mode ('' when hidden),
      * instance-over-site.
      *
-     * @param array<string, mixed> $instance Per-instance overrides keyed by registry key.
+     * @param array $instance Per-instance overrides keyed by registry key.
      * @return string
      */
     public static function footer_text(array $instance = []): string {

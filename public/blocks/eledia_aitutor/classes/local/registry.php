@@ -70,7 +70,7 @@ class registry {
     /**
      * The full registry, key => descriptor.
      *
-     * @return array<string, array<string, mixed>>
+     * @return array<string, array<string,mixed>>
      */
     public static function all(): array {
         static $cache = null;
@@ -248,8 +248,8 @@ class registry {
      *
      * @param string $group Group id.
      * @param string $type Field type.
-     * @param array<string, mixed> $overrides Any descriptor overrides.
-     * @return array<string, mixed>
+     * @param array $overrides Any descriptor overrides.
+     * @return array<string,mixed>
      */
     private static function entry(string $group, string $type, array $overrides = []): array {
         return $overrides + [
@@ -286,7 +286,7 @@ class registry {
      * Wash options include the light()/dark() preset values verbatim so applying
      * a preset never loses them.
      *
-     * @return array<string, array<string, string>>
+     * @return array<string, array<string,string>>
      */
     private static function token_choices(): array {
         return [
@@ -358,7 +358,7 @@ class registry {
      * The friendly named options for a key, or null when it has none.
      *
      * @param string $key Registry key.
-     * @return array<string, string>|null CSS value => option lang-key.
+     * @return array<string,string>|null CSS value => option lang-key.
      */
     public static function choices(string $key): ?array {
         $entry = self::get($key);
@@ -375,7 +375,7 @@ class registry {
      * @param string $key Registry key.
      * @param string $emptylabel Label for the empty value (e.g. "Use site default").
      * @param string|null $current The currently stored value, or null.
-     * @return array<string, string> value => translated label.
+     * @return array<string,string> value => translated label.
      */
     public static function choice_select_options(
         string $key,
@@ -399,7 +399,7 @@ class registry {
      * A descriptor by key, or null when unknown.
      *
      * @param string $key Registry key.
-     * @return array<string, mixed>|null
+     * @return array<string,mixed>|null
      */
     public static function get(string $key): ?array {
         return self::all()[$key] ?? null;
@@ -443,7 +443,7 @@ class registry {
     /**
      * All keys that map to a `--eat-*` design token.
      *
-     * @return array<string, string> registry key => token name.
+     * @return array<string,string> registry key => token name.
      */
     public static function token_keys(): array {
         $out = [];
@@ -536,7 +536,7 @@ class registry {
      * application, so instance-over-site precedence lives in exactly one place.
      *
      * @param string $key Registry key.
-     * @param array<string, mixed> $instance Per-instance values keyed by registry key.
+     * @param array $instance Per-instance values keyed by registry key.
      * @return mixed
      */
     public static function effective(string $key, array $instance = []): mixed {

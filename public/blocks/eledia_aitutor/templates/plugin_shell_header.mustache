@@ -2,6 +2,62 @@
     @template block_eledia_aitutor/plugin_shell_header
 
     Shared Plugin Shell header owned by the eLeDia.ai Tutor block.
+
+    Renders the page title, optional breadcrumb/home links, tag chips, call-to-action
+    buttons, header action icons (help, settings, create) and an optional info bar with
+    progress, stats or a hint line. All sections are optional and driven by the context.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * name - Plugin name shown in the header title.
+    * tagline - Short tagline shown after the name.
+    * subtitle - Optional subtitle line below the title.
+    * sectionnav - Optional pre-rendered section navigation HTML.
+    * backurl, backlabel - Optional back link URL and accessible label.
+    * homeurl, homelabel - Optional home link URL and accessible label.
+    * hastags, tags - Whether to show tag chips and the list of {modifier, faicon, label}.
+    * ctas - Optional call-to-action buttons: {modifier, url, fa, label}.
+    * createurl, createlabel - Optional create action URL and label.
+    * headeractionicons - Optional extra action icons: {modifierclass, url, label, faicon}.
+    * helpurl, helplabel - Optional help action URL and label.
+    * settingsurl, settingsiscurrent, settingslabel - Optional settings action.
+    * hasactionicons, actionicons - Optional secondary action icon bar.
+    * hasprogress, progress - Optional progress bars: {label, percent, count}.
+    * hasstats, stats - Optional stat chips: {faicon, value, label}.
+    * hint - Optional informational hint shown when there is no progress or stats.
+
+    Example context (json):
+    {
+        "name": "eLeDia.ai Tutor",
+        "tagline": "Dashboard",
+        "subtitle": "Manage your AI tutors",
+        "sectionnav": "",
+        "homeurl": "https://example.com/blocks/eledia_aitutor/configuration.php",
+        "homelabel": "Dashboard",
+        "hastags": true,
+        "tags": [
+            {"modifier": "info", "faicon": "fa-plug", "label": "MCP"}
+        ],
+        "ctas": [
+            {"modifier": "primary", "url": "https://example.com/create", "fa": "fa-plus", "label": "Create tutor"}
+        ],
+        "helpurl": "https://example.com/blocks/eledia_aitutor/help.php",
+        "helplabel": "Help",
+        "settingsurl": "https://example.com/blocks/eledia_aitutor/operator_settings.php",
+        "settingsiscurrent": false,
+        "settingslabel": "Settings",
+        "hasprogress": false,
+        "hasstats": true,
+        "stats": [
+            {"faicon": "fa-users", "value": "12", "label": "learners"}
+        ],
+        "hint": "All systems ready."
+    }
 }}
 <div class="lh-plugin-header{{#sectionnav}} lh-plugin-header--has-section-nav{{/sectionnav}}">
     <div class="lh-plugin-header__row">

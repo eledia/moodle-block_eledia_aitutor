@@ -34,4 +34,3 @@ Feature: Standalone tutor chat page
     And I log in as "student1"
     When I visit "/blocks/eledia_aitutor/view.php"
     Then "What's due this week?" "button" should exist
-

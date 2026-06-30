@@ -113,7 +113,7 @@ class question_log {
      * @param int $courseid The course id.
      * @param int $days Look-back window in days.
      * @param int $limit Max hotspots returned.
-     * @return array<int, stdClass> Sorted by count desc: {label, count, cmid}.
+     * @return array<int,stdClass> Sorted by count desc: {label, count, cmid}.
      */
     public static function hotspots(int $courseid, int $days = 30, int $limit = 10): array {
         global $DB;
@@ -170,7 +170,7 @@ class question_log {
      *
      * @param int $courseid The course id.
      * @param int $days Number of days to cover.
-     * @return array<string, int> Map of "YYYY-MM-DD" (user timezone) => count.
+     * @return array<string,int> Map of "YYYY-MM-DD" (user timezone) => count.
      */
     public static function per_day(int $courseid, int $days = 14): array {
         global $DB;
@@ -282,7 +282,7 @@ class question_log {
      * (and belong to the course) are updatable — a misbehaving server cannot
      * relabel arbitrary rows.
      *
-     * @param array<int, string> $map Question id => topic label.
+     * @param array $map Question id => topic label.
      * @param int $courseid The course the batch belongs to.
      * @param int[] $allowedids The ids that were sent in the batch.
      * @return int Number of rows updated.

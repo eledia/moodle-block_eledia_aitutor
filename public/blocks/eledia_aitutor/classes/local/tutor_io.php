@@ -48,7 +48,7 @@ class tutor_io {
      *
      * @param string $name Display name.
      * @param string $shortname Machine name.
-     * @param array<string, mixed> $settings Registry-key => value map.
+     * @param array $settings Registry-key => value map.
      * @param stored_file|null $logo Logo image, or null.
      * @param stored_file|null $avatar Avatar image, or null.
      * @return string Absolute path to the generated ZIP (in a temp dir).
@@ -104,7 +104,7 @@ class tutor_io {
      * Parse an uploaded bundle into a validated structure.
      *
      * @param string $zippath Absolute path to the uploaded ZIP.
-     * @return array{name: string, shortname: string, settings: array<string, mixed>,
+     * @return array{name: string, shortname: string, settings: array<string,mixed>,
      *         logo: array{filename: string, content: string}|null,
      *         avatar: array{filename: string, content: string}|null}
      * @throws moodle_exception When the bundle is malformed.

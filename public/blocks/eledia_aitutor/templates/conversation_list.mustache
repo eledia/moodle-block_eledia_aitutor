@@ -32,16 +32,18 @@
         ]
     }
 }}
-{{#conversations}}
-    <li class="eledia_aitutor-history-item" data-region="conversation"
-        data-id="{{id}}" data-conversationid="{{conversationid}}">
-        <button type="button" class="eledia_aitutor-history-open" data-action="open-conversation">
-            <span class="eledia_aitutor-history-title">{{#title}}{{title}}{{/title}}{{^title}}{{preview}}{{/title}}</span>
-            <span class="eledia_aitutor-history-preview">{{preview}}</span>
-        </button>
-        <button type="button" class="btn btn-icon btn-sm eledia_aitutor-iconbtn"
-                data-action="delete-conversation" aria-label="{{deletelabel}}" title="{{deletelabel}}">
-            <i class="fa fa-trash" aria-hidden="true"></i>
-        </button>
-    </li>
-{{/conversations}}
+<ul class="eledia_aitutor-history-list" aria-label="{{#str}}history, block_eledia_aitutor{{/str}}">
+    {{#conversations}}
+        <li class="eledia_aitutor-history-item" data-region="conversation"
+            data-id="{{id}}" data-conversationid="{{conversationid}}">
+            <button type="button" class="eledia_aitutor-history-open" data-action="open-conversation">
+                <span class="eledia_aitutor-history-title">{{#title}}{{title}}{{/title}}{{^title}}{{preview}}{{/title}}</span>
+                <span class="eledia_aitutor-history-preview">{{preview}}</span>
+            </button>
+            <button type="button" class="btn btn-icon btn-sm eledia_aitutor-iconbtn"
+                    data-action="delete-conversation" aria-label="{{deletelabel}}" title="{{deletelabel}}">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+            </button>
+        </li>
+    {{/conversations}}
+</ul>

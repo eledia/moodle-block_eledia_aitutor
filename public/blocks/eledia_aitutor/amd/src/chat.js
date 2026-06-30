@@ -1059,8 +1059,12 @@ class TutorChat {
             item.remove();
             const list = this.historyPanel.querySelector('[data-region="history-list"]');
             const empty = this.historyPanel.querySelector('[data-region="history-empty"]');
-            if (list && !list.children.length && empty) {
-                empty.hidden = false;
+            const remaining = list ? list.querySelectorAll('[data-region="conversation"]').length : 0;
+            if (list && !remaining) {
+                list.innerHTML = '';
+                if (empty) {
+                    empty.hidden = false;
+                }
             }
             return null;
         }).catch(Notification.exception);

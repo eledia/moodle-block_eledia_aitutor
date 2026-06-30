@@ -65,7 +65,7 @@ class tutor_profile {
      * Decode a profile's settings JSON into a sanitised registry-key => value map.
      *
      * @param \stdClass $profile A profile record.
-     * @return array<string, mixed>
+     * @return array<string,mixed>
      */
     public static function settings(\stdClass $profile): array {
         $decoded = json_decode((string) $profile->settings, true);
@@ -77,7 +77,7 @@ class tutor_profile {
      *
      * @param string $name Display name.
      * @param string $description Optional notes.
-     * @param array<string, mixed> $settings Registry-key => value map.
+     * @param array $settings Registry-key => value map.
      * @param string $shortname Desired machine name ('' ⇒ derived from the name).
      * @return int The new profile id.
      */
@@ -107,7 +107,7 @@ class tutor_profile {
      * @param int $id Profile id.
      * @param string $name Display name.
      * @param string $description Optional notes.
-     * @param array<string, mixed> $settings Registry-key => value map.
+     * @param array $settings Registry-key => value map.
      * @return void
      */
     public static function update(int $id, string $name, string $description, array $settings): void {
@@ -196,8 +196,8 @@ class tutor_profile {
      * Keep only known registry keys with sanitised values; drop file keys
      * (images are stored separately) and anything unknown or invalid.
      *
-     * @param array<string, mixed> $settings Raw settings map.
-     * @return array<string, mixed>
+     * @param array $settings Raw settings map.
+     * @return array<string,mixed>
      */
     public static function clean_settings(array $settings): array {
         $out = [];

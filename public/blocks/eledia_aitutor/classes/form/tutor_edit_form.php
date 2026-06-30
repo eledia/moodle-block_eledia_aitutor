@@ -128,7 +128,7 @@ class tutor_edit_form extends moodleform {
      * Add one registry setting as a `cfg_<key>` field. Empty means "not set".
      *
      * @param string $key Registry key.
-     * @param array<string, mixed> $entry Registry descriptor.
+     * @param array $entry Registry descriptor.
      * @return void
      */
     private function add_registry_field(string $key, array $entry): void {

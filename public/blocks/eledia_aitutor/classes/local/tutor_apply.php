@@ -42,7 +42,7 @@ class tutor_apply {
      * when absent, so the result is an exact snapshot), and the logo/avatar are
      * copied into the system-context brand file areas.
      *
-     * @param array<string, mixed> $settings Registry-key => value map.
+     * @param array $settings Registry-key => value map.
      * @param stored_file|null $logo Source logo file, or null.
      * @param stored_file|null $avatar Source avatar file, or null.
      * @return void
@@ -75,7 +75,7 @@ class tutor_apply {
      * are cleared (so the instance falls back to the site for them).
      *
      * @param int $blockinstanceid The block_instances.id.
-     * @param array<string, mixed> $settings Registry-key => value map.
+     * @param array $settings Registry-key => value map.
      * @param stored_file|null $logo Source logo file, or null.
      * @param stored_file|null $avatar Source avatar file, or null.
      * @return void
@@ -100,7 +100,7 @@ class tutor_apply {
     /**
      * Return all eLeDia.ai Tutor block instances for display in admin screens.
      *
-     * @return array<int, \stdClass> block_instances records keyed by id.
+     * @return array<int,\stdClass> block_instances records keyed by id.
      */
     public static function instance_records(): array {
         global $DB;
@@ -114,9 +114,7 @@ class tutor_apply {
      * and the admin instance import — no throwaway profile needed.
      *
      * @param int $blockinstanceid The block_instances.id.
-     * @param array{settings: array<string, mixed>,
-     *        logo: array{filename: string, content: string}|null,
-     *        avatar: array{filename: string, content: string}|null} $bundle A parsed bundle.
+     * @param array $bundle A parsed bundle (settings plus optional logo/avatar bytes).
      * @return void
      */
     public static function to_instance_from_bundle(int $blockinstanceid, array $bundle): void {
@@ -152,7 +150,7 @@ class tutor_apply {
      * instance falls back to the site value for them).
      *
      * @param int $blockinstanceid The block_instances.id.
-     * @param array<string, mixed> $settings Registry-key => value map.
+     * @param array $settings Registry-key => value map.
      * @return void
      */
     private static function apply_settings_to_instance(int $blockinstanceid, array $settings): void {
@@ -193,7 +191,7 @@ class tutor_apply {
      * preset), ready to hand to {@see to_site()} / {@see to_instance()}.
      *
      * @param string $source 'profile:<id>' or 'preset:<id>'.
-     * @return array{settings: array<string, mixed>, logo: stored_file|null, avatar: stored_file|null}|null
+     * @return array{settings: array<string,mixed>, logo: stored_file|null, avatar: stored_file|null}|null
      */
     public static function source(string $source): ?array {
         [$type, $id] = array_pad(explode(':', $source, 2), 2, '');
@@ -222,7 +220,7 @@ class tutor_apply {
      * for export. Only registry keys actually set on the instance are included.
      *
      * @param int $blockinstanceid The block_instances.id.
-     * @return array{settings: array<string, mixed>, logo: stored_file|null, avatar: stored_file|null}
+     * @return array{settings: array<string,mixed>, logo: stored_file|null, avatar: stored_file|null}
      */
     public static function instance_source(int $blockinstanceid): array {
         global $DB;

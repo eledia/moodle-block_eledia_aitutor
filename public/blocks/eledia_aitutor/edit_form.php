@@ -156,7 +156,7 @@ class block_eledia_aitutor_edit_form extends block_edit_form {
      *
      * @param MoodleQuickForm $mform The form.
      * @param string $key Registry key.
-     * @param array<string, mixed> $entry Registry descriptor.
+     * @param array $entry Registry descriptor.
      * @return void
      */
     private function add_instance_field($mform, string $key, array $entry): void {
@@ -227,7 +227,7 @@ class block_eledia_aitutor_edit_form extends block_edit_form {
      * Friendly label for a registry key, falling back to the raw token name.
      *
      * @param string $key Registry key.
-     * @param array<string, mixed> $entry Registry descriptor.
+     * @param array $entry Registry descriptor.
      * @return string
      */
     private function reglabel(string $key, array $entry): string {

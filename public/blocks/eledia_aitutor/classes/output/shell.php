@@ -85,8 +85,9 @@ final class shell {
      * generic admin settings remain an operator-facing target linked from the
      * page content, in line with ux-system.md §3.5.
      *
+     * @param string $active The active nav slot key (one of the ACTIVE_* constants).
      * @param bool $settingsiscurrent Whether the settings slot represents the current page.
-     * @return array<string, mixed>
+     * @return array<string,mixed>
      */
     public static function context(
         string $active = self::ACTIVE_CONFIGURATION,
@@ -304,7 +305,7 @@ final class shell {
     /**
      * Render a list of nav items as the shared section-nav markup.
      *
-     * @param array<int, array{key: string, icon: string, label: string, url: \moodle_url}> $items
+     * @param array $items Nav items, each with key/icon/label/url.
      * @param string $active Active item key.
      * @return string Raw nav HTML.
      */

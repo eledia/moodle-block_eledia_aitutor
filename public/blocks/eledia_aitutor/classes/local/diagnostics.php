@@ -87,7 +87,7 @@ class diagnostics {
      * Return latest diagnostic entries for the dashboard.
      *
      * @param int $limit Maximum entries.
-     * @return array<int, object>
+     * @return array<int,object>
      */
     public static function latest(int $limit = 5): array {
         global $DB;
