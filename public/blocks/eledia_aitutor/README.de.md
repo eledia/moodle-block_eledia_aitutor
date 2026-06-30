@@ -115,14 +115,30 @@ vendor/bin/phpcs --standard=moodle blocks/eledia_aitutor
 
 ## CI, Mirror und Release
 
-Das Entwicklungsrepo kann den Pluginordner unter `public/blocks/eledia_aitutor`
-führen. Für GitHub und die Moodle-Plugin-Datenbank wird der Pluginordner flach
-gespiegelt, sodass `README.md`, `version.php`, `db/`, `classes/` und
-`.github/workflows/` direkt im Repository-Root liegen.
+Das Entwicklungsrepo führt den Pluginordner unter `public/blocks/eledia_aitutor`,
+sodass das Repo ein Moodle-5.x-Dokumentenstammverzeichnis spiegelt. Die
+CI-Konfiguration liegt im Repository-Root (eine Ebene über `public/`):
 
-Die GitHub-Workflows auf Basis von
-[`moodle-an-hochschulen/moodle-workflows`](https://github.com/moodle-an-hochschulen/moodle-workflows)
-übernehmen Moodle Plugin CI und Release-Vorbereitung.
+```text
+<repo root>/
+├── .gitlab-ci.yml                  # GitLab-Pipeline (im Repo-Root)
+├── .github/
+│   └── workflows/moodle-ci.yml     # GitHub Moodle Plugin CI
+└── public/
+    └── blocks/
+        └── eledia_aitutor/         # das Plugin
+```
+
+- `.gitlab-ci.yml` führt PHPCS (Moodle), PHPStan, Semgrep, Trivy, PHPUnit
+  (Plugin-Coverage) und Behat gegen `MOODLE_501_STABLE` aus. Das Plugin wird in
+  ein geklontes Moodle eingehängt, wobei das führende `public/` aus `PLUGIN_PATH`
+  entfernt wird – so funktioniert die Pipeline auf 4.x/5.0 (ohne `public/`) und
+  5.1+ (mit `public/`).
+- `.github/workflows/moodle-ci.yml` führt Moodle Plugin CI (auf Basis von
+  `moodlehq/moodle-plugin-ci`) über PHP 8.2–8.4 gegen `MOODLE_501_STABLE` aus.
+- Für die Veröffentlichung wird der Pluginordner flach in einen GitHub-Mirror
+  gespiegelt, sodass `README.md`, `version.php`, `db/`, `classes/` und
+  `.github/workflows/` direkt im Repository-Root liegen.
 
 ## Gespeicherte Daten
 

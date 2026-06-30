@@ -91,7 +91,7 @@ Then add the **eLeDia.ai Tutor** block to a course or the Dashboard.
 ## Quick test commands
 
 Paths assume the Moodle 5.1 layout where the code lives under `public/`. Run from the
-Moodle root. The PHPUnit suite (112 tests) and Behat suite (14 scenarios) pass on
+Moodle root. The PHPUnit suite (115 tests) and Behat suite (22 scenarios) pass on
 Moodle 5.1 / PHP 8.3 / PHPUnit 11; test metadata uses PHP attributes (`#[CoversClass]`),
 the Moodle 5.1 convention.
 
@@ -118,26 +118,30 @@ vendor/bin/phpcs --standard=moodle public/blocks/eledia_aitutor
 ## Continuous integration & publishing
 
 This plugin is developed inside a full Moodle tree but published to its own
-GitLab repository, **wrapped under `public/`** so the repo mirrors a Moodle 5.x
-document root:
+company repository, **wrapped under `public/`** so the repo mirrors a Moodle 5.x
+document root. The CI configuration lives at the repository root (one level above
+`public/`), not inside the plugin folder:
 
 ```text
 <repo root>/
-├── .gitlab-ci.yml            # at the repo root (GitLab's default location)
+├── .gitlab-ci.yml                  # GitLab pipeline (at the repo root)
+├── .github/
+│   └── workflows/moodle-ci.yml     # GitHub Moodle Plugin CI mirror
 └── public/
     └── blocks/
-        └── eledia_aitutor/    # the plugin
+        └── eledia_aitutor/         # the plugin
 ```
 
-- [.gitlab-ci.yml](.gitlab-ci.yml) runs PHPCS (Moodle), PHPStan, Semgrep, Trivy,
-  PHPUnit (plugin-only coverage) and Behat against `MOODLE_501_STABLE`. It mounts
-  the plugin into a cloned Moodle by stripping the leading `public/` from
+- `.gitlab-ci.yml` runs PHPCS (Moodle), PHPStan, Semgrep, Trivy, PHPUnit
+  (plugin-only coverage) and Behat against `MOODLE_501_STABLE`. It mounts the
+  plugin into a cloned Moodle by stripping the leading `public/` from
   `PLUGIN_PATH` to get the frankenstyle path, so it works on 4.x/5.0 (no `public/`)
   and 5.1+ (`public/`) alike.
-- [publish.sh](publish.sh) assembles that wrapped snapshot and force-pushes it to
-  **branch `51`** of
-  `git@gitlab.eledia.de:eledia_plugins/block/moodle-block_eledia_aitutor.git`
-  (override with `ELEDIA_REMOTE` / `ELEDIA_BRANCH`). It prompts before pushing.
+- `.github/workflows/moodle-ci.yml` runs Moodle Plugin CI (PHPCS, PHPMD, PHPDoc,
+  Grunt, PHPUnit, Behat) across PHP 8.2–8.4 against `MOODLE_501_STABLE`.
+- For publishing, the plugin folder is flattened into a GitHub mirror so that
+  `README.md`, `version.php`, `db/`, `classes/` and `.github/workflows/` sit at
+  the repository root, matching the Moodle Plugins Directory layout.
 
 ## What it stores
 
