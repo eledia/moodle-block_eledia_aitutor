@@ -91,7 +91,7 @@ Feature: Privacy guidelines, long-term memory opt-in and data deletion
     And I log in as "student1"
     And I am on "Course 1" course homepage
     When I click on "[data-action=privacy]" "css_element"
-    Then I should see "Institution privacy statement ABC."
+    Then I should see "Institution privacy statement ABC." in the ".eledia_aitutor-privacy-custom" "css_element"
     And I should not see "What is sent when you chat"
     And I should see "Long-term memory"
     And I should see "Delete all my tutor data"
