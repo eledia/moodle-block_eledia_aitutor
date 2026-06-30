@@ -222,6 +222,7 @@ class TutorChat {
         if (launch) {
             if (this.config.launchfab && launch.parentNode !== document.body) {
                 document.body.appendChild(launch);
+                this.hideFabBlockShell();
             }
             // Keep a handle: once portalled to <body> the button leaves the root,
             // so this.root.querySelector can no longer find it (open/close need it
@@ -271,6 +272,22 @@ class TutorChat {
                 this.trapFocus(e);
             }
         });
+    }
+
+    /**
+     * Hide the empty Moodle block shell when the launcher is a floating button.
+     *
+     * @return {void}
+     */
+    hideFabBlockShell() {
+        if (this.config.editing) {
+            return;
+        }
+        const shell = this.root.closest('.block_eledia_aitutor, [data-block="eledia_aitutor"]');
+        if (shell) {
+            shell.classList.add('eledia_aitutor-fab-shell-hidden');
+            shell.setAttribute('aria-hidden', 'true');
+        }
     }
 
     /**

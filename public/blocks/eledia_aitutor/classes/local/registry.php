@@ -206,6 +206,7 @@ class registry {
                 'pill' => 'launcherstyle_pill',
                 'solid' => 'launcherstyle_solid',
                 'fab' => 'launcherstyle_fab',
+                'compact' => 'launcherstyle_compact',
             ],
             'exposedefault' => true,
         ]);

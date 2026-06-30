@@ -58,7 +58,16 @@
             <span class="eledia_aitutor-launch-icon" aria-hidden="true">
                 <img class="eledia_aitutor-launch-img" src="{{logourl}}" alt="" width="20" height="20">
             </span>
-            {{^launchfab}}<span class="eledia_aitutor-launch-text">{{launchlabel}}</span>{{/launchfab}}
+            {{#launchcompact}}
+                <span class="eledia_aitutor-launch-copy">
+                    <span class="eledia_aitutor-launch-kicker">{{persona}}</span>
+                    <span class="eledia_aitutor-launch-text">{{launchlabel}}</span>
+                </span>
+                <span class="eledia_aitutor-launch-arrow" aria-hidden="true">
+                    <i class="fa fa-commenting-o"></i>
+                </span>
+            {{/launchcompact}}
+            {{^launchfab}}{{^launchcompact}}<span class="eledia_aitutor-launch-text">{{launchlabel}}</span>{{/launchcompact}}{{/launchfab}}
         </button>
     {{/embedded}}
 

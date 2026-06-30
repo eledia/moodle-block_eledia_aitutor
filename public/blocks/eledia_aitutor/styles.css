@@ -252,6 +252,80 @@
     color: var(--eat-accent-contrast);
 }
 
+.eledia_aitutor-root .eledia_aitutor-launch--compact {
+    width: 100%;
+    min-height: 4.25rem;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 8px;
+    box-shadow: none;
+    background: transparent;
+    border-color: transparent;
+    color: var(--eat-ink);
+}
+
+.eledia_aitutor-root .eledia_aitutor-launch--compact:hover,
+.eledia_aitutor-root .eledia_aitutor-launch--compact:focus,
+.eledia_aitutor-root .eledia_aitutor-launch--compact:focus-visible,
+.eledia_aitutor-root .eledia_aitutor-launch--compact:active {
+    background: var(--eat-tint);
+    border-color: var(--eat-line);
+    color: var(--eat-ink);
+    box-shadow: none;
+    transform: none;
+}
+
+.eledia_aitutor-launch--compact .eledia_aitutor-launch-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 4px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid var(--eat-line);
+    box-shadow: var(--eat-shadow-sm);
+}
+
+.eledia_aitutor-launch-copy {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    text-align: left;
+    line-height: 1.2;
+}
+
+.eledia_aitutor-launch-kicker {
+    color: var(--eat-ink);
+    font-weight: 700;
+    font-size: 0.95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.eledia_aitutor-launch--compact .eledia_aitutor-launch-text {
+    color: var(--eat-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.eledia_aitutor-launch-arrow {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    color: var(--eat-accent);
+    background: var(--eat-overlay);
+}
+
+.eledia_aitutor-fab-shell-hidden {
+    display: none !important;
+}
+
 /* Floating launcher (FAB): a themed, accent-filled circular button fixed in the
    bottom-right corner, offset above the host theme's own corner controls via the
    --eat-fab-* tokens (default tuned for Boost's "?" help button). The launch

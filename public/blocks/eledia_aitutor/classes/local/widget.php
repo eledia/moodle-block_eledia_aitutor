@@ -253,6 +253,7 @@ class widget {
             'launchlabel' => $brand['launchlabel'],
             'launcherstyle' => $brand['launcherstyle'],
             'launchfab' => $brand['launcherstyle'] === 'fab',
+            'launchcompact' => $brand['launcherstyle'] === 'compact',
             'stylechoice' => $allowstylechange,
             'styles' => $styles,
             'stylelocked' => !$allowstylechange && $answerstyle !== 'explain',
@@ -295,6 +296,7 @@ class widget {
             // Floating launcher is portalled to <body> by the JS so the block
             // drawer can't hide it.
             'launchfab' => $brand['launcherstyle'] === 'fab',
+            'editing' => $PAGE->user_is_editing(),
             // Brand variables so JS-created modals (portalled to <body>) can be
             // themed too — see TutorChat.applyBrand().
             'brandvars' => $brandstyle,

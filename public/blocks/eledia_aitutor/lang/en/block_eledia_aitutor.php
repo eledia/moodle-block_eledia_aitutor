@@ -262,6 +262,7 @@ $string['instancetutor_link'] = 'Import / export this tutor…';
 $string['instancetutor_title'] = 'Tutor design — import / export';
 $string['launch'] = 'Open the eLeDia.ai Tutor';
 $string['launcherstyle_fab'] = 'Floating button (bottom corner)';
+$string['launcherstyle_compact'] = 'Compact row';
 $string['launcherstyle_pill'] = 'Pill (outline)';
 $string['launcherstyle_solid'] = 'Solid (accent-filled)';
 $string['llmonly_banner'] = 'General knowledge mode — answers are not based on your course materials.';

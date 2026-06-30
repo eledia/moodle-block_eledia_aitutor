@@ -262,6 +262,7 @@ $string['instancetutor_link'] = 'Diesen Tutor importieren / exportieren …';
 $string['instancetutor_title'] = 'Tutor-Design – Import / Export';
 $string['launch'] = 'eLeDia.ai Tutor öffnen';
 $string['launcherstyle_fab'] = 'Schwebende Schaltfläche (untere Ecke)';
+$string['launcherstyle_compact'] = 'Kompakte Zeile';
 $string['launcherstyle_pill'] = 'Pille (Umriss)';
 $string['launcherstyle_solid'] = 'Gefüllt (Akzentfarbe)';
 $string['llmonly_banner'] = 'Allgemeinwissen-Modus — Antworten basieren nicht auf Ihren Kursmaterialien.';
