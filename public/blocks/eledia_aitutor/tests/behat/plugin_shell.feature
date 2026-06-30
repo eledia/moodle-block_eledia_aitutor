@@ -46,7 +46,7 @@ Feature: eLeDia.ai Tutor plugin shell
     When I visit "/blocks/eledia_aitutor/help.php"
     Then I should see "eLeDia.ai Tutor"
     And I should see "Help"
-    And I should see "Benutzer- und Administrationsdokumentation"
+    And I should see "User and administration documentation"
     And "#block-region-side-pre" "css_element" should not exist
     And "#theme_boost-drawers-blocks" "css_element" should not exist
 

@@ -1,177 +1,173 @@
-# Benutzer- und Administrationsdokumentation
+# User and administration documentation
 
-Dieses Dokument konsolidiert die frueher getrennten Nutzer-, Lehrenden-, Admin-,
-Troubleshooting- und Loesungsueberblick-Dokumente fuer den eLeDia.ai Tutor.
-
----
-
-## Zielgruppen
-
-- **Lernende** nutzen den Tutor als KI-gestuetzten Chat in Moodle.
-- **Lehrende** platzieren und konfigurieren Tutor-Blockinstanzen in Kursen.
-- **Administrator/innen** richten RAG/MCP, Limits, Datenschutz und Tutor-Designs
-  websiteweit ein.
+This document consolidates the formerly separate user, teacher, admin,
+troubleshooting and solution-overview documents for the eLeDia.ai Tutor.
 
 ---
 
-## Produktueberblick
+## Audiences
 
-Der eLeDia.ai Tutor ist ein Moodle-Block fuer einen eingebetteten KI-Chat. Die
-Antwortgenerierung erfolgt nicht im Browser und nicht direkt im Block, sondern
-serverseitig ueber einen konfigurierten RAG-/Tutor-MCP-Endpunkt. Moodle bleibt
-die Vertrauens- und Kontextquelle: Der Tutor arbeitet mit den Rechten der
-angemeldeten Person und kann nur Inhalte nutzen, die diese Person auch in Moodle
-sehen darf.
-
-Der Tutor kann je nach Konfiguration als Kursblock, angedocktes Panel, Dialog
-oder Vollbildansicht erscheinen. Tutor-Designs, Persona, Begruessung,
-Vorschlagsfragen und Antwortstil koennen websiteweit und, falls freigegeben,
-pro Blockinstanz angepasst werden.
+- **Learners** use the tutor as an AI-assisted chat in Moodle.
+- **Teachers** place and configure tutor block instances in courses.
+- **Administrators** set up RAG/MCP, limits, data protection and tutor designs
+  site-wide.
 
 ---
 
-## Lernende: Tutor nutzen
+## Product overview
 
-1. Moodle oeffnen und anmelden.
-2. Kurs, Dashboard oder Tutor-Seite mit eLeDia.ai Tutor oeffnen.
-3. Datenschutzhinweise bestaetigen, falls sie noch nicht bestaetigt wurden.
-4. Frage in das Chatfeld schreiben.
-5. Antwort lesen und bei Bedarf Folgefrage stellen.
+The eLeDia.ai Tutor is a Moodle block for an embedded AI chat. Responses are
+not generated in the browser or directly in the block, but server-side via a
+configured RAG/Tutor MCP endpoint. Moodle remains the source of trust and
+context: the tutor operates with the permissions of the logged-in person and
+can only use content that this person is also allowed to see in Moodle.
 
-Wichtige Bedienhinweise:
-
-- **Enter** sendet eine Nachricht, **Shift+Enter** fuegt einen Zeilenumbruch ein.
-- Vorgeschlagene Einstiegsfragen erscheinen als Chips, wenn sie konfiguriert
-  sind.
-- Antwortstile koennen zwischen **Erklaeren**, **Nur Hinweise** und
-  **Quiz mich** wechseln, sofern die Website oder der Block dies erlaubt.
-- Antworten koennen kopiert werden.
-- Fehlgeschlagene Antworten lassen sich erneut versuchen.
-- **Neue Unterhaltung** startet einen frischen Verlauf.
-- Wenn Verlauf aktiviert ist, oeffnet das Verlaufssymbol gespeicherte
-  Unterhaltungen.
-- Im Datenschutzdialog koennen Nutzende ihre eigenen Tutor-Daten loeschen.
-
-### Kurskontext
-
-In einem Kurs beantwortet der Tutor kursbezogene Fragen, zum Beispiel zu
-Aufgaben, Materialien oder naechsten Schritten. Ausserhalb eines Kurses kann er
-allgemeiner helfen, etwa zu Moodle-Navigation oder sichtbaren Kursen. Kurschat
-funktioniert nur dort, wo der Tutor fuer den Kurs aktiviert ist und Kurskontext
-uebergeben wird.
+Depending on the configuration, the tutor can appear as a course block, a docked
+panel, a dialog or a fullscreen view. Tutor designs, persona, greeting,
+suggested questions and answer style can be customized site-wide and, if
+permitted, per block instance.
 
 ---
 
-## Lehrende: Tutor im Kurs bereitstellen
+## Learners: using the tutor
 
-1. Bearbeiten im Kurs einschalten.
-2. Block **eLeDia.ai Tutor** hinzufuegen.
-3. Block ueber das Kontextmenue konfigurieren.
-4. Optional ein Tutor-Design anwenden, importieren oder exportieren.
-5. Kurs als Nutzer/in mit `block/eledia_aitutor:use` pruefen.
+1. Open Moodle and sign in.
+2. Open a course, the dashboard or a tutor page with the eLeDia.ai Tutor.
+3. Accept the data protection notice if you have not already done so.
+4. Type a question into the chat field.
+5. Read the answer and ask a follow-up question if needed.
 
-Wichtige Blockinstanz-Einstellungen:
+Key usage notes:
 
-| Einstellung | Wirkung |
+- **Enter** sends a message, **Shift+Enter** inserts a line break.
+- Suggested starter questions appear as chips when they are configured.
+- Answer styles can switch between **Explain**, **Hints only** and
+  **Quiz me**, provided the site or the block allows it.
+- Answers can be copied.
+- Failed answers can be retried.
+- **New conversation** starts a fresh history.
+- When history is enabled, the history icon opens saved conversations.
+- In the data protection dialog, users can delete their own tutor data.
+
+### Course context
+
+Within a course, the tutor answers course-related questions, for example about
+activities, materials or next steps. Outside a course it can help more
+generally, for instance with Moodle navigation or visible courses. Course chat
+only works where the tutor is enabled for the course and course context is
+passed in.
+
+---
+
+## Teachers: providing the tutor in a course
+
+1. Turn on editing in the course.
+2. Add the **eLeDia.ai Tutor** block.
+3. Configure the block via the context menu.
+4. Optionally apply, import or export a tutor design.
+5. Check the course as a user with `block/eledia_aitutor:use`.
+
+Key block instance settings:
+
+| Setting | Effect |
 |---|---|
-| Blocktitel | Ueberschrift des Blocks. |
-| Darstellungsmodus | Angedocktes Panel, eingebettet, Dialog oder Vollbild. |
-| Kurskontext uebergeben | Sendet die aktuelle Kurs-ID an den Tutor. |
-| Feste Kurs-ID | Erzwingt einen bestimmten Kurskontext, z. B. auf dem Dashboard. |
-| Taegliches Nachrichtenlimit | Optionales Limit fuer diese Instanz. |
-| Begruessung und Vorschlagsfragen | Einstiegstext und klickbare Startfragen. |
-| Persona | Name, Rolle, Tonfall, Zielgruppe und freie Instruktionen. |
-| Design | Farben, Flaechen, Typografie, Nachrichtenblasen, Launcher, Logo und Avatar. |
-| Verlauf | Zeigt gespeicherte Unterhaltungen, wenn global erlaubt. |
+| Block title | Heading of the block. |
+| Display mode | Docked panel, embedded, dialog or fullscreen. |
+| Pass course context | Sends the current course ID to the tutor. |
+| Fixed course ID | Forces a specific course context, e.g. on the dashboard. |
+| Daily message limit | Optional limit for this instance. |
+| Greeting and suggested questions | Starter text and clickable starter questions. |
+| Persona | Name, role, tone, audience and free-form instructions. |
+| Design | Colors, surfaces, typography, message bubbles, launcher, logo and avatar. |
+| History | Shows saved conversations when allowed globally. |
 
-Welche Design- und Persona-Felder sichtbar sind, haengt von der
-Governance-Einstellung der Website ab. Gesperrte Werte folgen immer dem
-Website-Default.
+Which design and persona fields are visible depends on the site's governance
+setting. Locked values always follow the site default.
 
 ---
 
-## Administrator/innen: zentrale Einrichtung
+## Administrators: central setup
 
-Die zentrale Konfiguration liegt unter **Website-Administration > Plugins >
-Bloecke > eLeDia.ai Tutor** und in der Plugin-Shell des Tutors.
+The central configuration is located under **Site administration > Plugins >
+Blocks > eLeDia.ai Tutor** and in the tutor's plugin shell.
 
-### RAG-/Tutor-MCP-Server
+### RAG/Tutor MCP server
 
-| Einstellung | Hinweis |
+| Setting | Note |
 |---|---|
-| RAG MCP server URL | Streamable-HTTP-MCP-Endpunkt, z. B. `https://rag.example.com/mcp`. |
-| RAG authorization method/token | Optionaler Bearer-Token oder Custom Header; bleibt serverseitig. |
-| Chat tool name | MCP-Tool fuer Chatantworten, Standard `tutor_chat`. |
-| History/Delete tools | Optionale Tools fuer Verlauf und Loeschung. |
-| Memory opt-in tool | Optionales Tool fuer Langzeitgedaechtnis und Opt-in-Sync. |
-| Allow insecure transport/private host | Nur fuer lokale Entwicklung oder bewusst interne Dienste. |
-| Request timeout/Streaming | Transportverhalten fuer Antworten. |
+| RAG MCP server URL | Streamable HTTP MCP endpoint, e.g. `https://rag.example.com/mcp`. |
+| RAG authorization method/token | Optional bearer token or custom header; stays server-side. |
+| Chat tool name | MCP tool for chat responses, default `tutor_chat`. |
+| History/Delete tools | Optional tools for history and deletion. |
+| Memory opt-in tool | Optional tool for long-term memory and opt-in sync. |
+| Allow insecure transport/private host | For local development or deliberately internal services only. |
+| Request timeout/Streaming | Transport behavior for responses. |
 
-### Moodle-MCP-Token
+### Moodle MCP token
 
-Wenn **MCP freischalten** aktiviert ist, nutzt der Tutor `webservice_elediamcp`,
-um nutzerbezogene Moodle-MCP-Tokens fuer den konfigurierten externen Dienst zu
-erzeugen. Ohne aktiviertes MCP funktioniert der Tutor als LLM-/RAG-Chat weiter,
-kann aber keine Moodle-bezogenen AI-Werkzeuge, Memory-Sync oder Fernloeschung
-ausfuehren. Tokens werden serverseitig provisioniert, kurzzeitig im
-Applikationscache gehalten und nie an den Browser gesendet.
+When **Enable MCP** is turned on, the tutor uses `webservice_elediamcp` to
+generate user-scoped Moodle MCP tokens for the configured external service.
+Without MCP enabled, the tutor continues to work as an LLM/RAG chat, but cannot
+run Moodle-related AI tools, memory sync or remote deletion. Tokens are
+provisioned server-side, held briefly in the application cache and never sent to
+the browser.
 
-### Verhalten und Limits
+### Behavior and limits
 
-Zentrale Optionen umfassen globalen Chat, Kurschat, maximale Nachrichtenlaenge,
-Rate Limit, taegliches Nachrichtenlimit, Datenschutztexte, Frageanalyse,
-Logging-Detailgrad und Re-Clustering fuer Analyse-Hotspots.
+Central options include global chat, course chat, maximum message length,
+rate limit, daily message limit, data protection texts, question analysis,
+logging verbosity and re-clustering for analysis hotspots.
 
-Jede Person muss die Datenschutzhinweise vor dem ersten Chat bestaetigen. Details
-stehen in `privacy.md`.
+Each person must accept the data protection notice before their first chat.
+Details are in `privacy.md`.
 
-### Tutor-Designs und Profile
+### Tutor designs and profiles
 
-Administrator/innen verwalten Tutor-Designs unter **Tutoren** in der Plugin-Shell.
-Dort koennen Presets und eigene Tutor-Profile auf die Website oder einzelne
-Blockinstanzen angewendet, dupliziert, importiert und exportiert werden.
+Administrators manage tutor designs under **Tutors** in the plugin shell. There
+you can apply, duplicate, import and export presets and your own tutor profiles
+to the site or to individual block instances.
 
-Die Einstellungen umfassen unter anderem:
+The settings include, among others:
 
-- Farben, Flaechen, Linien, Typografie und Schatten.
-- Nachrichtenblasen und Statuszustaende.
-- Start-Schaltflaeche, Fusszeile, Logo und Avatar.
-- Persona, System-Prompt, Begruessung und Vorschlagsfragen.
-- Governance, welche Werte pro Blockinstanz ueberschrieben werden duerfen.
+- Colors, surfaces, lines, typography and shadows.
+- Message bubbles and status states.
+- Launcher button, footer, logo and avatar.
+- Persona, system prompt, greeting and suggested questions.
+- Governance over which values may be overridden per block instance.
 
 ---
 
 ## Moodle App
 
-Da Drittanbieter-Bloecke in der Moodle App nicht wie im Web gerendert werden,
-stellt der Tutor eine eigene Seite bereit:
+Because third-party blocks are not rendered in the Moodle App the way they are
+on the web, the tutor provides its own page:
 
 ```text
 https://YOURSITE/blocks/eledia_aitutor/view.php
 https://YOURSITE/blocks/eledia_aitutor/view.php?courseid=N
 ```
 
-`?embedded=1` nutzt ein reduziertes Layout ohne Moodle-Chrome. Login,
-Einschreibung, Capabilities, Consent und Limits gelten wie im Web.
+`?embedded=1` uses a reduced layout without Moodle chrome. Login, enrolment,
+capabilities, consent and limits apply just as they do on the web.
 
 ---
 
 ## Troubleshooting
 
-| Symptom | Wahrscheinliche Ursache | Loesung |
+| Symptom | Likely cause | Solution |
 |---|---|---|
-| Konfigurationsproblem im Block | RAG-URL fehlt oder MCP ist aktiviert, aber MCP-Service/Connector fehlt | Einstellungen pruefen; MCP nur freischalten, wenn der Connector installiert und konfiguriert ist. |
-| Tutor-Dienst nicht verfuegbar | Transportfehler, falsche URL oder Serverfehler | URL aus Sicht des Moodle-Servers testen; HTTP-Security/Curl-Helper pruefen. |
-| Unerwartete Tutor-Antwort | RAG-Server liefert nicht das erwartete MCP-Format | Serververtrag in `03-dev-doc.md` pruefen. |
-| Wiederholte Auth-Fehler | Moodle-MCP-Token ungueltig oder Dienst deaktiviert | MCP-Service, Capabilities und Token-Lifetime pruefen. |
-| Nachrichten zu schnell | Rate Limit aktiv | Limit in den Einstellungen anpassen. |
-| Chat-JS wirkt alt | AMD-Build oder Moodle-Cache veraltet | AMD neu bauen und Moodle-Caches leeren. |
-| Kurskontext fehlt | Kurs nicht indexiert, Kurschat aus oder Kontextuebergabe deaktiviert | Kursblock/Instanz, RAG-Ingest und Einstellung `Kurskontext uebergeben` pruefen. |
+| Configuration problem in the block | RAG URL missing or MCP enabled but MCP service/connector missing | Check the settings; only enable MCP when the connector is installed and configured. |
+| Tutor service unavailable | Transport error, wrong URL or server error | Test the URL from the Moodle server's perspective; check HTTP security/curl helper. |
+| Unexpected tutor response | RAG server does not return the expected MCP format | Check the server contract in `03-dev-doc.md`. |
+| Repeated auth errors | Moodle MCP token invalid or service disabled | Check the MCP service, capabilities and token lifetime. |
+| Messages too fast | Rate limit active | Adjust the limit in the settings. |
+| Chat JS looks outdated | AMD build or Moodle cache outdated | Rebuild AMD and purge Moodle caches. |
+| Course context missing | Course not indexed, course chat off or context passing disabled | Check the course block/instance, RAG ingest and the `Pass course context` setting. |
 
 ---
 
-## Barrierefreiheit
+## Accessibility
 
-Die Oberflaeche ist per Tastatur bedienbar, neue Antworten werden fuer
-Screenreader angekuendigt und reduzierte Bewegung wird respektiert. Sichtbare
-Fokuszustaende sind Teil der UI-Baseline.
+The interface can be operated by keyboard, new answers are announced to screen
+readers and reduced motion is respected. Visible focus states are part of the
+UI baseline.
