@@ -54,7 +54,7 @@ final class chat_mode_test extends \advanced_testcase {
         $cat = $this->getDataGenerator()->create_category();
         $course = $this->getDataGenerator()->create_course(['category' => $cat->id]);
         set_config('enabledcategories', $ingested ? (string) $cat->id : '', 'local_ragingest');
-        // ingestion_available() requires BOTH the gate (the category above) AND a recorded
+        // The ingestion_available() call requires BOTH the gate (the category above) AND a recorded
         // ingestion state, so mark the course ingested through ragingest's own API.
         if ($ingested && class_exists('\\local_ragingest\\course_state')) {
             \local_ragingest\course_state::set_ingested((int) $course->id, true);

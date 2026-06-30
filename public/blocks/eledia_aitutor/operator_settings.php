@@ -136,7 +136,7 @@ if ($errormsg !== '') {
 $pageparams = $PAGE->url->params();
 $settingscontext = [
     'actionurl' => $PAGE->url->out(false),
-    'params' => array_map(static function($param) use ($pageparams): array {
+    'params' => array_map(static function ($param) use ($pageparams): array {
         return [
             'name' => $param,
             'value' => $pageparams[$param],

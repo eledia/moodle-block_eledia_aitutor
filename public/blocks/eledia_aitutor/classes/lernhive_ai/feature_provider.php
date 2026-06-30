@@ -24,8 +24,6 @@
 
 namespace block_eledia_aitutor\lernhive_ai;
 
-defined('MOODLE_INTERNAL') || die();
-
 use local_lernhive_ai\feature\descriptor;
 use local_lernhive_ai\feature\feature_provider as feature_provider_contract;
 use moodle_url;

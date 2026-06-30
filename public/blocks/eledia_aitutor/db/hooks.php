@@ -31,7 +31,7 @@ $callbacks = [
         'priority' => 480,
     ],
     [
-        // "Configure <this tutor block>" opens the Plugin Shell (the suitable settings UI)
+        // The "Configure <this tutor block>" action opens the Plugin Shell (the suitable settings UI)
         // instead of Moodle's generic block edit form. No-JS fallback: the control falls
         // back to a bui_editid page load, which this intercepts before any output.
         'hook' => \core\hook\output\before_http_headers::class,

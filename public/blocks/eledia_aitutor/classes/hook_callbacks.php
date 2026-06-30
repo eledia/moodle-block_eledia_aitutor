@@ -139,7 +139,7 @@ final class hook_callbacks {
         }
 
         $config = [
-            // __ID__ is substituted with the clicked block's instance id in JS.
+            // Placeholder __ID__ is substituted with the clicked block's instance id in JS.
             'instanceUrl' => (new moodle_url(
                 '/blocks/eledia_aitutor/edit_instance.php',
                 ['blockid' => '__ID__']

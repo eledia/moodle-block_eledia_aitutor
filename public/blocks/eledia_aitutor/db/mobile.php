@@ -34,13 +34,13 @@ defined('MOODLE_INTERNAL') || die();
 // Handlers follow the site toggles: disabling course or global chat removes
 // the corresponding app entry point (the app refreshes its remote add-ons on
 // login / pull-to-refresh; purge caches after changing the toggles).
-$eledia_aitutorhandlers = [];
+$handlers = [];
 
 if (\block_eledia_aitutor\local\security::course_chat_enabled()) {
     // A "Tutor" entry in the app's course options menu: opens the
     // course-scoped chat inside the app. Per-course opt-in (the tutor block
     // being present) is enforced by the content callback and view.php.
-    $eledia_aitutorhandlers['coursetutor'] = [
+    $handlers['coursetutor'] = [
         'delegate' => 'CoreCourseOptionsDelegate',
         'method' => 'mobile_course_view',
         'displaydata' => [
@@ -52,7 +52,7 @@ if (\block_eledia_aitutor\local\security::course_chat_enabled()) {
 
 if (\block_eledia_aitutor\local\security::global_chat_enabled()) {
     // A main-menu entry for the global chat.
-    $eledia_aitutorhandlers['globaltutor'] = [
+    $handlers['globaltutor'] = [
         'delegate' => 'CoreMainMenuDelegate',
         'method' => 'mobile_global_view',
         'displaydata' => [
@@ -63,9 +63,9 @@ if (\block_eledia_aitutor\local\security::global_chat_enabled()) {
     ];
 }
 
-$addons = empty($eledia_aitutorhandlers) ? [] : [
+$addons = empty($handlers) ? [] : [
     'block_eledia_aitutor' => [
-        'handlers' => $eledia_aitutorhandlers,
+        'handlers' => $handlers,
         'lang' => [
             ['pluginname', 'block_eledia_aitutor'],
         ],
