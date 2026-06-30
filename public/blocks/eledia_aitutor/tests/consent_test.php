@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\external\give_consent;
 use block_eledia_aitutor\local\consent;
 
@@ -25,13 +26,13 @@ use block_eledia_aitutor\local\consent;
  * Unit tests for the documented first-use privacy consent.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\consent
- * @covers      \block_eledia_aitutor\external\give_consent
- * @covers      \block_eledia_aitutor\observer
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\consent::class)]
+#[CoversClass(\block_eledia_aitutor\external\give_consent::class)]
+#[CoversClass(\block_eledia_aitutor\observer::class)]
 final class consent_test extends \advanced_testcase {
     /**
      * Consent starts absent, give() documents it once (idempotent) and fires

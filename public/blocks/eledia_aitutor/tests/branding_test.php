@@ -18,7 +18,9 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\branding;
+use block_eledia_aitutor\local\premium;
 use block_eledia_aitutor\local\presets;
 use block_eledia_aitutor\local\registry;
 
@@ -26,11 +28,11 @@ use block_eledia_aitutor\local\registry;
  * Unit tests for registry-driven branding + persona resolution.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\branding
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license      http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\branding::class)]
 final class branding_test extends \advanced_testcase {
     /**
      * With nothing configured, no token overrides are emitted (defaults stand)
@@ -181,6 +183,15 @@ final class branding_test extends \advanced_testcase {
 
         set_config('footermode', branding::FOOTER_CUSTOM, 'block_eledia_aitutor');
         set_config('footertext', 'A University', 'block_eledia_aitutor');
+
+        if (premium::has_feature(premium::FEATURE_FOOTER_BRANDING)) {
+            // Premium add-on present: footer customisation is unlocked.
+            $this->assertSame(branding::FOOTER_CUSTOM, branding::resolve([])['footermode']);
+            $this->assertSame('A University', branding::resolve([])['footertext']);
+            return;
+        }
+
+        // Free block: footer customisation is ignored — always the default credit.
         $this->assertSame(branding::FOOTER_DEFAULT, branding::resolve([])['footermode']);
         $this->assertSame(get_string('poweredby', 'block_eledia_aitutor'), branding::resolve([])['footertext']);
 
@@ -196,13 +207,20 @@ final class branding_test extends \advanced_testcase {
         set_config('footermode', branding::FOOTER_CUSTOM, 'block_eledia_aitutor');
         set_config('footertext', 'Site footer', 'block_eledia_aitutor');
 
-        // Not exposed by default → instance value ignored.
+        if (premium::has_feature(premium::FEATURE_FOOTER_BRANDING)) {
+            // Premium present: the site custom footer applies; an instance override
+            // only takes effect once the admin exposes the key.
+            $this->assertSame('Site footer', branding::resolve(['footertext' => 'Course footer'])['footertext']);
+            set_config('expose_footertext', 1, 'block_eledia_aitutor');
+            $this->assertSame('Course footer', branding::resolve(['footertext' => 'Course footer'])['footertext']);
+            return;
+        }
+
+        // Free block: footer is the default credit regardless of config or admin opt-in.
         $this->assertSame(
             get_string('poweredby', 'block_eledia_aitutor'),
             branding::resolve(['footertext' => 'Course footer'])['footertext']
         );
-
-        // Admin opt-in is still ignored without the premium add-on.
         set_config('expose_footertext', 1, 'block_eledia_aitutor');
         $this->assertSame(
             get_string('poweredby', 'block_eledia_aitutor'),

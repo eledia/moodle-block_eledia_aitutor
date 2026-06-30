@@ -70,19 +70,47 @@ $useshell = !$embedded
     && shell::is_available()
     && has_capability('moodle/site:config', \core\context\system::instance());
 
+// Per-instance preview: launched from a block's instance shell (blockid of a tutor
+// block the viewer can manage). Wrap the chat in that instance shell so the
+// Settings / Tutor / Preview / MCP menu persists for teachers (who lack site:config).
+$blockid = optional_param('blockid', 0, PARAM_INT);
+$useinstanceshell = false;
+if (!$embedded && !$useshell && $blockid > 0 && shell::is_available()) {
+    $blockrecord = $DB->get_record('block_instances', ['id' => $blockid, 'blockname' => 'eledia_aitutor']);
+    if ($blockrecord && has_capability('block/eledia_aitutor:manage', \core\context\block::instance($blockid))) {
+        $useinstanceshell = true;
+    }
+}
+$anyshell = $useshell || $useinstanceshell;
+
 $PAGE->set_url(new moodle_url(
     '/blocks/eledia_aitutor/view.php',
     ['courseid' => $courseid, 'embedded' => $embedded]
 ));
-$PAGE->set_context($context);
-$PAGE->set_pagelayout($embedded ? 'embedded' : 'standard');
+if ($useinstanceshell) {
+    // Render in the block context (as edit_instance.php / instance_tutor.php do) so the
+    // page does not pull in the course's secondary navigation and course-header banner:
+    // the instance shell supplies its own header, and the course name would otherwise be
+    // shown twice (course banner + shell tagline). require_login() above still scopes
+    // enrolment, and the chat itself renders in this block's context (see below).
+    $PAGE->set_context(\core\context\block::instance($blockid));
+    if ($courseid > 0) {
+        $PAGE->set_course($course);
+        $PAGE->set_pagelayout('incourse');
+    } else {
+        $PAGE->set_pagelayout('standard');
+    }
+} else {
+    $PAGE->set_context($context);
+    $PAGE->set_pagelayout($embedded ? 'embedded' : 'standard');
+}
 $PAGE->set_title(get_string('default_persona', 'block_eledia_aitutor'));
 if ($courseid > 0) {
-    $PAGE->set_heading(format_string($course->fullname));
+    $PAGE->set_heading($anyshell ? '' : format_string($course->fullname));
 } else {
-    $PAGE->set_heading($useshell ? '' : get_string('default_persona', 'block_eledia_aitutor'));
+    $PAGE->set_heading($anyshell ? '' : get_string('default_persona', 'block_eledia_aitutor'));
 }
-if ($useshell) {
+if ($anyshell) {
     shell::require_css();
 }
 $PAGE->add_body_class('eledia_aitutor-pagebody');
@@ -90,11 +118,13 @@ $PAGE->add_body_class('eledia_aitutor-pagebody');
 echo $OUTPUT->header();
 if ($useshell) {
     shell::open(shell::ACTIVE_PREVIEW);
+} else if ($useinstanceshell) {
+    shell::open_instance($blockid, shell::ACTIVE_INSTANCE_PREVIEW);
 }
 
 if (!$enabled) {
     echo $OUTPUT->notification(get_string($disabledstring, 'block_eledia_aitutor'), 'info');
-    if ($useshell) {
+    if ($anyshell) {
         shell::close();
     }
     echo $OUTPUT->footer();
@@ -105,7 +135,7 @@ if (!$enabled) {
 // tutor block. Without it, the page declines with a friendly notice.
 if ($courseid > 0 && !widget::course_has_tutor($courseid)) {
     echo $OUTPUT->notification(get_string('notenabledincourse', 'block_eledia_aitutor'), 'info');
-    if ($useshell) {
+    if ($anyshell) {
         shell::close();
     }
     echo $OUTPUT->footer();
@@ -119,7 +149,7 @@ if ($configerror !== null) {
         'isadmin' => $canmanage,
         'message' => $canmanage ? $configerror : get_string('unavailable_user', 'block_eledia_aitutor'),
     ]);
-    if ($useshell) {
+    if ($anyshell) {
         shell::close();
     }
     echo $OUTPUT->footer();
@@ -128,12 +158,25 @@ if ($configerror !== null) {
 
 // Always the inline (embedded display mode) panel: on a dedicated page the
 // launcher/overlay modes make no sense.
+$rendercontext = $context;
+$instancecfg = ['displaymode' => 'embedded'];
+if ($useinstanceshell) {
+    // Mirror the in-page block render (see block_eledia_aitutor::get_content) so the
+    // preview reflects THIS instance's saved settings — branding, persona and any
+    // exposed per-instance overrides — rather than the site defaults. The block
+    // context resolves the instance's own logo/avatar uploads.
+    $instancecfg = (array) (!empty($blockrecord->configdata)
+        ? unserialize_object(base64_decode($blockrecord->configdata)) : new stdClass());
+    $instancecfg['instanceid'] = (int) $blockid;
+    $instancecfg['displaymode'] = 'embedded';
+    $rendercontext = \core\context\block::instance($blockid);
+}
 echo html_writer::div(
-    widget::render($context, $courseid, ['displaymode' => 'embedded']),
+    widget::render($rendercontext, $courseid, $instancecfg),
     'eledia_aitutor-page'
 );
 
-if ($useshell) {
+if ($anyshell) {
     shell::close();
 }
 echo $OUTPUT->footer();

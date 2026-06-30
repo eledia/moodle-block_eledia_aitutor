@@ -315,22 +315,6 @@ define([], function() {
         }, 80);
     };
 
-    const resetMajorHashScroll = function() {
-        if ((window.location.hash || '').indexOf('#settings-') !== 0) {
-            return;
-        }
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-        const reset = function() {
-            window.scrollTo(0, 0);
-            document.documentElement.scrollTop = 0;
-            document.body.scrollTop = 0;
-        };
-        reset();
-        [50, 150, 350].forEach(function(delay) {
-            window.setTimeout(reset, delay);
-        });
-    };
-
     const setActive = function(key, form, fieldset, grid, topics) {
         const activeKey = key || 'design';
         form.dataset.eatActiveSettings = activeKey;

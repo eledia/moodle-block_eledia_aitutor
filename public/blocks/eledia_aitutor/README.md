@@ -84,22 +84,30 @@ Then add the **eLeDia.ai Tutor** block to a course or the Dashboard.
 
 ## Quick test commands
 
+Paths assume the Moodle 5.1 layout where the code lives under `public/`. Run from the
+Moodle root. The PHPUnit suite (112 tests) and Behat suite (14 scenarios) pass on
+Moodle 5.1 / PHP 8.3 / PHPUnit 11; test metadata uses PHP attributes (`#[CoversClass]`),
+the Moodle 5.1 convention.
+
 ```bash
-# From the Moodle root.
-# PHPUnit
-php admin/tool/phpunit/cli/init.php
-vendor/bin/phpunit --filter block_eledia_aitutor
+# PHPUnit — initialise once (re-run after any version bump), then run the component suite.
+php public/admin/tool/phpunit/cli/init.php
+vendor/bin/phpunit --testsuite block_eledia_aitutor_testsuite
 
-# A single suite
-vendor/bin/phpunit blocks/eledia_aitutor/tests/rag_client_test.php
+# A single test file
+vendor/bin/phpunit public/blocks/eledia_aitutor/tests/rag_client_test.php
 
-# Behat
-php admin/tool/behat/cli/init.php
-vendor/bin/behat --tags @block_eledia_aitutor
+# Behat — initialise once, then run this plugin's tagged scenarios (needs Selenium).
+php public/admin/tool/behat/cli/init.php
+vendor/bin/behat --config "$(php public/admin/tool/behat/cli/util.php --behatdir 2>/dev/null || echo behatdata/behatrun)/behat/behat.yml" --tags @block_eledia_aitutor
 
-# Code style
-vendor/bin/phpcs --standard=moodle blocks/eledia_aitutor
+# Code style (requires moodlehq/moodle-cs installed via composer)
+vendor/bin/phpcs --standard=moodle public/blocks/eledia_aitutor
 ```
+
+> Note: the footer-branding tests assert the free-block behaviour only when the optional
+> `local_elediaai_tutor_premium` add-on is **absent**; when it is installed they verify the
+> unlocked behaviour instead, so the suite is green with or without the add-on.
 
 ## Continuous integration & publishing
 

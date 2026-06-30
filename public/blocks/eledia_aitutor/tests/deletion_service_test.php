@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\conversation_repository;
 use block_eledia_aitutor\local\deletion_service;
 use block_eledia_aitutor\local\rag_client;
@@ -27,11 +28,11 @@ use moodle_url;
  * Unit tests for the user data deletion service.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\deletion_service
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\deletion_service::class)]
 final class deletion_service_test extends \advanced_testcase {
     /**
      * Load the fake transport helper.

@@ -18,17 +18,18 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\security;
 
 /**
  * Unit tests for the security/configuration helper.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\security
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\security::class)]
 final class security_test extends \advanced_testcase {
     /**
      * A valid HTTPS RAG URL is accepted.

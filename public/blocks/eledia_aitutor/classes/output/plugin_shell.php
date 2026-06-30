@@ -59,15 +59,9 @@ final class plugin_shell {
             }
         }
 
-        // The help target lives in local_lernhive. Only offer it when that plugin
-        // is actually installed; otherwise leave helpurl empty so the template
-        // omits the help action rather than linking to a dead page.
+        // No shared help target is bundled with the suite, so the shell offers no
+        // help action (the template omits it when helpurl is empty).
         $helpurl = '';
-        if (\core_component::get_plugin_directory('local', 'lernhive') !== null) {
-            $helpurl = self::url_to_string(
-                new moodle_url('/local/lernhive/support.php', ['component' => $component])
-            );
-        }
 
         return [
             'hasactions' => $resolvedsettingsurl !== '',

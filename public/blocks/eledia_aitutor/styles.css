@@ -2496,13 +2496,10 @@ body:not(.theme-lernhive) .lh-plugin-section-nav {
     background: transparent;
     border-top: 1px solid var(--lh-border);
     display: flex;
+    flex-wrap: wrap;
     gap: 0.25rem;
     margin: 1rem -1rem -1rem;
-    mask-image: linear-gradient(to right, #000 calc(100% - 1.75rem), transparent);
-    overflow-x: auto;
-    padding: 0 1.75rem 0 0.9rem;
-    scrollbar-width: thin;
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.75rem), transparent);
+    padding: 0 0.9rem;
 }
 body:not(.theme-lernhive) .lh-plugin-section-nav__item {
     align-items: center;
@@ -3290,4 +3287,258 @@ body:not(.theme-lernhive) .lh-plugin-infobar__stat {
 }
 .eat-report-card .generaltable {
     margin-bottom: 0;
+}
+
+/* ----------------------------------------------------------------------------
+   Per-instance settings shell (edit_instance.php).
+   The instance editor reuses the shared settings-hub markup so it matches the
+   site settings page. Those shared classes (.eat-settings-hub*, -group, -topic)
+   read --eat-settings-* custom properties that are otherwise declared only on
+   the admin settings page id, so the cards/groups rendered no borders and the
+   icon chips no colour here. Redeclare the properties on the instance wrapper,
+   then restyle the moodleform's collapsible header sections as the same bordered
+   cards the admin page shows (chevrons removed, sections shown one at a time by
+   the hub JS).
+   ------------------------------------------------------------------------- */
+.eat-instance-shell {
+    --eat-settings-primary: var(--lh-primary, #194866);
+    --eat-settings-primary-light: var(--lh-primary-light, #f3f5f8);
+    --eat-settings-border: var(--lh-border, #dbe7ee);
+    --eat-settings-muted: var(--lh-text-secondary, #5f6b77);
+    --eat-settings-text: var(--lh-text, #1f2937);
+    --eat-settings-radius: var(--lh-radius-sm, 8px);
+    --eat-settings-shadow: var(--lh-shadow-card, 0 2px 8px rgba(15, 23, 42, 0.05));
+}
+.eat-instance-shell .eat-section-heading {
+    color: var(--eat-settings-text);
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: 0 0 0.15rem;
+}
+.eat-instance-shell .eat-settings-hub {
+    margin-top: 0.4rem;
+}
+/* Each managed moodleform section becomes a bordered card, not a collapsible. */
+.eat-instance-shell form fieldset.eat-settings-group {
+    background: #fff;
+    border: 1px solid var(--eat-settings-border);
+    border-radius: var(--eat-settings-radius);
+    box-shadow: var(--eat-settings-shadow);
+    margin: 0 0 0.7rem;
+    overflow: visible;
+    padding: 0.7rem 1.1rem 0.45rem;
+}
+/* Hide the collapse chevron (the hub reveals one section at a time) and show the
+   section title as a plain group heading; keep the body open. */
+.eat-instance-shell form fieldset.eat-settings-group .ftoggler .fheader {
+    display: none;
+}
+.eat-instance-shell form fieldset.eat-settings-group .ftoggler > h3 {
+    color: var(--eat-settings-text);
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+.eat-instance-shell form fieldset.eat-settings-group > .fcontainer {
+    display: block;
+}
+
+/* ---- Form-row spacing + admin parity ----
+   The instance editor uses moodleform `.fitem` rows (the admin page uses `.form-item`).
+   Give them the admin page's roomy two-column layout + row separators so colour fields
+   (swatch + hex input) get clear breathing room before the next picker. */
+.eat-instance-shell form fieldset.eat-settings-group .fcontainer .fitem {
+    align-items: start;
+    border-bottom: 1px solid rgba(219, 231, 238, 0.6);
+    column-gap: 1.35rem;
+    display: grid;
+    grid-template-columns: 14.5rem minmax(0, 1fr);
+    margin: 0;
+    padding: 0.75rem 0.25rem;
+}
+.eat-instance-shell form fieldset.eat-settings-group .fcontainer .fitem:last-child {
+    border-bottom: 0;
+}
+.eat-instance-shell form fieldset.eat-settings-group .fcontainer .fitem + .fitem {
+    padding-top: 0.55rem;
+}
+.eat-instance-shell form fieldset.eat-settings-group .fitem > .col-form-label,
+.eat-instance-shell form fieldset.eat-settings-group .fitem > .fitemtitle {
+    flex: none;
+    grid-column: 1;
+    max-width: none;
+    padding-top: 0.2rem;
+    text-align: right;
+    width: 100%;
+}
+.eat-instance-shell form fieldset.eat-settings-group .fitem > .felement,
+.eat-instance-shell form fieldset.eat-settings-group .fitem > [data-fieldtype] {
+    flex: 1 1 auto;
+    grid-column: 2;
+    max-width: none;
+    min-width: 0;
+}
+.eat-instance-shell form fieldset.eat-settings-group .fitem.femptylabel > .felement {
+    grid-column: 1 / -1;
+}
+/* Colour picker: keep the swatch + hex field on one tidy line with breathing room. */
+.eat-instance-shell .form-colourpicker {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.15rem 0 0.35rem;
+}
+.eat-instance-shell .form-colourpicker input.form-control {
+    flex: 0 0 auto;
+    max-width: 9rem;
+    width: auto;
+}
+
+/* ---- Always-available Save ----
+   The real Save/Cancel buttonar (moodleform renders it after the section fieldsets) is
+   tagged `eat-instance-actions` by the hub JS and floated as a FIXED, full-width action
+   bar pinned to the bottom of the viewport (the conventional settings-page pattern), so
+   it is reachable without scrolling. position:fixed (not sticky) is used because Boost
+   page wrappers set overflow, which silently breaks sticky. */
+.eat-instance-shell .eat-instance-actions {
+    -webkit-backdrop-filter: blur(8px);
+    align-items: center;
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.97);
+    border-top: 1px solid var(--eat-settings-border);
+    bottom: 0;
+    box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.09);
+    display: flex;
+    gap: 0.6rem;
+    justify-content: flex-end;
+    left: 0;
+    margin: 0;
+    padding: 0.7rem 1.75rem;
+    position: fixed;
+    right: 0;
+    z-index: 1020;
+}
+.eat-instance-shell .eat-instance-actions.fitem {
+    grid-template-columns: none;
+}
+/* Flatten moodleform's group grid (empty label col + a 75%-wide felement that nests
+   each button in its own row) into a simple right-aligned button cluster. */
+.eat-instance-shell .eat-instance-actions > .col-md-3,
+.eat-instance-shell .eat-instance-actions > .col-form-label,
+.eat-instance-shell .eat-instance-actions > .fitemtitle {
+    display: none;
+}
+.eat-instance-shell .eat-instance-actions > .felement {
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    margin: 0;
+    max-width: none;
+    padding: 0;
+    width: auto;
+}
+.eat-instance-shell .eat-instance-actions .felement > div {
+    margin: 0;
+    width: auto;
+}
+.eat-instance-shell .eat-instance-actions .felement .d-flex {
+    align-items: center;
+    gap: 0.6rem;
+}
+.eat-instance-shell .eat-instance-actions .felement .fitem {
+    margin: 0;
+}
+.eat-instance-shell .eat-instance-actions .form-control-feedback {
+    display: none;
+}
+/* Room so the fixed Save bar never hides the last settings. */
+.eat-instance-shell {
+    padding-bottom: 5.5rem;
+}
+
+/* ---- Live preview: floating, draggable panel ----
+   The form stays full-width; the preview overlays the page as a movable card (so it never
+   affects the form layout). Drag by the title bar; the chevron minimises it. The widget
+   inside is inert and re-themes instantly as design fields change (see instance_preview.js). */
+.eat-instance-shell .eat-preview-float {
+    background: #fff;
+    border: 1px solid var(--eat-settings-border);
+    border-radius: var(--eat-settings-radius);
+    bottom: 5rem;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.24);
+    display: flex;
+    flex-direction: column;
+    max-width: calc(100vw - 2rem);
+    overflow: hidden;
+    position: fixed;
+    right: 1.5rem;
+    width: 22rem;
+    z-index: 1030;
+}
+.eat-instance-shell .eat-preview-float__bar {
+    align-items: center;
+    background: var(--eat-settings-primary);
+    color: #fff;
+    cursor: move;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+    padding: 0.4rem 0.4rem 0.4rem 0.85rem;
+    touch-action: none;
+    user-select: none;
+}
+.eat-instance-shell .eat-preview-float__title {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.eat-instance-shell .eat-preview-float__toggle {
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.3rem 0.5rem;
+}
+.eat-instance-shell .eat-preview-float__toggle:hover,
+.eat-instance-shell .eat-preview-float__toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.2);
+    outline: none;
+}
+.eat-instance-shell .eat-preview-float--collapsed .eat-preview-float__body {
+    display: none;
+}
+/* The embedded widget fills the panel. */
+.eat-instance-shell .eat-preview-float .eat-instance-preview,
+.eat-instance-shell .eat-preview-float .eledia_aitutor-root,
+.eat-instance-shell .eat-preview-float .eledia_aitutor-panel,
+.eat-instance-shell .eat-preview-float .eledia_aitutor-window {
+    margin: 0;
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+.eat-instance-shell .eat-preview-float .eledia_aitutor-embedded .eledia_aitutor-window {
+    border: 0;
+    border-radius: 0;
+    height: clamp(360px, 58vh, 560px);
+}
+/* Never let the colour picker spill out of its row. */
+.eat-instance-shell .admin_colourpicker {
+    max-width: 100%;
+}
+@media (max-width: 60rem) {
+    .eat-instance-shell .eat-preview-float {
+        width: calc(100vw - 2rem);
+    }
+    .eat-instance-shell form fieldset.eat-settings-group .fcontainer .fitem {
+        grid-template-columns: 1fr;
+    }
+    .eat-instance-shell form fieldset.eat-settings-group .fitem > .col-form-label,
+    .eat-instance-shell form fieldset.eat-settings-group .fitem > .fitemtitle {
+        text-align: left;
+    }
 }

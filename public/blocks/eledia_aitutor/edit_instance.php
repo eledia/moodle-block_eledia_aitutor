@@ -33,6 +33,7 @@ use block_eledia_aitutor\local\chat_mode;
 use block_eledia_aitutor\local\formhelper;
 use block_eledia_aitutor\local\registry;
 use block_eledia_aitutor\local\security;
+use block_eledia_aitutor\local\widget;
 use block_eledia_aitutor\output\shell;
 
 /**
@@ -156,7 +157,9 @@ class block_eledia_aitutor_instance_shell_form extends moodleform {
                 'insgroup_' . $group,
                 get_string('reggroup_' . $group, 'block_eledia_aitutor')
             );
-            $mform->setExpanded('insgroup_' . $group, $group === 'persona');
+            // Expanded by default: the settings-hub JS shows one section at a time,
+            // so collapsed groups would hide content behind the active card.
+            $mform->setExpanded('insgroup_' . $group, true);
             foreach ($exposed as $key) {
                 $this->add_instance_field($mform, $key, registry::get($key));
             }
@@ -325,8 +328,9 @@ $pageurl = new moodle_url('/blocks/eledia_aitutor/edit_instance.php', ['blockid'
 $PAGE->set_url($pageurl);
 $PAGE->set_context($blockcontext);
 $PAGE->set_title(get_string('instance_shell_title', 'block_eledia_aitutor'));
-$PAGE->set_heading($parent ? $parent->get_context_name(false)
-    : get_string('instance_shell_title', 'block_eledia_aitutor'));
+// Empty: the instance shell renders its own header ("eLeDia.ai Tutor | Settings (course)"),
+// so a separate course-name page heading above it would be redundant.
+$PAGE->set_heading('');
 shell::require_css();
 
 $config = !empty($record->configdata) ? unserialize_object(base64_decode($record->configdata)) : new stdClass();
@@ -416,7 +420,7 @@ if ($data = $form->get_data()) {
 }
 
 echo $OUTPUT->header();
-shell::open(shell::ACTIVE_TUTORS);
+shell::open_instance($blockid, shell::ACTIVE_INSTANCE_SETTINGS);
 
 if (!shell::is_available()) {
     echo $OUTPUT->heading(get_string('instance_shell_title', 'block_eledia_aitutor'), 2);
@@ -433,7 +437,135 @@ echo html_writer::tag(
     get_string('instance_shell_intro', 'block_eledia_aitutor'),
     ['class' => 'text-muted']
 );
+// Site admins keep one-click access to the site-wide settings hub (the per-instance
+// shell otherwise only exposes this block's own settings).
+if (has_capability('moodle/site:config', \core\context\system::instance())) {
+    echo html_writer::div(
+        html_writer::link(
+            new moodle_url('/admin/settings.php', ['section' => 'blocksettingeledia_aitutor']),
+            get_string('instance_shell_siteadmin_link', 'block_eledia_aitutor'),
+            ['class' => 'btn btn-outline-secondary btn-sm']
+        ),
+        'eat-instance-siteadmin mb-3'
+    );
+}
+
 $form->display();
+
+// Live preview: a floating, draggable panel that overlays the page (so it never
+// affects the form layout) and re-themes instantly as design fields change. Drag it by
+// its title bar; the chevron minimises it. See instance_preview.js.
+$previewcfg = (array) $config;
+$previewcfg['instanceid'] = $blockid;
+$previewcfg['displaymode'] = 'embedded';
+$previewcfg['preview'] = true;
+echo html_writer::start_div('eat-preview-float', ['data-region' => 'eat-preview-float']);
+echo html_writer::start_div('eat-preview-float__bar', ['data-region' => 'eat-preview-drag']);
+echo html_writer::tag(
+    'span',
+    get_string('instance_preview_heading', 'block_eledia_aitutor'),
+    ['class' => 'eat-preview-float__title']
+);
+echo html_writer::tag(
+    'button',
+    '<i class="fa fa-window-minimize" aria-hidden="true"></i>',
+    [
+        'type' => 'button',
+        'class' => 'eat-preview-float__toggle',
+        'data-action' => 'eat-preview-toggle',
+        'aria-label' => get_string('instance_preview_toggle', 'block_eledia_aitutor'),
+    ]
+);
+echo html_writer::end_div();
+echo html_writer::start_div('eat-preview-float__body');
+echo html_writer::div(
+    widget::render($blockcontext, $courseid, $previewcfg),
+    'eledia_aitutor-page eat-instance-preview'
+);
+echo html_writer::end_div();
+echo html_writer::end_div();
+
+// Wrap the moodleform in the settings hub (Design / Conversation / Technical cards),
+// mirroring the admin settings experience. The group -> major mapping matches the
+// admin settings page (see settings.php). Degrades to the plain form if the JS
+// cannot build the hub.
+if (shell::is_available()) {
+    $designgroups = ['accent', 'surfaces', 'text', 'bubbles', 'states', 'shape', 'effects', 'launcher', 'footer', 'files'];
+    $conversationgroups = ['persona', 'conversation'];
+    $groupmajors = ['quicksettings' => 'technical'];
+    foreach ($designgroups as $g) {
+        $groupmajors['insgroup_' . $g] = 'design';
+    }
+    foreach ($conversationgroups as $g) {
+        $groupmajors['insgroup_' . $g] = 'conversation';
+    }
+    $hubconfig = [
+        'sectionCards' => [
+            [
+                'key' => 'design',
+                'icon' => 'fa-palette',
+                'title' => get_string('setting_section_design', 'block_eledia_aitutor'),
+                'body' => get_string('setting_section_design_desc', 'block_eledia_aitutor'),
+            ],
+            [
+                'key' => 'conversation',
+                'icon' => 'fa-comments',
+                'title' => get_string('setting_section_conversation', 'block_eledia_aitutor'),
+                'body' => get_string('setting_section_conversation_desc', 'block_eledia_aitutor'),
+            ],
+            [
+                'key' => 'technical',
+                'icon' => 'fa-plug',
+                'title' => get_string('setting_section_technical', 'block_eledia_aitutor'),
+                'body' => get_string('setting_section_technical_desc', 'block_eledia_aitutor'),
+            ],
+        ],
+        'groupMajors' => $groupmajors,
+        'hubTitle' => get_string('settings_hub_title', 'block_eledia_aitutor'),
+        'hubDesc' => get_string('settings_hub_desc', 'block_eledia_aitutor'),
+        'topicsLabel' => get_string('settings_hub_topics_label', 'block_eledia_aitutor'),
+    ];
+    $encodedhub = json_encode(
+        $hubconfig,
+        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+    );
+    $PAGE->requires->js_amd_inline(
+        "require(['block_eledia_aitutor/instance_settings_shell'], function(shell) {"
+        . "shell.init({$encodedhub});"
+        . "});"
+    );
+}
+
+// Live preview: re-theme the inert preview widget client-side as the design fields
+// change. Pass the registry key -> --eat-token map and each token field's type so the
+// module knows how to read/apply each value, plus the defaults used when a field is
+// cleared (so the preview reverts exactly like the saved render would).
+$previewtokens = [];
+$previewtypes = [];
+foreach (registry::token_keys() as $regkey => $token) {
+    $previewtokens[$regkey] = $token;
+    $entry = registry::get($regkey);
+    $previewtypes[$regkey] = (string) ($entry['type'] ?? '');
+}
+$previewmeta = [
+    'tokenMap' => $previewtokens,
+    'fieldTypes' => $previewtypes,
+    'defaults' => [
+        'welcome' => get_string('default_welcome', 'block_eledia_aitutor'),
+        'persona' => get_string('default_persona', 'block_eledia_aitutor'),
+        'poweredby' => get_string('poweredby', 'block_eledia_aitutor'),
+    ],
+];
+$encodedpreview = json_encode(
+    $previewmeta,
+    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+);
+$PAGE->requires->js_amd_inline(
+    "require(['block_eledia_aitutor/instance_preview'], function(preview) {"
+    . "preview.init({$encodedpreview});"
+    . "});"
+);
+
 echo html_writer::end_div();
 
 shell::close();

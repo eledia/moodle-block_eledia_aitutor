@@ -119,6 +119,11 @@ class widget {
     public static function render(\context $context, int $courseid, array $instance = []): string {
         global $OUTPUT, $PAGE, $USER;
 
+        // Inert mode: a non-interactive render for the settings live preview. The
+        // chat module is not booted and the composer is disabled, so the preview is
+        // visually faithful but never talks to the backend.
+        $preview = !empty($instance['preview']);
+
         // Resolve the answer mode (grounded / LLM-only / unavailable). When the
         // tutor cannot answer here (no knowledge base and LLM-only disallowed),
         // show a friendly notice and skip the chat UI entirely.
@@ -207,6 +212,7 @@ class widget {
             'instanceid' => (int) ($instance['instanceid'] ?? 0),
             'displaymode' => $displaymode,
             'embedded' => $displaymode === 'embedded',
+            'preview' => $preview,
             'persona' => format_string($persona),
             'logourl' => $logourl,
             'avatarurl' => $avatarurl,
@@ -267,10 +273,58 @@ class widget {
             JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
         );
 
+        // Inert settings preview: seed a short, representative conversation so the design
+        // tokens that only appear on specific elements — the learner bubble, a grounded
+        // answer with sources and code, and an error state — all have something to render
+        // against. Built from the same message template the chat JS uses.
+        if ($preview) {
+            $samples = [
+                [
+                    'isuser' => true,
+                    'sendername' => get_string('senderyou', 'block_eledia_aitutor'),
+                    'text' => get_string('preview_learner_msg', 'block_eledia_aitutor'),
+                ],
+                [
+                    'isassistant' => true,
+                    'sendername' => format_string($persona),
+                    'avatarurl' => $avatarurl,
+                    'html' => get_string('preview_bot_msg', 'block_eledia_aitutor'),
+                    'showgrounding' => true,
+                    'grounded' => true,
+                    'hassources' => true,
+                    'sources' => [[
+                        'num' => 1,
+                        'title' => get_string('preview_source_title', 'block_eledia_aitutor'),
+                        'hasurl' => false,
+                        'snippet' => get_string('preview_source_snippet', 'block_eledia_aitutor'),
+                    ]],
+                    'copylabel' => get_string('copy', 'block_eledia_aitutor'),
+                ],
+                [
+                    'isassistant' => true,
+                    'sendername' => format_string($persona),
+                    'avatarurl' => $avatarurl,
+                    'failuretext' => get_string('preview_error_msg', 'block_eledia_aitutor'),
+                    'failed' => true,
+                    'copylabel' => get_string('copy', 'block_eledia_aitutor'),
+                    'retrylabel' => get_string('retry', 'block_eledia_aitutor'),
+                ],
+            ];
+            $previewmessages = '';
+            foreach ($samples as $sample) {
+                $previewmessages .= $OUTPUT->render_from_template('block_eledia_aitutor/message', $sample);
+            }
+            $templatecontext['previewmessages'] = $previewmessages;
+        }
+
         $html = $OUTPUT->render_from_template('block_eledia_aitutor/launcher', $templatecontext);
 
-        // Pass only the element id; the JS reads the rest from the data-island.
-        $PAGE->requires->js_call_amd('block_eledia_aitutor/chat', 'init', [$uniqid]);
+        // Pass only the element id; the JS reads the rest from the data-island. The
+        // settings live preview is inert — it boots no chat module (the design tokens
+        // are re-themed client-side by instance_preview.js instead).
+        if (!$preview) {
+            $PAGE->requires->js_call_amd('block_eledia_aitutor/chat', 'init', [$uniqid]);
+        }
 
         return $html;
     }

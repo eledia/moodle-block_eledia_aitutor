@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\consent;
 use block_eledia_aitutor\local\ltm;
 
@@ -25,11 +26,11 @@ use block_eledia_aitutor\local\ltm;
  * Unit tests for the long-term memory opt-in helper.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\ltm
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\ltm::class)]
 final class ltm_test extends \advanced_testcase {
     /**
      * Long-term memory must be disabled unless the user explicitly opted in.

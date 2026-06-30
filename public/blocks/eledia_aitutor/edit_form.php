@@ -47,7 +47,8 @@ class block_eledia_aitutor_edit_form extends block_edit_form {
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
         // Import / export this instance's tutor (settings + images), or apply a
-        // site preset — available once the block exists.
+        // site preset — available once the block exists. The shell reflects this
+        // specific instance; admins reach the site-wide settings via a link in it.
         if (!empty($this->block->instance->id)) {
             $shelllink = new \moodle_url(
                 '/blocks/eledia_aitutor/edit_instance.php',

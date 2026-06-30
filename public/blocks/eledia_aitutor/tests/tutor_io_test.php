@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\branding;
 use block_eledia_aitutor\local\tutor_io;
 use block_eledia_aitutor\local\tutor_profile;
@@ -26,11 +27,11 @@ use block_eledia_aitutor\local\tutor_profile;
  * Unit tests for tutor import/export round-tripping.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\tutor_io
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license      http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\tutor_io::class)]
 final class tutor_io_test extends \advanced_testcase {
     /** @var string A 1×1 transparent PNG. */
     private const PNG_1X1 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';

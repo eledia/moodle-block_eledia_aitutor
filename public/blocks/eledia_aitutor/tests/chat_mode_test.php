@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace block_eledia_aitutor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\local\chat_mode;
 
 /**
@@ -28,11 +29,11 @@ use block_eledia_aitutor\local\chat_mode;
  * allowllmonly setting.
  *
  * @package     block_eledia_aitutor
- * @covers      \block_eledia_aitutor\local\chat_mode
  * @author      Christopher Reimann <christopher.reimann@eledia.de>
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\local\chat_mode::class)]
 final class chat_mode_test extends \advanced_testcase {
     /**
      * Skip if the ingestion plugin isn't installed (it should be in this tree).
@@ -53,6 +54,11 @@ final class chat_mode_test extends \advanced_testcase {
         $cat = $this->getDataGenerator()->create_category();
         $course = $this->getDataGenerator()->create_course(['category' => $cat->id]);
         set_config('enabledcategories', $ingested ? (string) $cat->id : '', 'local_ragingest');
+        // ingestion_available() requires BOTH the gate (the category above) AND a recorded
+        // ingestion state, so mark the course ingested through ragingest's own API.
+        if ($ingested && class_exists('\\local_ragingest\\course_state')) {
+            \local_ragingest\course_state::set_ingested((int) $course->id, true);
+        }
         return (int) $course->id;
     }
 
