@@ -809,6 +809,27 @@ a.eledia_aitutor-avatar:focus-visible {
     background: var(--eat-tint);
 }
 
+/* --- Write confirmations. --------------------------------------------- */
+.eledia_aitutor-confirmation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.eledia_aitutor-confirmation .btn {
+    min-width: 4.5rem;
+}
+
+.eledia_aitutor-confirmation .btn-primary {
+    background: var(--eat-accent);
+    border-color: var(--eat-accent);
+}
+
+.eledia_aitutor-confirmation .btn-outline-secondary {
+    background: #fff;
+}
+
 /* --- Sources / citations. --------------------------------------------- */
 .eledia_aitutor-sources {
     margin-top: 0.5rem;
@@ -989,6 +1010,12 @@ a.eledia_aitutor-avatar:focus-visible {
     background: transparent;
     color: var(--eat-muted);
     border: 1px solid var(--eat-line);
+}
+
+.eledia_aitutor-mcp {
+    background: #eef2ff;
+    color: #1e3a8a;
+    border: 1px solid #c7d2fe;
 }
 
 /* --- Standalone page (view.php; Moodle App embedding). ------------------ */
