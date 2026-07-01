@@ -48,6 +48,13 @@
             <img class="eledia_aitutor-msg-avatar-img" src="{{avatarurl}}" alt="" width="20" height="20">
         </span>{{/isassistant}}
         <span class="eledia_aitutor-sender">{{sendername}}</span>
+        {{#showmcpbadge}}
+            <span class="eledia_aitutor-grounding eledia_aitutor-mcp"
+                  title="Diese Antwort nutzt Moodle-MCP-Tools.">
+                <i class="fa fa-plug" aria-hidden="true"></i>
+                MCP
+            </span>
+        {{/showmcpbadge}}
         {{#showgrounding}}
             {{#grounded}}
                 <span class="eledia_aitutor-grounding eledia_aitutor-grounded"
@@ -72,6 +79,16 @@
                 {{#failuretext}}<p>{{failuretext}}</p>{{/failuretext}}
                 {{^failuretext}}{{{html}}}{{/failuretext}}
             </div>
+            {{#hasconfirmation}}
+                <div class="eledia_aitutor-confirmation" data-region="confirmation-actions">
+                    <button type="button" class="btn btn-primary btn-sm"
+                            data-action="confirm-reply"
+                            data-message="{{confirmation.yesmessage}}">{{confirmation.yeslabel}}</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            data-action="confirm-reply"
+                            data-message="{{confirmation.nomessage}}">{{confirmation.nolabel}}</button>
+                </div>
+            {{/hasconfirmation}}
             {{#hassources}}
                 <div class="eledia_aitutor-sources">
                     <div class="eledia_aitutor-sources-title">{{#str}}sources, block_eledia_aitutor{{/str}}</div>

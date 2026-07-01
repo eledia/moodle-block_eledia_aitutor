@@ -52,7 +52,7 @@ class chat_service {
      *                              tool (false = LLM-only); null omits the flag.
      * @param array|null $persona Structured persona to send to the RAG server
      *                            (name/role/tone/audience/instructions); null sends none.
-     * @return array{answerhtml: string, answermarkdown: string, conversationid: ?string, sources: array, iserror: bool}
+     * @return array{answerhtml: string, answermarkdown: string, conversationid: ?string, sources: array, answerorigin: string, confirmation: ?array, iserror: bool}
      * @throws \moodle_exception On validation, configuration, quota or RAG failure.
      */
     public static function send(
@@ -229,6 +229,8 @@ class chat_service {
             'answermarkdown' => $result['answer'],
             'conversationid' => $newconversationid !== null ? (string) $newconversationid : null,
             'sources' => $result['sources'],
+            'answerorigin' => $result['answer_origin'] ?? (!empty($result['sources']) ? 'rag' : 'general'),
+            'confirmation' => $result['confirmation'] ?? null,
             'iserror' => $result['iserror'],
         ];
     }

@@ -165,11 +165,13 @@ class send_message extends external_api {
             'answerhtml' => $result['answerhtml'],
             'conversationid' => $result['conversationid'] ?? '',
             'iserror' => $result['iserror'],
+            'answerorigin' => $result['answerorigin'] ?? 'general',
             'sources' => array_map(static fn($s) => [
                 'title' => $s['title'],
                 'url' => clean_param((string) $s['url'], PARAM_URL),
                 'snippet' => $s['snippet'],
             ], $result['sources']),
+            'confirmation' => is_array($result['confirmation'] ?? null) ? $result['confirmation'] : [],
         ];
     }
 
@@ -183,6 +185,8 @@ class send_message extends external_api {
             'answerhtml' => new external_value(PARAM_RAW, 'Sanitised HTML of the assistant answer'),
             'conversationid' => new external_value(PARAM_RAW, 'Server conversation id, or empty'),
             'iserror' => new external_value(PARAM_BOOL, 'Whether the tool reported an error'),
+            'answerorigin' => new external_value(PARAM_ALPHA, 'Answer origin: rag, mcp or general', VALUE_DEFAULT,
+                'general'),
             'sources' => new external_multiple_structure(
                 new external_single_structure([
                     'title' => new external_value(PARAM_TEXT, 'Source title'),
@@ -193,6 +197,14 @@ class send_message extends external_api {
                 VALUE_DEFAULT,
                 []
             ),
+            'confirmation' => new external_single_structure([
+                'required' => new external_value(PARAM_BOOL, 'Whether the assistant needs an explicit confirmation',
+                    VALUE_DEFAULT, false),
+                'yeslabel' => new external_value(PARAM_TEXT, 'Label for the confirm button', VALUE_DEFAULT, 'Ja'),
+                'nolabel' => new external_value(PARAM_TEXT, 'Label for the decline button', VALUE_DEFAULT, 'Nein'),
+                'yesmessage' => new external_value(PARAM_TEXT, 'Message sent when confirming', VALUE_DEFAULT, 'Ja'),
+                'nomessage' => new external_value(PARAM_TEXT, 'Message sent when declining', VALUE_DEFAULT, 'Nein'),
+            ], 'Optional confirmation controls for pending write actions', VALUE_DEFAULT),
         ]);
     }
 }

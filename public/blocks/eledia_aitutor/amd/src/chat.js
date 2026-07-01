@@ -310,6 +310,7 @@ class TutorChat {
             case 'privacy': this.openPrivacy(); break;
             case 'history': this.toggleHistory(); break;
             case 'copy': this.copyAnswer(el); break;
+            case 'confirm-reply': this.confirmReply(el); break;
             case 'retry': this.retry(el); break;
             case 'open-conversation': this.openConversation(el); break;
             case 'delete-conversation': this.deleteConversation(el); break;
@@ -619,7 +620,8 @@ class TutorChat {
                 this.saveConversationPointer(response.conversationid);
                 this.historyLoaded = false;
             }
-            return this.appendAssistant(response.answerhtml, response.sources || [], response.iserror);
+            return this.appendAssistant(response.answerhtml, response.sources || [], response.iserror,
+                response.confirmation || null, response.answerorigin || 'general');
         }).catch((error) => {
             this.hideTyping();
             this.busy = false;
@@ -645,9 +647,11 @@ class TutorChat {
      * @param {string} html Server-sanitised HTML answer.
      * @param {Array} sources Source rows.
      * @param {boolean} iserror Whether the tool reported an error.
+     * @param {object|null} confirmation Optional confirmation button payload.
+     * @param {string} answerorigin Answer origin: rag, mcp or general.
      * @return {Promise}
      */
-    appendAssistant(html, sources, iserror) {
+    appendAssistant(html, sources, iserror, confirmation, answerorigin) {
         const mappedSources = (sources || []).map((s, i) => ({
             num: i + 1,
             title: s.title,
@@ -655,18 +659,44 @@ class TutorChat {
             hasurl: !!s.url,
             snippet: s.snippet
         }));
+        const confirm = confirmation && confirmation.required ? {
+            yeslabel: confirmation.yeslabel || 'Ja',
+            nolabel: confirmation.nolabel || 'Nein',
+            yesmessage: confirmation.yesmessage || 'Ja',
+            nomessage: confirmation.nomessage || 'Nein'
+        } : null;
+        const ismcp = answerorigin === 'mcp';
         return this.appendMessage({
             isassistant: true,
             sendername: this.config.persona,
             html: html,
             failed: !!iserror,
+            hasconfirmation: !!confirm,
+            confirmation: confirm,
             sources: mappedSources,
             hassources: mappedSources.length > 0,
-            showgrounding: !iserror,
-            grounded: mappedSources.length > 0,
+            showmcpbadge: !iserror && ismcp,
+            showgrounding: !iserror && !ismcp,
+            grounded: answerorigin === 'rag' || (!answerorigin && mappedSources.length > 0),
             copylabel: strings.copy,
             retrylabel: strings.retry
         });
+    }
+
+    /**
+     * Send a structured confirmation reply from a rendered assistant button.
+     *
+     * @param {HTMLElement} el The clicked confirmation button.
+     * @return {void}
+     */
+    confirmReply(el) {
+        const message = el.getAttribute('data-message') || '';
+        if (!message || this.busy || !this.consented) {
+            return;
+        }
+        this.input.value = message;
+        this.autoGrow();
+        this.send();
     }
 
     /**

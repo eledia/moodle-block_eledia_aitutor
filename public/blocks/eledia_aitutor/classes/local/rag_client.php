@@ -140,7 +140,7 @@ class rag_client {
      *                              omits the flag (server default: enabled).
      * @param array|null $persona Structured persona (any of name/role/tone/
      *                            audience/instructions); empty/null sends none.
-     * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, iserror: bool}
+     * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, answer_origin: string, confirmation: ?array, iserror: bool}
      * @throws rag_exception On transport or protocol failure.
      */
     public function chat(
@@ -531,7 +531,7 @@ class rag_client {
      * RAG servers without configuration.
      *
      * @param array $result The JSON-RPC result.
-     * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, iserror: bool}
+     * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, answer_origin: string, confirmation: ?array, iserror: bool}
      */
     private function normalise_tool_result(array $result): array {
         $iserror = !empty($result['isError']);
@@ -550,6 +550,8 @@ class rag_client {
         $conversationid = null;
         $sources = [];
         $topic = null;
+        $answerorigin = 'general';
+        $confirmation = null;
 
         if (is_array($payload)) {
             foreach (['answer', 'text', 'message', 'response', 'content', 'output'] as $key) {
@@ -567,7 +569,16 @@ class rag_client {
             foreach (['sources', 'citations', 'documents', 'references'] as $key) {
                 if (isset($payload[$key]) && is_array($payload[$key])) {
                     $sources = $this->normalise_sources($payload[$key]);
+                    if (!empty($sources)) {
+                        $answerorigin = 'rag';
+                    }
                     break;
+                }
+            }
+            if (!empty($payload['answer_origin']) && is_string($payload['answer_origin'])) {
+                $candidate = clean_param($payload['answer_origin'], PARAM_ALPHA);
+                if (in_array($candidate, ['rag', 'mcp', 'general'], true)) {
+                    $answerorigin = $candidate;
                 }
             }
             // Canonical topic label for analytics clustering (see the spec).
@@ -576,6 +587,15 @@ class rag_client {
                     $topic = \core_text::substr(trim($payload[$key]), 0, 100);
                     break;
                 }
+            }
+            if (is_array($payload['confirmation'] ?? null) && !empty($payload['confirmation']['required'])) {
+                $confirmation = [
+                    'required' => true,
+                    'yeslabel' => clean_param((string) ($payload['confirmation']['yeslabel'] ?? 'Ja'), PARAM_TEXT),
+                    'nolabel' => clean_param((string) ($payload['confirmation']['nolabel'] ?? 'Nein'), PARAM_TEXT),
+                    'yesmessage' => clean_param((string) ($payload['confirmation']['yesmessage'] ?? 'Ja'), PARAM_TEXT),
+                    'nomessage' => clean_param((string) ($payload['confirmation']['nomessage'] ?? 'Nein'), PARAM_TEXT),
+                ];
             }
         }
 
@@ -592,6 +612,8 @@ class rag_client {
             'conversation_id' => $conversationid,
             'sources' => $sources,
             'topic' => $topic,
+            'answer_origin' => $answerorigin,
+            'confirmation' => $confirmation,
             'iserror' => $iserror,
         ];
     }
