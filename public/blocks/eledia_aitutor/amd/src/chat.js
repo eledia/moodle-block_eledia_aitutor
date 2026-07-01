@@ -738,10 +738,60 @@ class TutorChat {
             if (!node) {
                 return null;
             }
+            this.prepareAssistantLinks(node);
             this.log.appendChild(node);
             this.scrollToBottom();
             return node;
         }).catch(Notification.exception);
+    }
+
+    /**
+     * Prepare links inside assistant messages.
+     *
+     * Moodle page navigations destroy the floating chat DOM. Links that clearly
+     * point to a different course therefore open in a new tab; links in the
+     * current course keep Moodle's normal same-tab behaviour.
+     *
+     * @param {HTMLElement} node Rendered message wrapper.
+     * @return {void}
+     */
+    prepareAssistantLinks(node) {
+        node.querySelectorAll('.eledia_aitutor-markdown a[href]').forEach((link) => {
+            const targetcourseid = this.courseIdFromLink(link);
+            if (targetcourseid === null || targetcourseid === (this.config.courseid || 0)) {
+                link.removeAttribute('target');
+                link.removeAttribute('rel');
+                return;
+            }
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+        });
+    }
+
+    /**
+     * Extract a course id from common Moodle URLs when it is explicit.
+     *
+     * @param {HTMLAnchorElement} link Link to inspect.
+     * @return {number|null} Course id, or null when the URL does not say.
+     */
+    courseIdFromLink(link) {
+        const raw = link.getAttribute('href') || '';
+        if (raw === '' || raw.charAt(0) === '#') {
+            return null;
+        }
+        let url = null;
+        try {
+            url = new URL(raw, window.location.href);
+        } catch (e) {
+            return null;
+        }
+        const pathname = url.pathname || '';
+        if (pathname.indexOf('/course/view.php') !== -1) {
+            const id = parseInt(url.searchParams.get('id') || '0', 10);
+            return id > 0 ? id : null;
+        }
+        const courseid = parseInt(url.searchParams.get('courseid') || '0', 10);
+        return courseid > 0 ? courseid : null;
     }
 
     /**

@@ -332,6 +332,13 @@ if ($hassiteconfig) {
     ));
 
     $settings->add(new admin_setting_configcheckbox(
+        'block_eledia_aitutor/enablesitewidechat',
+        get_string('setting_enablesitewidechat', 'block_eledia_aitutor'),
+        get_string('setting_enablesitewidechat_desc', 'block_eledia_aitutor'),
+        1
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
         'block_eledia_aitutor/allowllmonly',
         get_string('setting_allowllmonly', 'block_eledia_aitutor'),
         get_string('setting_allowllmonly_desc', 'block_eledia_aitutor'),

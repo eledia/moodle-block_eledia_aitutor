@@ -98,7 +98,7 @@
                                 {{#num}}<span class="eledia_aitutor-source-num">[S{{num}}]</span> {{/num}}
                                 {{#hasurl}}
                                     {{! url is server-normalised with PARAM_URL before it reaches this template. }}
-                                    <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{title}}</a>
+                                    <a href="{{url}}">{{title}}</a>
                                 {{/hasurl}}
                                 {{^hasurl}}<span>{{title}}</span>{{/hasurl}}
                                 {{#snippet}}<span class="eledia_aitutor-source-snippet">{{snippet}}</span>{{/snippet}}

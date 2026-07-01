@@ -26,12 +26,48 @@ namespace block_eledia_aitutor;
 
 use core\hook\output\before_http_headers;
 use core\hook\output\before_standard_top_of_body_html_generation;
+use block_eledia_aitutor\local\security;
+use block_eledia_aitutor\local\widget;
 use moodle_url;
 
 /**
  * Output hooks.
  */
 final class hook_callbacks {
+    /**
+     * Inject the learner-facing floating tutor outside block regions.
+     *
+     * The course block remains the opt-in signal. Once a teacher added the block
+     * to a course, this hook keeps the tutor available on course subpages where
+     * Moodle may not render the block region. The course overview page itself is
+     * skipped to avoid duplicate widgets when the normal block is visible.
+     *
+     * @param before_standard_top_of_body_html_generation $hook
+     */
+    public static function inject_sitewide_tutor(before_standard_top_of_body_html_generation $hook): void {
+        global $PAGE;
+
+        if (!self::sitewide_tutor_allowed_on_page()) {
+            return;
+        }
+
+        [$context, $courseid] = self::sitewide_tutor_context();
+        if ($context === null) {
+            return;
+        }
+        if (!has_capability('block/eledia_aitutor:use', $context)) {
+            return;
+        }
+
+        // For the global hook, configuration problems are silent. The block and
+        // configuration shell still surface actionable messages to managers.
+        if (widget::config_error($courseid) !== null) {
+            return;
+        }
+
+        $hook->add_html(widget::render($context, $courseid, []));
+    }
+
     /**
      * Inject an admin-only navbar launcher that opens the tutor dashboard.
      *
@@ -71,6 +107,61 @@ final class hook_callbacks {
                 '</a>' .
             '</div>'
         );
+    }
+
+    /**
+     * Whether the global floating tutor may be considered for this page.
+     *
+     * @return bool
+     */
+    private static function sitewide_tutor_allowed_on_page(): bool {
+        global $PAGE;
+
+        if ((int) security::get_config('enablesitewidechat', 1) !== 1) {
+            return false;
+        }
+        if (!isloggedin() || isguestuser()) {
+            return false;
+        }
+        if (in_array($PAGE->pagelayout, ['login', 'popup', 'embedded', 'maintenance'], true)) {
+            return false;
+        }
+        if ($PAGE->user_is_editing()) {
+            return false;
+        }
+        // The course front page renders the real block region. Let that instance
+        // own the UI so per-instance overrides remain visible there.
+        if (str_starts_with((string) $PAGE->pagetype, 'course-view-')) {
+            return false;
+        }
+        // Avoid injecting into the block's own admin/standalone pages.
+        return strpos((string) $PAGE->url->get_path(), '/blocks/eledia_aitutor/') !== 0;
+    }
+
+    /**
+     * Resolve the context and course id for the global floating tutor.
+     *
+     * @return array{0: \context|null, 1: int}
+     */
+    private static function sitewide_tutor_context(): array {
+        global $PAGE;
+
+        $courseid = 0;
+        if (!empty($PAGE->course->id) && (int) $PAGE->course->id !== SITEID) {
+            $courseid = (int) $PAGE->course->id;
+        }
+
+        if ($courseid > 0) {
+            if (!security::course_chat_enabled() || !widget::course_has_tutor($courseid)) {
+                return [null, 0];
+            }
+            return [\core\context\course::instance($courseid), $courseid];
+        }
+
+        if (!security::global_chat_enabled()) {
+            return [null, 0];
+        }
+        return [\core\context\system::instance(), 0];
     }
 
     /**

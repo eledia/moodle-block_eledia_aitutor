@@ -26,6 +26,12 @@ defined('MOODLE_INTERNAL') || die();
 
 $callbacks = [
     [
+        // Render the learner-facing floating tutor outside Moodle block regions.
+        'hook' => \core\hook\output\before_standard_top_of_body_html_generation::class,
+        'callback' => \block_eledia_aitutor\hook_callbacks::class . '::inject_sitewide_tutor',
+        'priority' => 490,
+    ],
+    [
         'hook' => \core\hook\output\before_standard_top_of_body_html_generation::class,
         'callback' => \block_eledia_aitutor\hook_callbacks::class . '::inject_admin_launcher',
         'priority' => 480,
