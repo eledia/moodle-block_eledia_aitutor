@@ -410,7 +410,18 @@ if ($ragingestpending > 0) {
         ['class' => 'eat-setup-callout eat-setup-callout--warning']
     );
 }
-$missingpluginsnotice = (!$literagavailable || !$ragingestavailable || ($mcpenabled && !$mcpavailable))
+// Name only the companion plugins that are actually missing.
+$missingplugins = [];
+if (!$literagavailable) {
+    $missingplugins[] = 'eLeDia LiteRAG (local_literag)';
+}
+if (!$ragingestavailable) {
+    $missingplugins[] = 'eLeDia.ai RagIngest (local_ragingest)';
+}
+if ($mcpenabled && !$mcpavailable) {
+    $missingplugins[] = 'eLeDia MCP (webservice_elediamcp)';
+}
+$missingpluginsnotice = $missingplugins !== []
     ? html_writer::tag(
         'div',
         html_writer::tag(
@@ -419,7 +430,11 @@ $missingpluginsnotice = (!$literagavailable || !$ragingestavailable || ($mcpenab
         ) .
         html_writer::tag(
             'p',
-            get_string('configuration_wizard_missing_body', 'block_eledia_aitutor')
+            get_string(
+                'configuration_wizard_missing_body',
+                'block_eledia_aitutor',
+                implode(', ', $missingplugins)
+            )
         ),
         ['class' => 'eat-setup-callout eat-setup-callout--warning']
     )
