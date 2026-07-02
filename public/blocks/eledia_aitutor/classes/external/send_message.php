@@ -42,6 +42,9 @@ class send_message extends external_api {
     /** @var string[] Accepted answer styles ('' = use the instance default). */
     private const ANSWER_STYLES = ['', 'explain', 'hint', 'quiz'];
 
+    /** @var string[] Accepted routing intents ('' = server default 'auto'). */
+    private const INTENTS = ['', 'auto', 'action', 'knowledge'];
+
     /**
      * Parameter definition.
      *
@@ -59,6 +62,12 @@ class send_message extends external_api {
                 VALUE_DEFAULT,
                 ''
             ),
+            'intent' => new external_value(
+                PARAM_ALPHA,
+                'Routing hint (auto|action|knowledge), or empty for the server default',
+                VALUE_DEFAULT,
+                ''
+            ),
         ]);
     }
 
@@ -70,6 +79,7 @@ class send_message extends external_api {
      * @param int $courseid Course id, or 0.
      * @param string $conversationid Existing conversation id, or ''.
      * @param string $answerstyle Requested answer style, or '' for the instance default.
+     * @param string $intent Routing hint (auto|action|knowledge), or '' for the server default.
      * @return array Response structure.
      * @throws moodle_exception
      */
@@ -78,7 +88,8 @@ class send_message extends external_api {
         string $message,
         int $courseid,
         string $conversationid,
-        string $answerstyle = ''
+        string $answerstyle = '',
+        string $intent = ''
     ): array {
         $params = self::validate_parameters(self::execute_parameters(), [
             'contextid' => $contextid,
@@ -86,10 +97,14 @@ class send_message extends external_api {
             'courseid' => $courseid,
             'conversationid' => $conversationid,
             'answerstyle' => $answerstyle,
+            'intent' => $intent,
         ]);
 
         if (!in_array($params['answerstyle'], self::ANSWER_STYLES, true)) {
             throw new \invalid_parameter_exception('Invalid answer style.');
+        }
+        if (!in_array($params['intent'], self::INTENTS, true)) {
+            throw new \invalid_parameter_exception('Invalid intent.');
         }
 
         global $USER;
@@ -158,7 +173,8 @@ class send_message extends external_api {
             $effectivestyle,
             $dailylimit,
             $ragenabled,
-            $persona
+            $persona,
+            $params['intent'] !== '' ? $params['intent'] : null
         );
 
         return [

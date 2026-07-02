@@ -120,4 +120,165 @@ final class widget_test extends \advanced_testcase {
         set_config('mcpserviceid', 1, 'block_eledia_aitutor');
         $this->assertNull(widget::config_error($courseid, $grounded));
     }
+
+    /**
+     * Prepare a renderable global-chat setup (LLM-only, no ingestion) and a
+     * logged-in user.
+     *
+     * @return \stdClass The user.
+     */
+    private function setup_render_user(): \stdClass {
+        set_config('ragserverurl', 'https://rag.example.com/mcp', 'block_eledia_aitutor');
+        set_config('allowllmonly', 1, 'block_eledia_aitutor');
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        return $user;
+    }
+
+    /**
+     * On the dashboard the hero variant renders: greeting headline, briefing
+     * chip and no classic welcome bubble.
+     */
+    public function test_render_dashboard_shows_hero_and_briefing(): void {
+        $this->resetAfterTest();
+        $user = $this->setup_render_user();
+        set_config('promptstarters', "What is due this week?", 'block_eledia_aitutor');
+
+        $html = widget::render(\core\context\system::instance(), 0, ['dashboard' => true]);
+
+        $this->assertStringContainsString('eledia_aitutor-hero', $html);
+        $expectedgreeting = str_replace(
+            '{firstname}',
+            $user->firstname,
+            get_string('default_dashboardgreeting', 'block_eledia_aitutor')
+        );
+        $this->assertStringContainsString($expectedgreeting, $html);
+        $this->assertStringContainsString('data-action="briefing"', $html);
+        $this->assertStringContainsString('What is due this week?', $html);
+        $this->assertStringNotContainsString('eledia_aitutor-welcome', $html);
+
+        // Slim chrome: no history browser, no new-conversation button, no
+        // answer-style chips, no mode banner, no identity row.
+        $this->assertStringNotContainsString('data-action="history"', $html);
+        $this->assertStringNotContainsString('data-action="newconversation"', $html);
+        $this->assertStringNotContainsString('data-region="styles"', $html);
+        $this->assertStringNotContainsString('eledia_aitutor-modenote', $html);
+        $this->assertStringNotContainsString('eledia_aitutor-identity', $html);
+        // The privacy control stays.
+        $this->assertStringContainsString('data-action="privacy"', $html);
+    }
+
+    /**
+     * The hero always chats globally: a course id wired into the instance
+     * (fixed course id) is discarded on the dashboard, so the send path never
+     * hits the course-block gate.
+     */
+    public function test_render_dashboard_forces_global_chat(): void {
+        $this->resetAfterTest();
+        $this->setup_render_user();
+        $course = $this->getDataGenerator()->create_course();
+
+        $html = widget::render(\core\context\system::instance(), (int) $course->id, ['dashboard' => true]);
+        $this->assertStringContainsString('"courseid":0', $html);
+
+        // Off the dashboard the course id passes through untouched.
+        $html = widget::render(\core\context\system::instance(), (int) $course->id, []);
+        $this->assertStringContainsString('"courseid":' . $course->id, $html);
+    }
+
+    /**
+     * The site toggle switches the hero off: the same dashboard flag renders
+     * the classic widget.
+     */
+    public function test_render_dashboard_disabled_renders_classic(): void {
+        $this->resetAfterTest();
+        $this->setup_render_user();
+        set_config('dashboardenabled', 0, 'block_eledia_aitutor');
+
+        $html = widget::render(\core\context\system::instance(), 0, ['dashboard' => true]);
+
+        $this->assertStringNotContainsString('eledia_aitutor-hero', $html);
+        $this->assertStringNotContainsString('data-action="briefing"', $html);
+        $this->assertStringContainsString('eledia_aitutor-welcome', $html);
+    }
+
+    /**
+     * Off the dashboard nothing changes: no hero, no briefing chip.
+     */
+    public function test_render_without_dashboard_flag_is_classic(): void {
+        $this->resetAfterTest();
+        $this->setup_render_user();
+
+        $html = widget::render(\core\context\system::instance(), 0, []);
+
+        $this->assertStringNotContainsString('eledia_aitutor-hero', $html);
+        $this->assertStringNotContainsString('data-action="briefing"', $html);
+        $this->assertStringContainsString('eledia_aitutor-welcome', $html);
+    }
+
+    /**
+     * Pills parse the "fa-icon | Label | Prompt" line format: the short label
+     * is the button text, the full prompt travels in data-prompt, the icon
+     * renders as a FontAwesome element.
+     */
+    public function test_render_dashboard_pill_format(): void {
+        $this->resetAfterTest();
+        $this->setup_render_user();
+        set_config(
+            'promptstarters',
+            "fa-tasks | Open tasks | Which tasks are currently open for me?\n"
+                . 'action | fa-plus | Create course | Create a new course for me.',
+            'block_eledia_aitutor'
+        );
+
+        $html = widget::render(\core\context\system::instance(), 0, ['dashboard' => true]);
+
+        $this->assertStringContainsString('Open tasks', $html);
+        $this->assertStringContainsString('data-prompt="Which tasks are currently open for me?"', $html);
+        $this->assertStringContainsString('fa fa-tasks', $html);
+        $this->assertStringNotContainsString('data-prompt="Open tasks"', $html);
+
+        // The 'action' intent segment lands as data-intent; the plain pill has none.
+        $this->assertStringContainsString('data-intent="action"', $html);
+        $this->assertStringContainsString('data-prompt="Create a new course for me."', $html);
+        $this->assertStringNotContainsString('data-intent="auto"', $html);
+    }
+
+    /**
+     * An unconfigured dashboard still shows the built-in audience pills.
+     */
+    public function test_render_dashboard_default_pills(): void {
+        $this->resetAfterTest();
+        $this->setup_render_user();
+
+        $html = widget::render(\core\context\system::instance(), 0, ['dashboard' => true]);
+
+        $this->assertStringContainsString('data-action="starter"', $html);
+        $this->assertStringContainsString('data-prompt=', $html);
+    }
+
+    /**
+     * Teachers get the teacher starter list on the dashboard; the base list
+     * stays for everyone else.
+     */
+    public function test_render_dashboard_teacher_starters(): void {
+        $this->resetAfterTest();
+        $user = $this->setup_render_user();
+        set_config('promptstarters', "Student question", 'block_eledia_aitutor');
+        set_config('promptstarters_teacher', "Show my grading queue", 'block_eledia_aitutor');
+
+        // As a plain user: the base list.
+        $html = widget::render(\core\context\system::instance(), 0, ['dashboard' => true]);
+        $this->assertStringContainsString('Student question', $html);
+        $this->assertStringNotContainsString('Show my grading queue', $html);
+
+        // As a teacher (audience cache purged after the role change): the teacher list.
+        $course = $this->getDataGenerator()->create_course();
+        $this->getDataGenerator()->enrol_user($user->id, $course->id, 'editingteacher');
+        \cache::make('block_eledia_aitutor', 'audience')->purge();
+
+        $html = widget::render(\core\context\system::instance(), 0, ['dashboard' => true]);
+        $this->assertStringContainsString('Show my grading queue', $html);
+        $this->assertStringNotContainsString('Student question', $html);
+    }
 }

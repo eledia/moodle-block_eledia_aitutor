@@ -809,6 +809,248 @@ a.eledia_aitutor-avatar:focus-visible {
     background: var(--eat-tint);
 }
 
+/* --- Dashboard hero (/my/): Claude-style start surface. ----------------- */
+.eledia_aitutor-header--hero {
+    justify-content: flex-end;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 0;
+    background: transparent;
+}
+
+/* The hero panel sizes to its content: no fixed conversation height, the
+   log stays collapsed until the first exchange and then grows (capped). */
+.eledia_aitutor-panel--hero .eledia_aitutor-window {
+    height: auto;
+    min-height: 0;
+}
+
+.eledia_aitutor-panel--hero .eledia_aitutor-log {
+    flex: 0 1 auto;
+    max-height: 55vh;
+    /* No own surface or vertical padding: an empty log collapses invisibly
+       (no grey strip on first open); the first/last message carry the gap. */
+    background: transparent;
+    padding: 0 1rem;
+}
+
+.eledia_aitutor-panel--hero .eledia_aitutor-message:first-child {
+    margin-top: 0.75rem;
+}
+
+.eledia_aitutor-panel--hero .eledia_aitutor-message:last-child {
+    margin-bottom: 0.75rem;
+}
+
+.eledia_aitutor-hero {
+    padding: 1.5rem 1rem 1rem;
+    text-align: center;
+}
+
+.eledia_aitutor-hero-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    font-family: var(--eat-hero-font, georgia, 'Times New Roman', serif);
+    color: var(--eat-ink);
+    font-size: 1.7rem;
+    font-weight: 500;
+    line-height: 1.25;
+    margin: 0 0 0.25rem;
+}
+
+.eledia_aitutor-hero-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.eledia_aitutor-hero-sub {
+    color: var(--eat-muted);
+    font-size: 0.95rem;
+}
+
+.eledia_aitutor-hero-sub p:last-child {
+    margin-bottom: 0;
+}
+
+/* The composer becomes the central card (rounded, framed, floating). */
+.eledia_aitutor-panel--hero .eledia_aitutor-composer {
+    border-top: 0;
+    border: 1px solid var(--eat-line);
+    border-radius: 24px;
+    margin: 0.25rem 1.25rem 0;
+    padding: 0.7rem 0.7rem 0.7rem 1.15rem;
+    box-shadow: var(--eat-shadow-sm);
+}
+
+/* Pills live under the composer, centred (Claude-style action row). */
+.eledia_aitutor-starters--hero {
+    justify-content: center;
+    align-self: auto;
+    max-width: 100%;
+    padding: 0.8rem 1.25rem 1.25rem;
+    margin: 0;
+}
+
+.eledia_aitutor-starters--hero .eledia_aitutor-starter {
+    font-size: 0.86rem;
+    padding: 0.45rem 1rem;
+    /* Pills stay pills: overlong labels (e.g. a pipe-less full prompt) are
+       ellipsised instead of wrapping into a text blob. */
+    max-width: 240px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* LernHive touch: pill icons pick up the brand orange. */
+.eledia_aitutor-starters--hero .eledia_aitutor-starter .fa {
+    color: var(--eat-brand);
+    margin-right: 0.15rem;
+}
+
+.eledia_aitutor-briefing {
+    border-color: var(--eat-accent-dark, var(--eat-accent));
+    background: var(--eat-accent);
+    color: var(--eat-accent-contrast, #fff);
+}
+
+.eledia_aitutor-starters--hero .eledia_aitutor-briefing .fa {
+    color: inherit;
+}
+
+.eledia_aitutor-briefing:hover,
+.eledia_aitutor-briefing:focus-visible {
+    border-color: var(--eat-accent-dark, var(--eat-accent));
+    background: var(--eat-accent-dark, var(--eat-accent));
+    color: var(--eat-accent-contrast, #fff);
+}
+
+.eledia_aitutor-briefing:active {
+    background: var(--eat-accent-dark, var(--eat-accent));
+}
+
+/* --- AI-Home full page (home.php). -------------------------------------- */
+.eledia_aitutor-home {
+    max-width: 860px;
+    margin: 0 auto;
+    padding-top: clamp(0.25rem, 3vh, 2rem);
+}
+
+/* No block drawer on the home page: the page shows no blocks, so the
+   Boost drawer toggle would only open an empty drawer. */
+.eledia_aitutor-homebody .drawer-toggler {
+    display: none;
+}
+
+/* The whole page adopts the conversation tint (the --eat-body-bg default;
+   the tokens are widget-scoped, hence the literal), so the sticky composer
+   footer blends seamlessly instead of sitting on a white page as a grey band.
+   Boost renders the content inside a white rounded card (#page.drawers
+   .main-inner) — that selector needs the id to win the specificity contest. */
+.eledia_aitutor-homebody,
+.eledia_aitutor-homebody #page,
+.eledia_aitutor-homebody #page.drawers .main-inner,
+.eledia_aitutor-homebody .main-inner,
+.eledia_aitutor-homebody #page-content,
+.eledia_aitutor-homebody #region-main,
+.eledia_aitutor-homebody #page-footer {
+    background: #f4f6f8;
+    box-shadow: none;
+}
+
+/* The page rule below pins a viewport height on embedded windows; the hero
+   sizes to content instead (also on the home page). */
+.eledia_aitutor-page .eledia_aitutor-panel--hero .eledia_aitutor-window {
+    height: auto;
+    min-height: 0;
+}
+
+/* On the home page the window frame disappears: the page IS the surface,
+   only the composer card and the bubbles keep their chrome (Claude-style). */
+.eledia_aitutor-home .eledia_aitutor-window {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+}
+
+.eledia_aitutor-home .eledia_aitutor-hero-title {
+    font-size: 2.1rem;
+}
+
+.eledia_aitutor-home .eledia_aitutor-hero-avatar {
+    width: 42px;
+    height: 42px;
+}
+
+.eledia_aitutor-home .eledia_aitutor-panel--hero .eledia_aitutor-composer {
+    background: var(--eat-surface);
+}
+
+/* Full-page conversation: the page scrolls, not an inner box. Both axes must
+   be visible — a hidden x-axis would force the y-axis back to auto and
+   produce the double scrollbar. */
+.eledia_aitutor-home .eledia_aitutor-panel--hero .eledia_aitutor-log {
+    max-height: none;
+    overflow: visible;
+}
+
+/* Composer + pills stick to the bottom of the viewport while the
+   conversation scrolls behind them (Claude-style). */
+.eledia_aitutor-home .eledia_aitutor-hero-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: var(--eat-body-bg);
+    padding-top: 0.5rem;
+    /* Breathing room to the viewport edge (Claude-style); the footer's own
+       background fills the gap so nothing scrolls through underneath. */
+    padding-bottom: 1.25rem;
+}
+
+.eledia_aitutor-home .eledia_aitutor-starters--hero {
+    padding-bottom: 0;
+}
+
+/* New messages scrolled into view clear the sticky footer. */
+.eledia_aitutor-home .eledia_aitutor-message {
+    scroll-margin-bottom: 9rem;
+}
+
+/* The "powered by" line sits directly on the page surface — no white box. */
+.eledia_aitutor-panel--hero .eledia_aitutor-footer {
+    background: transparent;
+    border-top: 0;
+}
+
+/* Already a full page: the enlarge control is meaningless on the home page. */
+.eledia_aitutor-home [data-action="expand"] {
+    display: none;
+}
+
+/* --- Teacher-Copilot card on the analytics report. --------------------- */
+.eat-copilot .eat-copilot-intro {
+    color: var(--eat-muted);
+    margin: 0.25rem 0 0.75rem;
+}
+
+.eat-copilot .eat-copilot-status {
+    color: var(--eat-muted);
+    font-size: 0.9rem;
+    min-height: 1.2rem;
+    margin-top: 0.5rem;
+}
+
+.eat-copilot .eat-copilot-result {
+    border-top: 1px solid var(--eat-line);
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+}
+
 /* --- Write confirmations. --------------------------------------------- */
 .eledia_aitutor-confirmation {
     display: flex;

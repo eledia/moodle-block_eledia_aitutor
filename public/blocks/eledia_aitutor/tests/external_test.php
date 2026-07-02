@@ -21,6 +21,7 @@ namespace block_eledia_aitutor;
 use PHPUnit\Framework\Attributes\CoversClass;
 use block_eledia_aitutor\external\clear_conversation;
 use block_eledia_aitutor\external\delete_my_data;
+use block_eledia_aitutor\external\generate_copilot_analysis;
 use block_eledia_aitutor\external\get_conversations;
 use block_eledia_aitutor\external\send_message;
 use block_eledia_aitutor\external\set_ltm;
@@ -36,6 +37,7 @@ use block_eledia_aitutor\local\ltm;
  * @copyright   2026 eLeDia GmbH, Berlin
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\block_eledia_aitutor\external\generate_copilot_analysis::class)]
 #[CoversClass(\block_eledia_aitutor\external\send_message::class)]
 #[CoversClass(\block_eledia_aitutor\external\get_conversations::class)]
 #[CoversClass(\block_eledia_aitutor\external\clear_conversation::class)]
@@ -71,6 +73,39 @@ final class external_test extends \advanced_testcase {
 
         $this->expectException(\required_capability_exception::class);
         send_message::execute($context->id, 'Hi', 0, '');
+    }
+
+    /**
+     * The copilot analysis is reserved for report viewers: an ordinary
+     * student in the course is rejected before any data is touched.
+     */
+    public function test_generate_copilot_analysis_requires_viewreports(): void {
+        $this->resetAfterTest();
+        set_config('enableanalytics', 1, 'block_eledia_aitutor');
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
+        $this->setUser($student);
+
+        $this->expectException(\required_capability_exception::class);
+        generate_copilot_analysis::execute((int) $course->id);
+    }
+
+    /**
+     * The copilot analysis refuses to run while question analytics is off.
+     */
+    public function test_generate_copilot_analysis_requires_analytics(): void {
+        $this->resetAfterTest();
+        set_config('enableanalytics', 0, 'block_eledia_aitutor');
+        $course = $this->getDataGenerator()->create_course();
+        $teacher = $this->getDataGenerator()->create_and_enrol($course, 'editingteacher');
+        $this->setUser($teacher);
+
+        try {
+            generate_copilot_analysis::execute((int) $course->id);
+            $this->fail('Expected the analytics gate to throw.');
+        } catch (\moodle_exception $e) {
+            $this->assertSame('report_disabled', $e->errorcode);
+        }
     }
 
     /**

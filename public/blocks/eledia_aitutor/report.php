@@ -147,6 +147,10 @@ if (!empty($hotspots)) {
     echo html_writer::end_div();
 }
 
+// Teacher-Copilot: on-demand AI analysis of the logged questions.
+echo $OUTPUT->render_from_template('block_eledia_aitutor/copilot_section', ['courseid' => $course->id]);
+$PAGE->requires->js_call_amd('block_eledia_aitutor/copilot_report', 'init', [$course->id]);
+
 // Questions per day (last 14 days, newest first).
 $perday = array_reverse(question_log::per_day($course->id, 14), true);
 $max = max(1, max($perday));

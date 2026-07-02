@@ -64,7 +64,7 @@ class registry {
     /** @var string[] Group ids in display order. */
     private const GROUP_ORDER = [
         'persona', 'accent', 'surfaces', 'text', 'bubbles', 'states',
-        'shape', 'effects', 'conversation', 'launcher', 'footer', 'files',
+        'shape', 'effects', 'conversation', 'dashboard', 'launcher', 'footer', 'files',
     ];
 
     /**
@@ -197,6 +197,29 @@ class registry {
         ]);
         $entries['historyenabled'] = self::entry('conversation', 'checkbox', [
             'default' => 1, 'exposedefault' => true,
+        ]);
+
+        // Dashboard hero mode (/my/ pages only). The hero replaces the classic
+        // widget with a prominent greeting, audience-specific prompt starters
+        // and a briefing button; empty text values fall back to lang-string
+        // defaults at render time (see widget::render()).
+        $entries['dashboardenabled'] = self::entry('dashboard', 'checkbox', [
+            'default' => 1, 'exposedefault' => true,
+        ]);
+        $entries['dashboardgreeting'] = self::entry('dashboard', 'text', [
+            'exposedefault' => true,
+        ]);
+        $entries['promptstarters_teacher'] = self::entry('dashboard', 'textarea', [
+            'exposedefault' => true,
+        ]);
+        $entries['promptstarters_manager'] = self::entry('dashboard', 'textarea', [
+            'exposedefault' => true,
+        ]);
+        $entries['briefingenabled'] = self::entry('dashboard', 'checkbox', [
+            'default' => 1, 'exposedefault' => true,
+        ]);
+        $entries['briefingprompt'] = self::entry('dashboard', 'textarea', [
+            'exposedefault' => true,
         ]);
 
         // Launcher.

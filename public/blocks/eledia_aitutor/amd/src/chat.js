@@ -153,9 +153,16 @@ class TutorChat {
         }
         if (!this.config.historyenabled) {
             // No history tool: continue the thread without a visible replay.
+            // The hero keeps its greeting and pills — there are no messages to
+            // show, so an emptied start surface would just look broken.
             this.conversationId = stored;
-            this.hideStarters();
-            this.setStatus(strings.resumed);
+            if (!this.config.dashboardmode) {
+                // Classic widget: hide the chips and announce the resume. The
+                // hero stays silent — visually nothing changed, so a
+                // "conversation resumed" notice would only confuse.
+                this.hideStarters();
+                this.setStatus(strings.resumed);
+            }
             return;
         }
         this.loadConversation(stored).then(() => {
@@ -300,12 +307,19 @@ class TutorChat {
     handleAction(action, el) {
         switch (action) {
             case 'launch': this.open(); break;
-            case 'close': this.expanded ? this.shrink() : this.close(); break;
+            case 'close':
+                if (this.expanded) {
+                    this.shrink();
+                } else {
+                    this.close();
+                }
+                break;
             case 'expand': this.toggleExpanded(); break;
             case 'send': this.send(); break;
             case 'newconversation': this.newConversation(); break;
             case 'style': this.setStyle(el); break;
             case 'starter': this.useStarter(el); break;
+            case 'briefing': this.useBriefing(); break;
             case 'consent-accept': this.giveConsent(el); break;
             case 'privacy': this.openPrivacy(); break;
             case 'history': this.toggleHistory(); break;
@@ -527,11 +541,13 @@ class TutorChat {
             return;
         }
         this.lastUserMessage = message;
+        this.lastIntent = this.pendingIntent || '';
+        this.pendingIntent = '';
         this.input.value = '';
         this.autoGrow();
         this.hideStarters();
         this.appendUser(message);
-        this.dispatch(message);
+        this.dispatch(message, this.lastIntent);
     }
 
     /**
@@ -544,7 +560,30 @@ class TutorChat {
         if (this.busy || !this.consented) {
             return;
         }
-        this.input.value = (el.textContent || '').trim();
+        // Pills carry the full prompt in data-prompt (the label is short);
+        // legacy chips without it send their visible text. An optional
+        // data-intent routes the turn server-side (action = Moodle tools only).
+        this.input.value = (el.dataset.prompt || el.textContent || '').trim();
+        this.pendingIntent = el.dataset.intent || '';
+        this.autoGrow();
+        this.send();
+    }
+
+    /**
+     * Send the configured briefing prompt (dashboard hero mode).
+     *
+     * The prompt travels the normal composer path, so the server treats it
+     * like any typed message; the chip region is hidden by send() as usual.
+     *
+     * @return {void}
+     */
+    useBriefing() {
+        if (this.busy || !this.consented || !this.config.briefingprompt) {
+            return;
+        }
+        this.input.value = this.config.briefingprompt;
+        // The briefing is an action prompt: Moodle tools, no KB retrieval.
+        this.pendingIntent = 'action';
         this.autoGrow();
         this.send();
     }
@@ -555,9 +594,19 @@ class TutorChat {
      * @return {void}
      */
     hideStarters() {
-        const starters = this.panel.querySelector('[data-region="starters"]');
-        if (starters) {
-            starters.setAttribute('hidden', 'hidden');
+        // Hero mode: the pills are a permanent quick-action row under the
+        // composer and stay available throughout the conversation; only the
+        // greeting leaves once the log owns the panel (Claude-style). The
+        // classic in-log chips still hide with the first message.
+        if (!this.config.dashboardmode) {
+            const starters = this.panel.querySelector('[data-region="starters"]');
+            if (starters) {
+                starters.setAttribute('hidden', 'hidden');
+            }
+        }
+        const hero = this.panel.querySelector('[data-region="hero"]');
+        if (hero) {
+            hero.setAttribute('hidden', 'hidden');
         }
     }
 
@@ -570,6 +619,10 @@ class TutorChat {
         const starters = this.panel.querySelector('[data-region="starters"]');
         if (starters) {
             starters.removeAttribute('hidden');
+        }
+        const hero = this.panel.querySelector('[data-region="hero"]');
+        if (hero) {
+            hero.removeAttribute('hidden');
         }
     }
 
@@ -588,16 +641,17 @@ class TutorChat {
         if (bubble) {
             bubble.remove();
         }
-        this.dispatch(message);
+        this.dispatch(message, this.lastIntent || '');
     }
 
     /**
      * Perform the AJAX send and render the response.
      *
      * @param {string} message The user message.
+     * @param {string} [intent] Optional routing hint (''|'auto'|'action'|'knowledge').
      * @return {void}
      */
-    dispatch(message) {
+    dispatch(message, intent) {
         this.busy = true;
         this.showTyping();
         this.setStatus(strings.thinking);
@@ -609,7 +663,8 @@ class TutorChat {
                 message: message,
                 courseid: this.config.courseid || 0,
                 conversationid: this.conversationId || '',
-                answerstyle: this.answerStyle || ''
+                answerstyle: this.answerStyle || '',
+                intent: intent || ''
             }
         }])[0].then((response) => {
             this.hideTyping();
@@ -621,7 +676,7 @@ class TutorChat {
                 this.historyLoaded = false;
             }
             return this.appendAssistant(response.answerhtml, response.sources || [], response.iserror,
-                response.confirmation || null, response.answerorigin || 'general');
+                response.confirmation || null, response.answerorigin || '');
         }).catch((error) => {
             this.hideTyping();
             this.busy = false;
@@ -666,6 +721,8 @@ class TutorChat {
             nomessage: confirmation.nomessage || 'Nein'
         } : null;
         const ismcp = answerorigin === 'mcp';
+        const israg = answerorigin === 'rag' || (!answerorigin && mappedSources.length > 0);
+        const visibleSources = israg ? mappedSources : [];
         return this.appendMessage({
             isassistant: true,
             sendername: this.config.persona,
@@ -673,11 +730,11 @@ class TutorChat {
             failed: !!iserror,
             hasconfirmation: !!confirm,
             confirmation: confirm,
-            sources: mappedSources,
-            hassources: mappedSources.length > 0,
+            sources: visibleSources,
+            hassources: visibleSources.length > 0,
             showmcpbadge: !iserror && ismcp,
             showgrounding: !iserror && !ismcp,
-            grounded: answerorigin === 'rag' || (!answerorigin && mappedSources.length > 0),
+            grounded: israg,
             copylabel: strings.copy,
             retrylabel: strings.retry
         });
@@ -1290,6 +1347,16 @@ class TutorChat {
     scrollToBottom() {
         const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const behavior = reduce ? 'auto' : 'smooth';
+        // Page-scrolling hero (AI-Home): the log has no inner scrollbar, so
+        // bring the newest entry into view via the page instead. Messages set
+        // scroll-margin-bottom so they clear the sticky composer footer.
+        if (this.config.dashboardmode && this.log.scrollHeight <= this.log.clientHeight + 1) {
+            const last = this.log.lastElementChild;
+            if (last && last.scrollIntoView) {
+                last.scrollIntoView({block: 'end', behavior: behavior});
+            }
+            return;
+        }
         try {
             this.log.scrollTo({top: this.log.scrollHeight, behavior: behavior});
         } catch (e) {

@@ -44,4 +44,14 @@ $definitions = [
         'simpledata' => false,
         'ttl' => 3700,
     ],
+    // Coarse user audience (student/teacher/manager) for dashboard starter
+    // selection. Role changes surface after at most the TTL or a cache purge.
+    'audience' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 100,
+        'ttl' => 3600,
+    ],
 ];

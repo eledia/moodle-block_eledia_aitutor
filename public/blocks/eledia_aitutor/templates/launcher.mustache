@@ -38,7 +38,16 @@
         "launchlabel": "Open the eLeDia.ai Tutor",
         "logourl": "https://example.com/pix/logo.svg",
         "avatarurl": "https://example.com/pix/avatar.svg",
-        "consented": true
+        "consented": true,
+        "dashboardmode": false,
+        "dashboardgreeting": "Have you moodled today?",
+        "briefing": false,
+        "briefinglabel": "Daily briefing",
+        "showchips": true,
+        "starters": [
+            {"label": "What is due?", "prompt": "What is due this week?", "hasicon": true, "icon": "fa-calendar-check-o"}
+        ],
+        "hasstarters": true
     }
 }}
 {{#customcss}}
@@ -71,7 +80,7 @@
         </button>
     {{/embedded}}
 
-    <div class="eledia_aitutor-panel {{#embedded}}eledia_aitutor-embedded{{/embedded}}"
+    <div class="eledia_aitutor-panel {{#embedded}}eledia_aitutor-embedded{{/embedded}}{{#dashboardmode}} eledia_aitutor-panel--hero{{/dashboardmode}}"
          style="{{brandvars}}"
          data-region="panel"
          role="region"
@@ -81,20 +90,22 @@
         <div class="eledia_aitutor-backdrop" data-action="close" hidden></div>
 
         <div class="eledia_aitutor-window" role="document">
-            <header class="eledia_aitutor-header">
-                <div class="eledia_aitutor-identity">
-                    <a class="eledia_aitutor-avatar" href="https://eledia.ai"
-                       target="_blank" rel="noopener"
-                       title="{{#str}}eledialink, block_eledia_aitutor{{/str}}"
-                       aria-label="{{#str}}eledialink, block_eledia_aitutor{{/str}}">
-                        <img class="eledia_aitutor-avatar-img" src="{{logourl}}" alt="" width="34" height="34">
-                        <span class="eledia_aitutor-status-dot"></span>
-                    </a>
-                    <span class="eledia_aitutor-identity-text">
-                        <span class="eledia_aitutor-title">{{persona}}</span>
-                        <span class="eledia_aitutor-presence">{{#str}}online, block_eledia_aitutor{{/str}}</span>
-                    </span>
-                </div>
+            <header class="eledia_aitutor-header{{#dashboardmode}} eledia_aitutor-header--hero{{/dashboardmode}}">
+                {{^dashboardmode}}
+                    <div class="eledia_aitutor-identity">
+                        <a class="eledia_aitutor-avatar" href="https://eledia.ai"
+                           target="_blank" rel="noopener"
+                           title="{{#str}}eledialink, block_eledia_aitutor{{/str}}"
+                           aria-label="{{#str}}eledialink, block_eledia_aitutor{{/str}}">
+                            <img class="eledia_aitutor-avatar-img" src="{{logourl}}" alt="" width="34" height="34">
+                            <span class="eledia_aitutor-status-dot"></span>
+                        </a>
+                        <span class="eledia_aitutor-identity-text">
+                            <span class="eledia_aitutor-title">{{persona}}</span>
+                            <span class="eledia_aitutor-presence">{{#str}}online, block_eledia_aitutor{{/str}}</span>
+                        </span>
+                    </div>
+                {{/dashboardmode}}
                 <div class="eledia_aitutor-actions">
                     {{#showexpand}}
                         <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
@@ -113,11 +124,13 @@
                             <i class="fa fa-clock-o" aria-hidden="true"></i>
                         </button>
                     {{/historyenabled}}
-                    <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
-                            data-action="newconversation" aria-label="{{#str}}newconversation, block_eledia_aitutor{{/str}}"
-                            title="{{#str}}newconversation, block_eledia_aitutor{{/str}}">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                    </button>
+                    {{^dashboardmode}}
+                        <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
+                                data-action="newconversation" aria-label="{{#str}}newconversation, block_eledia_aitutor{{/str}}"
+                                title="{{#str}}newconversation, block_eledia_aitutor{{/str}}">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
+                    {{/dashboardmode}}
                     <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
                             data-action="privacy" aria-label="{{#str}}privacyguidelines, block_eledia_aitutor{{/str}}"
                             title="{{#str}}privacyguidelines, block_eledia_aitutor{{/str}}"
@@ -134,12 +147,24 @@
                 </div>
             </header>
 
-            {{#llmonly}}
-                <div class="eledia_aitutor-modenote" role="note">
-                    <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
-                    {{#str}}llmonly_banner, block_eledia_aitutor{{/str}}
+            {{^dashboardmode}}
+                {{#llmonly}}
+                    <div class="eledia_aitutor-modenote" role="note">
+                        <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
+                        {{#str}}llmonly_banner, block_eledia_aitutor{{/str}}
+                    </div>
+                {{/llmonly}}
+            {{/dashboardmode}}
+
+            {{#dashboardmode}}
+                <div class="eledia_aitutor-hero" data-region="hero">
+                    <h2 class="eledia_aitutor-hero-title">
+                        <img class="eledia_aitutor-hero-avatar" src="{{avatarurl}}" alt="" width="34" height="34">
+                        <span>{{dashboardgreeting}}</span>
+                    </h2>
+                    {{#welcome}}<div class="eledia_aitutor-hero-sub">{{{welcome}}}</div>{{/welcome}}
                 </div>
-            {{/llmonly}}
+            {{/dashboardmode}}
 
             {{#historyenabled}}
                 <div class="eledia_aitutor-history" data-region="history" hidden
@@ -154,24 +179,30 @@
             <div class="eledia_aitutor-log" data-region="log"
                  role="log" aria-live="polite" aria-atomic="false"
                  aria-label="{{#str}}conversation, block_eledia_aitutor{{/str}}" tabindex="0">
-                <div class="eledia_aitutor-message eledia_aitutor-assistant eledia_aitutor-welcome">
-                    <div class="eledia_aitutor-meta">
-                        <span class="eledia_aitutor-msg-avatar" aria-hidden="true">
-                            <img class="eledia_aitutor-msg-avatar-img" src="{{avatarurl}}" alt="" width="20" height="20">
-                        </span>
-                        <span class="eledia_aitutor-sender">{{persona}}</span>
+                {{^dashboardmode}}
+                    <div class="eledia_aitutor-message eledia_aitutor-assistant eledia_aitutor-welcome">
+                        <div class="eledia_aitutor-meta">
+                            <span class="eledia_aitutor-msg-avatar" aria-hidden="true">
+                                <img class="eledia_aitutor-msg-avatar-img" src="{{avatarurl}}" alt="" width="20" height="20">
+                            </span>
+                            <span class="eledia_aitutor-sender">{{persona}}</span>
+                        </div>
+                        <div class="eledia_aitutor-bubble">{{{welcome}}}</div>
                     </div>
-                    <div class="eledia_aitutor-bubble">{{{welcome}}}</div>
-                </div>
-                {{#hasstarters}}
-                    <div class="eledia_aitutor-starters" data-region="starters" role="group"
-                         aria-label="{{#str}}starters_label, block_eledia_aitutor{{/str}}">
-                        {{#starters}}
-                            <button type="button" class="eledia_aitutor-starter"
-                                    data-action="starter">{{.}}</button>
-                        {{/starters}}
-                    </div>
-                {{/hasstarters}}
+                {{/dashboardmode}}
+                {{^dashboardmode}}
+                    {{#hasstarters}}
+                        <div class="eledia_aitutor-starters" data-region="starters" role="group"
+                             aria-label="{{#str}}starters_label, block_eledia_aitutor{{/str}}">
+                            {{#starters}}
+                                <button type="button" class="eledia_aitutor-starter"
+                                        data-action="starter" data-prompt="{{prompt}}">
+                                    {{#hasicon}}<i class="fa {{icon}}" aria-hidden="true"></i> {{/hasicon}}{{label}}
+                                </button>
+                            {{/starters}}
+                        </div>
+                    {{/hasstarters}}
+                {{/dashboardmode}}
                 {{#preview}}{{{previewmessages}}}{{/preview}}
             </div>
 
@@ -219,6 +250,7 @@
                 </div>
             {{/stylelocked}}
 
+            {{#dashboardmode}}<div class="eledia_aitutor-hero-footer" data-region="hero-footer">{{/dashboardmode}}
             <form class="eledia_aitutor-composer" data-region="composer"
                   aria-label="{{#str}}messagelabel, block_eledia_aitutor{{/str}}">
                 <label class="sr-only" for="{{uniqid}}_input">
@@ -233,6 +265,29 @@
                     <i class="fa fa-paper-plane" aria-hidden="true"></i>
                 </button>
             </form>
+
+            {{#dashboardmode}}
+                {{#showchips}}
+                    <div class="eledia_aitutor-starters eledia_aitutor-starters--hero"
+                         data-region="starters" role="group"
+                         aria-label="{{#str}}starters_label, block_eledia_aitutor{{/str}}">
+                        {{#briefing}}
+                            <button type="button" class="eledia_aitutor-starter eledia_aitutor-briefing"
+                                    data-action="briefing">
+                                <i class="fa fa-sun-o" aria-hidden="true"></i> {{briefinglabel}}
+                            </button>
+                        {{/briefing}}
+                        {{#starters}}
+                            <button type="button" class="eledia_aitutor-starter"
+                                    data-action="starter" data-prompt="{{prompt}}"
+                                    {{#intent}}data-intent="{{intent}}"{{/intent}}>
+                                {{#hasicon}}<i class="fa {{icon}}" aria-hidden="true"></i> {{/hasicon}}{{label}}
+                            </button>
+                        {{/starters}}
+                    </div>
+                {{/showchips}}
+                </div>
+            {{/dashboardmode}}
 
             {{#showfooter}}
                 <div class="eledia_aitutor-footer">{{footertext}}</div>

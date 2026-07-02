@@ -52,6 +52,9 @@ class chat_service {
      *                              tool (false = LLM-only); null omits the flag.
      * @param array|null $persona Structured persona to send to the RAG server
      *                            (name/role/tone/audience/instructions); null sends none.
+     * @param string|null $intent Optional routing hint ('auto'|'action'|'knowledge');
+     *                            'action' (dashboard pills/briefing) asks the server
+     *                            to skip retrieval and answer with Moodle tools only.
      * @return array{answerhtml: string, answermarkdown: string, conversationid: ?string, sources: array, answerorigin: string, confirmation: ?array, iserror: bool}
      * @throws \moodle_exception On validation, configuration, quota or RAG failure.
      */
@@ -65,7 +68,8 @@ class chat_service {
         ?string $answerstyle = null,
         ?int $dailylimit = null,
         ?bool $ragenabled = null,
-        ?array $persona = null
+        ?array $persona = null,
+        ?string $intent = null
     ): array {
         global $CFG;
 
@@ -124,7 +128,8 @@ class chat_service {
                 $answerstyle,
                 $userlang,
                 $ragenabled,
-                $persona
+                $persona,
+                $intent
             );
         } catch (rag_exception $e) {
             // The cached token may have been revoked/expired server-side: drop it,
@@ -146,7 +151,8 @@ class chat_service {
                     $answerstyle,
                     $userlang,
                     $ragenabled,
-                    $persona
+                    $persona,
+                    $intent
                 );
             } catch (rag_exception $retry) {
                 self::log_failure($userid, $context, 'rag_error', $retry, $courseid);
@@ -175,6 +181,11 @@ class chat_service {
         // hadn't): drop any sources a non-compliant server returned, so the UI
         // never shows a "grounded" badge and analytics record grounded=false.
         if ($ragenabled === false) {
+            $result['sources'] = [];
+        }
+
+        $answerorigin = $result['answer_origin'] ?? (!empty($result['sources']) ? 'rag' : 'general');
+        if ($answerorigin !== 'rag') {
             $result['sources'] = [];
         }
 
@@ -229,7 +240,7 @@ class chat_service {
             'answermarkdown' => $result['answer'],
             'conversationid' => $newconversationid !== null ? (string) $newconversationid : null,
             'sources' => $result['sources'],
-            'answerorigin' => $result['answer_origin'] ?? (!empty($result['sources']) ? 'rag' : 'general'),
+            'answerorigin' => $answerorigin,
             'confirmation' => $result['confirmation'] ?? null,
             'iserror' => $result['iserror'],
         ];

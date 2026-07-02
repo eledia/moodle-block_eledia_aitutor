@@ -140,6 +140,10 @@ class rag_client {
      *                              omits the flag (server default: enabled).
      * @param array|null $persona Structured persona (any of name/role/tone/
      *                            audience/instructions); empty/null sends none.
+     * @param string|null $intent Optional routing hint ('auto'|'action'|'knowledge'):
+     *                            'action' asks the server to skip knowledge-base
+     *                            retrieval (Moodle tools + LLM only); null/empty
+     *                            omits the argument (server default: auto).
      * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, answer_origin: string, confirmation: ?array, iserror: bool}
      * @throws rag_exception On transport or protocol failure.
      */
@@ -154,7 +158,8 @@ class rag_client {
         ?string $answerstyle = null,
         ?string $userlang = null,
         ?bool $ragenabled = null,
-        ?array $persona = null
+        ?array $persona = null,
+        ?string $intent = null
     ): array {
         $arguments = [
             'system_url' => $systemurl,
@@ -186,6 +191,9 @@ class rag_client {
         // guidance for the tutor's voice. See docs/rag_server_spec.md A.1.
         if (!empty($persona)) {
             $arguments['persona'] = $persona;
+        }
+        if ($intent !== null && $intent !== '' && $intent !== 'auto') {
+            $arguments['intent'] = $intent;
         }
 
         $result = $this->call_tool($toolname, $arguments);
@@ -605,6 +613,12 @@ class rag_client {
         }
         if ($answer === '' && $iserror) {
             $answer = get_string('error_rag_tool_error', 'block_eledia_aitutor');
+        }
+
+        // MCP tool answers are not retrieval-grounded citations. Some MCP
+        // servers still return helper references; keep them out of the Tutor UI.
+        if ($answerorigin !== 'rag') {
+            $sources = [];
         }
 
         return [

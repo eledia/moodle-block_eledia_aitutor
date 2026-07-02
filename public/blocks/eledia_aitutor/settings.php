@@ -345,9 +345,21 @@ if ($hassiteconfig) {
         1
     ));
 
-    foreach (['persona', 'conversation'] as $group) {
+    foreach (['persona', 'conversation', 'dashboard'] as $group) {
         $addregistrygroup($group);
     }
+
+    // AI-Home: pointer to the full-page start experience and how to make it
+    // the site's landing page (defaulthomepage → custom URL, Moodle 4.2+).
+    $settings->add(new admin_setting_heading(
+        'block_eledia_aitutor/headerhome',
+        get_string('setting_header_home', 'block_eledia_aitutor'),
+        get_string(
+            'setting_header_home_desc',
+            'block_eledia_aitutor',
+            (new moodle_url('/blocks/eledia_aitutor/home.php'))->out(false)
+        )
+    ));
 
     $settings->add(new admin_setting_heading(
         'block_eledia_aitutor/headerprivacy',

@@ -121,6 +121,9 @@ class block_eledia_aitutor extends block_base {
         $courseid = $this->resolve_course_id();
         $instance = (array) ($this->config ?? new stdClass());
         $instance['instanceid'] = (int) $this->instance->id;
+        // On the Dashboard (/my/) the widget may render its hero variant; the
+        // registry toggle 'dashboardenabled' decides whether it actually does.
+        $instance['dashboard'] = $this->page->pagetype === 'my-index';
 
         // Surface configuration problems to those who can fix them; everyone else
         // gets a friendly unavailable notice instead of a broken widget.

@@ -88,4 +88,12 @@ $functions = [
         'capabilities' => 'block/eledia_aitutor:deleteownhistory',
         'loginrequired' => true,
     ],
+    'block_eledia_aitutor_generate_copilot_analysis' => [
+        'classname' => 'block_eledia_aitutor\external\generate_copilot_analysis',
+        'description' => 'Generate a teacher-facing AI analysis of the course\'s logged tutor questions.',
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => 'block/eledia_aitutor:viewreports',
+        'loginrequired' => true,
+    ],
 ];

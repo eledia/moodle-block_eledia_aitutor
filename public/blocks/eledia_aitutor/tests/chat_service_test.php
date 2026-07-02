@@ -113,6 +113,49 @@ final class chat_service_test extends \advanced_testcase {
     }
 
     /**
+     * The routing intent reaches the server payload; the 'auto' default is
+     * omitted entirely (strict server schemas stay happy).
+     */
+    public function test_send_passes_intent_to_server(): void {
+        $this->resetAfterTest();
+        $this->configure_mcp_service();
+        $user = $this->create_consented_user();
+
+        $transport = fake_transport::json_result(['structuredContent' => ['answer' => 'ok']]);
+        $client = new rag_client(new moodle_url('https://rag.example.com/mcp'), null, $transport, 30);
+
+        chat_service::send(
+            (int) $user->id,
+            'Create a course.',
+            null,
+            null,
+            \core\context\system::instance(),
+            $client,
+            null,
+            null,
+            false,
+            null,
+            'action'
+        );
+        $this->assertSame('action', $transport->last_payload()['params']['arguments']['intent']);
+
+        chat_service::send(
+            (int) $user->id,
+            'Another question.',
+            null,
+            null,
+            \core\context\system::instance(),
+            $client,
+            null,
+            null,
+            false,
+            null,
+            null
+        );
+        $this->assertArrayNotHasKey('intent', $transport->last_payload()['params']['arguments']);
+    }
+
+    /**
      * In LLM-only mode, sources returned by a non-compliant server are
      * stripped: no grounded badge, analytics record grounded=false.
      */

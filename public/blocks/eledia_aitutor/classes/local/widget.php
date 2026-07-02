@@ -153,6 +153,18 @@ class widget {
         // visually faithful but never talks to the backend.
         $preview = !empty($instance['preview']);
 
+        // Dashboard hero mode: only when the block flagged a /my/ page AND the
+        // registry toggle allows it. The hero replaces the welcome bubble with a
+        // prominent greeting and always renders inline, so it forces 'embedded'.
+        // The hero is a personal, course-independent surface: it always chats
+        // globally, even when the instance is wired to a course (a fixed course
+        // id on the dashboard would otherwise fail the course-block gate).
+        $dashboard = !empty($instance['dashboard'])
+            && (int) registry::effective('dashboardenabled', $instance) === 1;
+        if ($dashboard) {
+            $courseid = 0;
+        }
+
         // Resolve the answer mode (grounded / LLM-only / unavailable). When the
         // tutor cannot answer here (no knowledge base and LLM-only disallowed),
         // show a friendly notice and skip the chat UI entirely.
@@ -171,12 +183,17 @@ class widget {
         }
 
         // Behaviour settings resolved instance-over-site through the registry.
-        $displaymode = (string) registry::effective('displaymode', $instance);
+        // The hero keeps the chrome minimal: no history browser (the composer
+        // and the chips are the whole surface).
+        $displaymode = $dashboard ? 'embedded' : (string) registry::effective('displaymode', $instance);
         $historyenabled = ((int) registry::effective('historyenabled', $instance) === 1)
-            && has_capability('block/eledia_aitutor:viewhistory', $context);
+            && has_capability('block/eledia_aitutor:viewhistory', $context)
+            && !$dashboard;
         $welcome = (string) registry::effective('welcomemessage', $instance);
         if (trim($welcome) === '') {
-            $welcome = get_string('default_welcome', 'block_eledia_aitutor');
+            // On the dashboard the hero greeting carries the opening, so an
+            // unset welcome stays empty instead of the built-in default.
+            $welcome = $dashboard ? '' : get_string('default_welcome', 'block_eledia_aitutor');
         }
         $persona = (string) registry::effective('persona', $instance);
         if (trim($persona) === '') {
@@ -184,11 +201,13 @@ class widget {
         }
 
         // Pedagogical answer style: default plus whether learners may switch.
+        // The hero hides the style chips entirely (slim surface); the default
+        // style still applies server-side.
         $answerstyle = (string) registry::effective('answerstyle', $instance);
         if (!in_array($answerstyle, ['explain', 'hint', 'quiz'], true)) {
             $answerstyle = 'explain';
         }
-        $allowstylechange = (int) registry::effective('allowstylechange', $instance) === 1;
+        $allowstylechange = (int) registry::effective('allowstylechange', $instance) === 1 && !$dashboard;
 
         $uniqid = 'eledia_aitutor_' . uniqid();
         $consented = consent::has_consented((int) $USER->id);
@@ -213,19 +232,55 @@ class widget {
             ? format_text($privacytext, FORMAT_HTML, ['context' => $context])
             : '';
 
-        // Prompt starters: instance value, falling back to the site default
-        // (resolved by the registry). One per line, capped so the welcome stays tidy.
-        $startersraw = (string) registry::effective('promptstarters', $instance);
-        $starters = [];
-        foreach (preg_split('/\R/', $startersraw) ?: [] as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $starters[] = format_string($line);
+        // Dashboard extras: greeting headline and the briefing chip. Empty
+        // settings fall back to built-in lang strings (default_welcome pattern).
+        $dashboardgreeting = '';
+        $briefing = false;
+        $briefingprompt = '';
+        if ($dashboard) {
+            $dashboardgreeting = trim((string) registry::effective('dashboardgreeting', $instance));
+            if ($dashboardgreeting === '') {
+                $dashboardgreeting = get_string('default_dashboardgreeting', 'block_eledia_aitutor');
             }
-            if (count($starters) >= 6) {
-                break;
+            // Personal touch: admins may greet by first name ("…, {firstname}?").
+            $dashboardgreeting = str_replace('{firstname}', (string) ($USER->firstname ?? ''), $dashboardgreeting);
+            if ((int) registry::effective('briefingenabled', $instance) === 1) {
+                $briefingprompt = trim((string) registry::effective('briefingprompt', $instance));
+                if ($briefingprompt === '') {
+                    $briefingprompt = get_string('default_briefingprompt', 'block_eledia_aitutor');
+                }
+                $briefing = $briefingprompt !== '';
             }
         }
+
+        // Prompt starters: instance value, falling back to the site default
+        // (resolved by the registry). One per line, capped so the welcome stays tidy.
+        // On the dashboard the audience-specific list wins when it is non-empty:
+        // managers fall back through the teacher list to the base list, teachers
+        // straight to the base list; a fully unconfigured dashboard ships with
+        // built-in pills per audience. Selection is cosmetic only — every prompt
+        // still runs under the user's real capabilities server-side.
+        $starterskey = 'promptstarters';
+        $audience = user_audience::STUDENT;
+        if ($dashboard) {
+            $audience = user_audience::resolve((int) $USER->id);
+            if (
+                $audience === user_audience::MANAGER
+                    && trim((string) registry::effective('promptstarters_manager', $instance)) !== ''
+            ) {
+                $starterskey = 'promptstarters_manager';
+            } else if (
+                $audience !== user_audience::STUDENT
+                    && trim((string) registry::effective('promptstarters_teacher', $instance)) !== ''
+            ) {
+                $starterskey = 'promptstarters_teacher';
+            }
+        }
+        $startersraw = (string) registry::effective($starterskey, $instance);
+        if ($dashboard && trim($startersraw) === '') {
+            $startersraw = get_string('default_promptstarters_' . $audience, 'block_eledia_aitutor');
+        }
+        $starters = self::parse_starters($startersraw);
 
         $styles = [];
         foreach (['explain', 'hint', 'quiz'] as $style) {
@@ -256,11 +311,16 @@ class widget {
             'launchcompact' => $brand['launcherstyle'] === 'compact',
             'stylechoice' => $allowstylechange,
             'styles' => $styles,
-            'stylelocked' => !$allowstylechange && $answerstyle !== 'explain',
+            'stylelocked' => !$allowstylechange && $answerstyle !== 'explain' && !$dashboard,
             'lockedlabel' => get_string('answerstyle_' . $answerstyle, 'block_eledia_aitutor'),
             'consented' => $consented,
             'starters' => $starters,
             'hasstarters' => !empty($starters),
+            'dashboardmode' => $dashboard,
+            'dashboardgreeting' => format_string($dashboardgreeting),
+            'briefing' => $briefing,
+            'briefinglabel' => get_string('briefing_button', 'block_eledia_aitutor'),
+            'showchips' => !empty($starters) || $briefing,
             'llmonly' => $mode === chat_mode::MODE_LLMONLY,
             // Branding: CSS-variable overrides applied inline on the root AND the
             // panel. The panel re-declares the --eat-* tokens on itself (it is
@@ -293,6 +353,10 @@ class widget {
             'consented' => $consented,
             'privacyhtml' => $privacyhtml,
             'ragmode' => $mode,
+            'dashboardmode' => $dashboard,
+            // Plain text; the briefing chip sends this through the normal
+            // composer path, so the server treats it like any typed message.
+            'briefingprompt' => $briefing ? $briefingprompt : '',
             // Floating launcher is portalled to <body> by the JS so the block
             // drawer can't hide it.
             'launchfab' => $brand['launcherstyle'] === 'fab',
@@ -361,5 +425,61 @@ class widget {
         }
 
         return $html;
+    }
+
+    /**
+     * Parse configured prompt starters into chip descriptors.
+     *
+     * Each non-empty line is one chip. Segments are separated by "|"; before
+     * the label an optional intent keyword and/or FontAwesome icon may appear
+     * (in any order):
+     *  - "action | fa-icon | Label | Prompt" — routing intent, icon, label, prompt;
+     *  - "fa-icon | Label | Prompt" — icon, short label, full prompt;
+     *  - "Label | Prompt" — short label, full prompt;
+     *  - "Prompt" — the prompt doubles as the label (legacy format).
+     * Intents: 'action' = Moodle tools only (no knowledge-base retrieval),
+     * 'knowledge' = retrieval only, 'auto' = server decides (default).
+     *
+     * @param string $raw The raw multi-line setting value.
+     * @return array<int,array{label: string, prompt: string, hasicon: bool, icon: string, intent: string}>
+     */
+    private static function parse_starters(string $raw): array {
+        $starters = [];
+        foreach (preg_split('/\R/', $raw) ?: [] as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            $parts = array_map('trim', explode('|', $line));
+            $icon = '';
+            $intent = '';
+            while (count($parts) > 1) {
+                if ($icon === '' && preg_match('/^fa-[a-z0-9-]+$/', $parts[0])) {
+                    $icon = array_shift($parts);
+                    continue;
+                }
+                if ($intent === '' && in_array($parts[0], ['action', 'knowledge', 'auto'], true)) {
+                    $intent = array_shift($parts);
+                    continue;
+                }
+                break;
+            }
+            $label = $parts[0];
+            $prompt = count($parts) > 1 ? implode(' | ', array_slice($parts, 1)) : $label;
+            if ($label === '' || $prompt === '') {
+                continue;
+            }
+            $starters[] = [
+                'label' => format_string($label),
+                'prompt' => format_string($prompt),
+                'hasicon' => $icon !== '',
+                'icon' => $icon,
+                'intent' => $intent === 'auto' ? '' : $intent,
+            ];
+            if (count($starters) >= 6) {
+                break;
+            }
+        }
+        return $starters;
     }
 }
