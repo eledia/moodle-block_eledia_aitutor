@@ -238,4 +238,28 @@ final class hook_callbacks {
         ];
         $PAGE->requires->js_call_amd('block_eledia_aitutor/configure_redirect', 'init', [$config]);
     }
+
+    /**
+     * Point the primary navigation's Dashboard entry at the AI-Home page.
+     *
+     * Opt-in via the aihomenav site setting: the Dashboard item keeps its
+     * familiar label and place in the menu, but leads to the tutor's
+     * full-page start experience (home.php) instead of /my/. The classic
+     * dashboard stays directly reachable under /my/.
+     *
+     * @param \core\hook\navigation\primary_extend $hook The hook.
+     */
+    public static function repoint_dashboard_nav(\core\hook\navigation\primary_extend $hook): void {
+        if ((int) security::get_config('aihomenav', 0) !== 1) {
+            return;
+        }
+        if (!isloggedin() || isguestuser()) {
+            return;
+        }
+
+        $node = $hook->get_primaryview()->find('myhome', null);
+        if ($node) {
+            $node->action = new moodle_url('/blocks/eledia_aitutor/home.php');
+        }
+    }
 }

@@ -51,4 +51,11 @@ $callbacks = [
         'callback' => \block_eledia_aitutor\hook_callbacks::class . '::configure_block_in_shell',
         'priority' => 470,
     ],
+    [
+        // Point the primary navigation's Dashboard entry at the AI-Home page
+        // when the admin enabled that redirect (aihomenav setting).
+        'hook' => \core\hook\navigation\primary_extend::class,
+        'callback' => \block_eledia_aitutor\hook_callbacks::class . '::repoint_dashboard_nav',
+        'priority' => 500,
+    ],
 ];

@@ -361,6 +361,13 @@ if ($hassiteconfig) {
         )
     ));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'block_eledia_aitutor/aihomenav',
+        get_string('setting_aihomenav', 'block_eledia_aitutor'),
+        get_string('setting_aihomenav_desc', 'block_eledia_aitutor'),
+        0
+    ));
+
     $settings->add(new admin_setting_heading(
         'block_eledia_aitutor/headerprivacy',
         get_string('setting_header_privacy', 'block_eledia_aitutor'),
