@@ -246,3 +246,45 @@ als Browser-Journeys absichern.
 **Ausstehend**
 - In CI mit voll initialisiertem Behat-Profil ausfuehren:
   `vendor/bin/behat --tags @block_eledia_aitutor`.
+
+### task09 Hero-/AI-Home-Erlebnis in der Moodle App (Release 3)
+Status:    geplant
+Feature:   feat (Dashboard-Hero, AI-Home)
+Prioritaet: P2
+Linked:    -
+
+**Ziel**
+Die App oeffnet den Tutor derzeit als klassisches eingebettetes Chat-Widget
+(`db/mobile.php` -> `classes/output/mobile.php` -> `<core-iframe>` auf
+`view.php?embedded=1`). Der Release-2-Hero-Modus ("Heute schon gemoodlet?",
+rollenbasierte Pills, Tagesbriefing) erscheint in der App nicht, weil er in
+`home.php` / dem Dashboard-Block sitzt. In Release 3 soll die App dieselbe
+AI-Home-UX zeigen.
+
+**Umsetzungsplan**
+- `view.php` einen optionalen Schalter geben (`hero=1` PARAM_BOOL), der die
+  Hero-Variante rendert: intern `widget::render($ctx, 0, ['dashboard' => 1])`
+  statt des klassischen embedded Widgets. Nur fuer den globalen Kontext
+  (courseid 0) sinnvoll; im Kurskontext beim klassischen Chat bleiben.
+- `classes/output/mobile.php::iframe_response()` fuer den globalen Handler
+  `hero=1` an die URL haengen. Kurs-Handler unveraendert lassen.
+  Alternative pruefen: direkt `home.php?embedded=1` einbetten statt
+  `view.php?hero=1` — `home.php` muss dann den `embedded`-Pagelayout
+  unterstuetzen (aktuell fest `standard`). `view.php`-Weg ist kleiner und
+  haelt eine Einstiegs-Datei; bevorzugen.
+- CSS: die Hero-Sticky-Composer-Leiste im chrome-losen `pagelayout-embedded`
+  pruefen — `position: sticky; bottom` gegen `100vh`-Iframe testen, ggf.
+  Safe-Area-Insets (`env(safe-area-inset-bottom)`) fuer Notch-Geraete.
+- Rollen-Pills: `user_audience::resolve()` funktioniert in der App identisch
+  (serverseitig), MUC-Cache greift. Kein Extra-Aufwand erwartet.
+- `tests/mobile_test.php` um einen Fall fuer den Hero-Handler erweitern
+  (`hero=1` in der iframe-URL, nur global).
+- Manuell in der Moodle App gegen demo.eledia.ai testen: Auto-Login im
+  core-iframe, Hero-Darstellung, Pill-Klick loest MCP-Aktion aus,
+  Briefing-Button.
+
+**Offene Entscheidung**
+- Soll der App-Haupteintrag komplett auf Hero umstellen, oder bleibt der reine
+  Chat als Standard und Hero ist ein Site-Schalter? Empfehlung: Site-Schalter
+  (z.B. `mobileherohome`), damit Institutionen ohne AI-Home-Startseite die
+  schlanke Variante behalten.
