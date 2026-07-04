@@ -55,7 +55,10 @@ class chat_service {
      * @param string|null $intent Optional routing hint ('auto'|'action'|'knowledge');
      *                            'action' (dashboard pills/briefing) asks the server
      *                            to skip retrieval and answer with Moodle tools only.
-     * @return array{answerhtml: string, answermarkdown: string, conversationid: ?string, sources: array, answerorigin: string, confirmation: ?array, iserror: bool}
+     * @return array{
+     *     answerhtml: string, answermarkdown: string, conversationid: ?string,
+     *     sources: array, answerorigin: string, confirmation: ?array, iserror: bool
+     * }
      * @throws \moodle_exception On validation, configuration, quota or RAG failure.
      */
     public static function send(

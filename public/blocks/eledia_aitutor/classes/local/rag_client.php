@@ -144,7 +144,10 @@ class rag_client {
      *                            'action' asks the server to skip knowledge-base
      *                            retrieval (Moodle tools + LLM only); null/empty
      *                            omits the argument (server default: auto).
-     * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, answer_origin: string, confirmation: ?array, iserror: bool}
+     * @return array{
+     *     answer: string, conversation_id: ?string, sources: array, topic: ?string,
+     *     answer_origin: string, confirmation: ?array, iserror: bool
+     * }
      * @throws rag_exception On transport or protocol failure.
      */
     public function chat(
@@ -539,7 +542,10 @@ class rag_client {
      * RAG servers without configuration.
      *
      * @param array $result The JSON-RPC result.
-     * @return array{answer: string, conversation_id: ?string, sources: array, topic: ?string, answer_origin: string, confirmation: ?array, iserror: bool}
+     * @return array{
+     *     answer: string, conversation_id: ?string, sources: array, topic: ?string,
+     *     answer_origin: string, confirmation: ?array, iserror: bool
+     * }
      */
     private function normalise_tool_result(array $result): array {
         $iserror = !empty($result['isError']);
