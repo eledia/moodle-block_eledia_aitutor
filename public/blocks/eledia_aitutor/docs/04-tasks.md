@@ -288,3 +288,46 @@ AI-Home-UX zeigen.
   Chat als Standard und Hero ist ein Site-Schalter? Empfehlung: Site-Schalter
   (z.B. `mobileherohome`), damit Institutionen ohne AI-Home-Startseite die
   schlanke Variante behalten.
+
+### task10 Sitewide-Tutor-Launcher als FAB (unten rechts) statt inline oben
+Linked: hook_callbacks::inject_sitewide_tutor
+Status: open
+
+**Kontext**
+Der sitewide-Tutor (`inject_sitewide_tutor`) wird per
+`before_standard_top_of_body_html`-Hook oben in `#page-wrapper` injiziert. Seit
+dem Fix, der `embedded` bei der globalen Injektion auf `docked` zwingt (v0.18.5),
+rendert das grosse Inline-Panel nicht mehr ueber der Kursnavigation — richtig so.
+Aber der `docked`-Launcher rendert weiterhin als **Inline-Element ganz oben**
+(bei `top:0`, ueber der Breadcrumb) und hinterlaesst dadurch einen schmalen
+Leerstreifen zwischen Moodle-Navbar und Breadcrumb. Verifiziert auf dev.eledia.ai
+(2026-07-05): `data-mode=docked`, Launch-Button vorhanden, aber Launcher-Root bei
+`top:0` ueber der Nav.
+
+**Ziel**
+Der sitewide-injizierte Launcher soll als **FAB** (schwebender runder Knopf unten
+rechts) rendern statt als Inline-Element im Seitenfluss. Dann verschwindet der
+Leerstreifen oben, die Breadcrumb sitzt direkt unter der Navbar, und der Tutor
+bleibt ueber den Ecken-Button erreichbar.
+
+**Umsetzungsplan**
+- Der FAB-Stil existiert bereits: CSS `.eledia_aitutor-launch--fab` (fixed unten
+  rechts, `--eat-fab-bottom/right`), und der Template-Zweig `{{#launchfab}}` in
+  `templates/launcher.mustache`. `launchfab` kommt aus
+  `brand['launcherstyle'] === 'fab'` (siehe `widget::render`).
+- In `inject_sitewide_tutor` beim `widget::render(...)`-Aufruf den Launcher-Stil
+  auf `fab` erzwingen (analog zur `displaymode`-Coercion `embedded`->`docked`) —
+  z.B. Option `launcherstyle => 'fab'` mitgeben, ODER pruefen, ob `launcherstyle`
+  ueberhaupt schon per Options-Array durchgereicht wird; ggf. in `widget::render`
+  einen Options-Override fuer `launcherstyle` ergaenzen.
+- Nur fuer die **sitewide-Injektion** erzwingen; der platzierte Block-Launcher
+  bleibt konfigurierbar (embedded/pill/fab je nach Instanz/Branding).
+- Verifizieren auf einer Kurs-Unterseite (z.B. `mod/elli/view.php?id=…`): Tutor
+  erscheint als runder FAB unten rechts, kein Leerstreifen oben, Breadcrump
+  direkt unter der Navbar; Klick oeffnet das Docked-Panel; Icon-System intakt.
+- Danach `vendor-tutor-suite.sh` -> Monorepo -> deploy (dev.eledia.ai).
+
+**Offene Entscheidung**
+- FAB fix erzwingen fuer sitewide, oder als Setting (`sitewidelauncherstyle`)?
+  Empfehlung: fix `fab` — der sitewide-Launcher hat keinen sinnvollen Inline-Platz
+  auf fremden Unterseiten. Kosmetisch, kein Bug; niedrige Prioritaet.
