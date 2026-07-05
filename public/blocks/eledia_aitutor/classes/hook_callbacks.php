@@ -26,6 +26,7 @@ namespace block_eledia_aitutor;
 
 use core\hook\output\before_http_headers;
 use core\hook\output\before_standard_top_of_body_html_generation;
+use block_eledia_aitutor\local\registry;
 use block_eledia_aitutor\local\security;
 use block_eledia_aitutor\local\widget;
 use moodle_url;
@@ -65,7 +66,15 @@ final class hook_callbacks {
             return;
         }
 
-        $hook->add_html(widget::render($context, $courseid, []));
+        // Embedded mode renders the panel inline, which only belongs inside the block
+        // region a teacher placed. Injected site-wide (outside any region, at the top
+        // of the body) an inline panel would sit above the page, so fall back to the
+        // docked launcher here. Non-inline modes stay as configured.
+        $mode = (string) registry::effective('displaymode', []);
+        if ($mode === 'embedded') {
+            $mode = 'docked';
+        }
+        $hook->add_html(widget::render($context, $courseid, ['displaymode' => $mode]));
     }
 
     /**
@@ -238,5 +247,4 @@ final class hook_callbacks {
         ];
         $PAGE->requires->js_call_amd('block_eledia_aitutor/configure_redirect', 'init', [$config]);
     }
-
 }
