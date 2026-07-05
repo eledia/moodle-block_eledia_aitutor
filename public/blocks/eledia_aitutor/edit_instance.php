@@ -481,7 +481,7 @@ echo html_writer::tag(
 );
 echo html_writer::tag(
     'button',
-    '<i class="fa fa-window-minimize" aria-hidden="true"></i>',
+    \block_eledia_aitutor\local\icon::render('window-minimize'),
     [
         'type' => 'button',
         'class' => 'eat-preview-float__toggle',
@@ -516,19 +516,19 @@ if (shell::is_available()) {
         'sectionCards' => [
             [
                 'key' => 'design',
-                'icon' => 'fa-palette',
+                'icon' => 'palette',
                 'title' => get_string('setting_section_design', 'block_eledia_aitutor'),
                 'body' => get_string('setting_section_design_desc', 'block_eledia_aitutor'),
             ],
             [
                 'key' => 'conversation',
-                'icon' => 'fa-comments',
+                'icon' => 'comments',
                 'title' => get_string('setting_section_conversation', 'block_eledia_aitutor'),
                 'body' => get_string('setting_section_conversation_desc', 'block_eledia_aitutor'),
             ],
             [
                 'key' => 'technical',
-                'icon' => 'fa-plug',
+                'icon' => 'plug',
                 'title' => get_string('setting_section_technical', 'block_eledia_aitutor'),
                 'body' => get_string('setting_section_technical_desc', 'block_eledia_aitutor'),
             ],

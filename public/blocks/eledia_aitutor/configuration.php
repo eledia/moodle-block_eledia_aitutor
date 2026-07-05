@@ -261,7 +261,7 @@ $card = static function (
         html_writer::tag(
             'div',
             html_writer::span(
-                html_writer::tag('i', '', ['class' => 'fa fa-' . $icon, 'aria-hidden' => 'true']),
+                \block_eledia_aitutor\local\icon::render($icon),
                 'lh-plugin-card__icon lh-plugin-card__icon--generic'
             ) .
             html_writer::tag(
@@ -273,7 +273,7 @@ $card = static function (
                 'div',
                 html_writer::link(
                     $link,
-                    html_writer::tag('i', '', ['class' => 'fa fa-' . $actionicon, 'aria-hidden' => 'true']) .
+                    \block_eledia_aitutor\local\icon::render($actionicon) .
                     html_writer::span($label, 'sr-only'),
                     [
                         'class' => 'lh-icon-action',
@@ -332,7 +332,7 @@ $wizardstep = static function (
             $taskaction = $taskavailable
                 ? html_writer::link(
                     $task['url'],
-                    html_writer::tag('i', '', ['class' => 'fa fa-arrow-right', 'aria-hidden' => 'true']) .
+                    \block_eledia_aitutor\local\icon::render('arrow-right') .
                     html_writer::span(get_string('configuration_wizard_task_open', 'block_eledia_aitutor'), 'sr-only'),
                     [
                         'class' => 'lh-icon-action eat-setup-task__action',
@@ -341,7 +341,7 @@ $wizardstep = static function (
                     ]
                 )
                 : html_writer::span(
-                    html_writer::tag('i', '', ['class' => 'fa fa-lock', 'aria-hidden' => 'true']) .
+                    \block_eledia_aitutor\local\icon::render('lock') .
                     html_writer::span($taskstatuslabel, 'sr-only'),
                     'lh-icon-action eat-setup-task__action eat-setup-task__action--disabled',
                     ['title' => $taskstatuslabel]
@@ -365,7 +365,7 @@ $wizardstep = static function (
         'section',
         html_writer::div(
             html_writer::span(
-                html_writer::tag('i', '', ['class' => 'fa fa-' . $icon, 'aria-hidden' => 'true']),
+                \block_eledia_aitutor\local\icon::render($icon),
                 'eat-setup-step__icon'
             ) .
             html_writer::span($statuslabel, 'eat-setup-step__status ' . $statusclass),
@@ -645,7 +645,7 @@ echo html_writer::tag(
     html_writer::tag(
         'div',
         html_writer::span(
-            html_writer::tag('i', '', ['class' => 'fa fa-check-circle', 'aria-hidden' => 'true']),
+            \block_eledia_aitutor\local\icon::render('check-circle'),
             'lh-plugin-card__icon lh-plugin-card__icon--generic'
         ) .
         html_writer::tag(
@@ -719,7 +719,7 @@ echo html_writer::tag(
     html_writer::tag(
         'div',
         html_writer::span(
-            html_writer::tag('i', '', ['class' => 'fa fa-exclamation-triangle', 'aria-hidden' => 'true']),
+            \block_eledia_aitutor\local\icon::render('exclamation-triangle'),
             'lh-plugin-card__icon lh-plugin-card__icon--generic'
         ) .
         html_writer::tag(

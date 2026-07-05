@@ -20,15 +20,18 @@
     * sectionnav - Optional pre-rendered section navigation HTML.
     * backurl, backlabel - Optional back link URL and accessible label.
     * homeurl, homelabel - Optional home link URL and accessible label.
-    * hastags, tags - Whether to show tag chips and the list of {modifier, faicon, label}.
-    * ctas - Optional call-to-action buttons: {modifier, url, fa, label}.
+    * hastags, tags - Whether to show tag chips and the list of {modifier, iconsvg, label}.
+    * ctas - Optional call-to-action buttons: {modifier, url, iconsvg, label}.
     * createurl, createlabel - Optional create action URL and label.
-    * headeractionicons - Optional extra action icons: {modifierclass, url, label, faicon}.
+    * headeractionicons - Optional extra action icons: {modifierclass, url, label, iconsvg}.
     * helpurl, helplabel - Optional help action URL and label.
     * settingsurl, settingsiscurrent, settingslabel - Optional settings action.
     * hasactionicons, actionicons - Optional secondary action icon bar.
     * hasprogress, progress - Optional progress bars: {label, percent, count}.
-    * hasstats, stats - Optional stat chips: {faicon, value, label}.
+    * hasstats, stats - Optional stat chips: {iconsvg, value, label}.
+
+    Each "iconsvg" is a pre-rendered inline Lucide <svg> string, produced with
+    \block_eledia_aitutor\local\icon::render('<name>') on the PHP side.
     * hint - Optional informational hint shown when there is no progress or stats.
 
     Example context (json):
@@ -41,10 +44,10 @@
         "homelabel": "Dashboard",
         "hastags": true,
         "tags": [
-            {"modifier": "info", "faicon": "fa-plug", "label": "MCP"}
+            {"modifier": "info", "iconsvg": "<svg class=\"lucide\">...</svg>", "label": "MCP"}
         ],
         "ctas": [
-            {"modifier": "primary", "url": "https://example.com/create", "fa": "fa-plus", "label": "Create tutor"}
+            {"modifier": "primary", "url": "https://example.com/create", "iconsvg": "<svg class=\"lucide\">...</svg>", "label": "Create tutor"}
         ],
         "helpurl": "https://example.com/blocks/eledia_aitutor/help.php",
         "helplabel": "Help",
@@ -54,7 +57,7 @@
         "hasprogress": false,
         "hasstats": true,
         "stats": [
-            {"faicon": "fa-users", "value": "12", "label": "learners"}
+            {"iconsvg": "<svg class=\"lucide\">...</svg>", "value": "12", "label": "learners"}
         ],
         "hint": "All systems ready."
     }
@@ -67,7 +70,7 @@
                    href="{{ backurl }}"
                    aria-label="{{ backlabel }}"
                    title="{{ backlabel }}">
-                    <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
                 </a>
             </div>
         {{/backurl}}
@@ -91,7 +94,7 @@
                     <span class="lh-plugin-header__tags" aria-label="{{#str}} tags {{/str}}">
                         {{#tags}}
                             <span class="lh-plugin-tag lh-plugin-tag--{{ modifier }}">
-                                <i class="fa {{ faicon }}" aria-hidden="true"></i>
+                                {{{ iconsvg }}}
                                 {{ label }}
                             </span>
                         {{/tags}}
@@ -106,7 +109,7 @@
         <div class="lh-plugin-header__actions">
             {{#ctas}}
                 <a class="lh-btn-{{ modifier }}" href="{{ url }}">
-                    {{#fa}}<i class="fa {{ fa }} me-1" aria-hidden="true"></i>{{/fa}}
+                    {{#iconsvg}}<span class="me-1">{{{ iconsvg }}}</span>{{/iconsvg}}
                     {{ label }}
                 </a>
             {{/ctas}}
@@ -115,7 +118,7 @@
                    href="{{ createurl }}"
                    aria-label="{{ createlabel }}"
                    title="{{ createlabel }}">
-                    <i class="fa fa-plus" aria-hidden="true"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                 </a>
             {{/createurl}}
             {{#headeractionicons}}
@@ -123,7 +126,7 @@
                    href="{{ url }}"
                    aria-label="{{ label }}"
                    title="{{ label }}">
-                    <i class="fa {{ faicon }}" aria-hidden="true"></i>
+                    {{{ iconsvg }}}
                 </a>
             {{/headeractionicons}}
             {{#helpurl}}
@@ -131,7 +134,7 @@
                    href="{{ helpurl }}"
                    aria-label="{{ helplabel }}"
                    title="{{ helplabel }}">
-                    <i class="fa fa-question" aria-hidden="true"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
                 </a>
             {{/helpurl}}
             {{#settingsurl}}
@@ -140,7 +143,7 @@
                           aria-current="page"
                           aria-label="{{ settingslabel }}"
                           title="{{ settingslabel }}">
-                        <i class="fa fa-gear" aria-hidden="true"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                     </span>
                 {{/settingsiscurrent}}
                 {{^settingsiscurrent}}
@@ -148,7 +151,7 @@
                        href="{{ settingsurl }}"
                        aria-label="{{ settingslabel }}"
                        title="{{ settingslabel }}">
-                        <i class="fa fa-gear" aria-hidden="true"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                     </a>
                 {{/settingsiscurrent}}
             {{/settingsurl}}
@@ -165,7 +168,7 @@
                    href="{{ url }}"
                    aria-label="{{ label }}"
                    title="{{ label }}">
-                    <i class="fa {{ faicon }}" aria-hidden="true"></i>
+                    {{{ iconsvg }}}
                     <span class="sr-only">{{ label }}</span>
                 </a>
             {{/actionicons}}
@@ -198,7 +201,7 @@
             <div class="lh-plugin-infobar__stats">
                 {{#stats}}
                     <span class="lh-plugin-infobar__stat">
-                        {{#faicon}}<i class="fa {{ faicon }}" aria-hidden="true"></i>{{/faicon}}
+                        {{#iconsvg}}{{{ iconsvg }}}{{/iconsvg}}
                         {{#value}}<strong>{{ value }}</strong>{{/value}}
                         {{ label }}
                     </span>
@@ -211,7 +214,7 @@
             <div class="lh-plugin-infobar">
                 <div class="lh-plugin-infobar__stats">
                     <span class="lh-plugin-infobar__stat">
-                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                         {{ hint }}
                     </span>
                 </div>

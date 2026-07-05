@@ -58,19 +58,19 @@ if ($hassiteconfig) {
             $sectioncards = [
                 [
                     'key' => 'design',
-                    'icon' => 'fa-palette',
+                    'icon' => 'palette',
                     'title' => get_string('setting_section_design', 'block_eledia_aitutor'),
                     'body' => get_string('setting_section_design_desc', 'block_eledia_aitutor'),
                 ],
                 [
                     'key' => 'conversation',
-                    'icon' => 'fa-comments',
+                    'icon' => 'comments',
                     'title' => get_string('setting_section_conversation', 'block_eledia_aitutor'),
                     'body' => get_string('setting_section_conversation_desc', 'block_eledia_aitutor'),
                 ],
                 [
                     'key' => 'technical',
-                    'icon' => 'fa-plug',
+                    'icon' => 'plug',
                     'title' => get_string('setting_section_technical', 'block_eledia_aitutor'),
                     'body' => get_string('setting_section_technical_desc', 'block_eledia_aitutor'),
                 ],
@@ -167,7 +167,7 @@ if ($hassiteconfig) {
         foreach ($cards as $card) {
             $html .= html_writer::div(
                 html_writer::span(
-                    html_writer::tag('i', '', ['class' => 'fa fa-' . $card['icon'], 'aria-hidden' => 'true']),
+                    \block_eledia_aitutor\local\icon::render($card['icon']),
                     'eat-settings-infocard__icon'
                 ) .
                 html_writer::div(
@@ -360,7 +360,6 @@ if ($hassiteconfig) {
             (new moodle_url('/blocks/eledia_aitutor/home.php'))->out(false)
         )
     ));
-
 
     $settings->add(new admin_setting_heading(
         'block_eledia_aitutor/headerprivacy',

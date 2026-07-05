@@ -319,7 +319,7 @@ if ($action === 'new' || $action === 'edit') {
     echo html_writer::div(
         html_writer::link(
             $baseurl,
-            html_writer::tag('i', '', ['class' => 'fa fa-arrow-left', 'aria-hidden' => 'true']) .
+            \block_eledia_aitutor\local\icon::render('arrow-left') .
             html_writer::span(get_string('tutor_back_to_library', 'block_eledia_aitutor')),
             ['class' => 'lh-btn--secondary eat-back-link']
         ),
@@ -345,7 +345,7 @@ if ($action === 'import') {
     $blockid = optional_param('blockid', 0, PARAM_INT);
     echo html_writer::start_div('eat-admin');
     echo html_writer::div(
-        html_writer::tag('i', '', ['class' => 'fa fa-upload', 'aria-hidden' => 'true']) .
+        \block_eledia_aitutor\local\icon::render('upload') .
         html_writer::span(get_string('tutor_import_help', 'block_eledia_aitutor')),
         'eat-admin-intro'
     );
@@ -367,7 +367,7 @@ echo html_writer::start_div('eat-admin');
 $libraryaction = static function (moodle_url $url, string $label, string $fa): string {
     return html_writer::link(
         $url,
-        html_writer::tag('i', '', ['class' => 'fa ' . $fa, 'aria-hidden' => 'true']) .
+        \block_eledia_aitutor\local\icon::render($fa) .
         html_writer::span($label, 'sr-only'),
         [
             'class' => 'lh-icon-action',
@@ -382,12 +382,12 @@ echo html_writer::div(
         $libraryaction(
             new moodle_url($baseurl, ['action' => 'new']),
             get_string('tutor_new', 'block_eledia_aitutor'),
-            'fa-plus'
+            'plus'
         ) .
         $libraryaction(
             new moodle_url($baseurl, ['action' => 'import']),
             get_string('tutor_import', 'block_eledia_aitutor'),
-            'fa-upload'
+            'upload'
         ),
         'lh-row-actions eat-section-actions'
     ),
@@ -436,7 +436,7 @@ if ($instances) {
     $actionicon = static function (moodle_url $url, string $label, string $fa, string $extra = ''): string {
         return html_writer::link(
             $url,
-            html_writer::tag('i', '', ['class' => 'fa ' . $fa, 'aria-hidden' => 'true']) .
+            \block_eledia_aitutor\local\icon::render($fa) .
             html_writer::span($label, 'sr-only'),
             [
                 'class' => trim('lh-icon-action ' . $extra),
@@ -473,7 +473,7 @@ if ($instances) {
             ) .
             html_writer::tag(
                 'button',
-                html_writer::tag('i', '', ['class' => 'fa fa-check', 'aria-hidden' => 'true']) .
+                \block_eledia_aitutor\local\icon::render('check') .
                 html_writer::span(get_string('tutor_apply', 'block_eledia_aitutor'), 'sr-only'),
                 [
                     'type' => 'submit',
@@ -488,17 +488,17 @@ if ($instances) {
         $links = $actionicon(
             new moodle_url($baseurl, ['action' => 'exportinstance', 'blockid' => $bi->id, 'sesskey' => sesskey()]),
             get_string('tutor_export', 'block_eledia_aitutor'),
-            'fa-download'
+            'download'
         ) .
             $actionicon(
                 new moodle_url($baseurl, ['action' => 'import', 'blockid' => $bi->id]),
                 get_string('tutor_import', 'block_eledia_aitutor'),
-                'fa-upload'
+                'upload'
             );
 
         echo html_writer::div(
             html_writer::div(
-                html_writer::tag('i', '', ['class' => 'fa fa-cube', 'aria-hidden' => 'true']) .
+                \block_eledia_aitutor\local\icon::render('cube') .
                 html_writer::span(s($location)) .
                 html_writer::span('#' . $bi->id, 'eat-instance-id'),
                 'eat-instance-loc'
@@ -594,7 +594,7 @@ function block_eledia_aitutor_tutor_card(
     $icon = static function (moodle_url $url, string $label, string $fa, string $extra = ''): string {
         return html_writer::link(
             $url,
-            html_writer::tag('i', '', ['class' => 'fa ' . $fa, 'aria-hidden' => 'true']) .
+            \block_eledia_aitutor\local\icon::render($fa) .
             html_writer::span($label, 'sr-only'),
             [
                 'class' => trim('lh-icon-action ' . $extra),
@@ -606,7 +606,7 @@ function block_eledia_aitutor_tutor_card(
 
     $actions = html_writer::link(
         new moodle_url($baseurl, ['action' => 'applysite', 'source' => $source] + $sk),
-        html_writer::tag('i', '', ['class' => 'fa fa-check', 'aria-hidden' => 'true']) .
+        \block_eledia_aitutor\local\icon::render('check') .
             html_writer::span(get_string('tutor_applysite', 'block_eledia_aitutor'), 'sr-only'),
         [
             'class' => 'lh-icon-action eat-applysite-action',
@@ -618,12 +618,12 @@ function block_eledia_aitutor_tutor_card(
         $icon(
             new moodle_url($baseurl, ['action' => 'export', 'source' => $source] + $sk),
             get_string('tutor_export', 'block_eledia_aitutor'),
-            'fa-download'
+            'download'
         ) .
         $icon(
             new moodle_url($baseurl, ['action' => 'duplicate', 'source' => $source] + $sk),
             get_string('tutor_duplicate', 'block_eledia_aitutor'),
-            'fa-clone'
+            'clone'
         ),
         'lh-row-actions eat-card-icons'
     );
@@ -632,12 +632,12 @@ function block_eledia_aitutor_tutor_card(
             $icon(
                 new moodle_url($baseurl, ['action' => 'edit', 'id' => $profileid]),
                 get_string('edit'),
-                'fa-pencil'
+                'pencil'
             ) .
             $icon(
                 new moodle_url($baseurl, ['action' => 'delete', 'id' => $profileid] + $sk),
                 get_string('delete'),
-                'fa-trash',
+                'trash',
                 'lh-icon-action--danger'
             ),
             'lh-row-actions eat-card-icons'
