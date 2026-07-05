@@ -45,7 +45,7 @@
         "briefinglabel": "Daily briefing",
         "showchips": true,
         "starters": [
-            {"label": "What is due?", "prompt": "What is due this week?", "hasicon": true, "icon": "fa-calendar-check-o"}
+            {"label": "What is due?", "prompt": "What is due this week?", "hasicon": true, "iconsvg": "<svg class=\"lucide\">...</svg>"}
         ],
         "hasstarters": true
     }
@@ -73,7 +73,7 @@
                     <span class="eledia_aitutor-launch-text">{{launchlabel}}</span>
                 </span>
                 <span class="eledia_aitutor-launch-arrow" aria-hidden="true">
-                    <i class="fa fa-commenting-o"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
                 </span>
             {{/launchcompact}}
             {{^launchfab}}{{^launchcompact}}<span class="eledia_aitutor-launch-text">{{launchlabel}}</span>{{/launchcompact}}{{/launchfab}}
@@ -114,34 +114,34 @@
                                 data-label-expand="{{expandlabel}}"
                                 data-label-collapse="{{collapselabel}}"
                                 aria-pressed="false">
-                            <i class="fa fa-expand" aria-hidden="true"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/></svg>
                         </button>
                     {{/showexpand}}
                     {{#historyenabled}}
                         <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
                                 data-action="history" aria-label="{{#str}}history, block_eledia_aitutor{{/str}}"
                                 title="{{#str}}history, block_eledia_aitutor{{/str}}">
-                            <i class="fa fa-clock-o" aria-hidden="true"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         </button>
                     {{/historyenabled}}
                     {{^dashboardmode}}
                         <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
                                 data-action="newconversation" aria-label="{{#str}}newconversation, block_eledia_aitutor{{/str}}"
                                 title="{{#str}}newconversation, block_eledia_aitutor{{/str}}">
-                            <i class="fa fa-plus" aria-hidden="true"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                         </button>
                     {{/dashboardmode}}
                     <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
                             data-action="privacy" aria-label="{{#str}}privacyguidelines, block_eledia_aitutor{{/str}}"
                             title="{{#str}}privacyguidelines, block_eledia_aitutor{{/str}}"
                             aria-haspopup="dialog">
-                        <i class="fa fa-shield" aria-hidden="true"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
                     </button>
                     {{^embedded}}
                         <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
                                 data-action="close" aria-label="{{#str}}close, block_eledia_aitutor{{/str}}"
                                 title="{{#str}}close, block_eledia_aitutor{{/str}}">
-                            <i class="fa fa-times" aria-hidden="true"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                         </button>
                     {{/embedded}}
                 </div>
@@ -150,7 +150,7 @@
             {{^dashboardmode}}
                 {{#llmonly}}
                     <div class="eledia_aitutor-modenote" role="note">
-                        <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
                         {{#str}}llmonly_banner, block_eledia_aitutor{{/str}}
                     </div>
                 {{/llmonly}}
@@ -197,7 +197,7 @@
                             {{#starters}}
                                 <button type="button" class="eledia_aitutor-starter"
                                         data-action="starter" data-prompt="{{prompt}}">
-                                    {{#hasicon}}<i class="fa {{icon}}" aria-hidden="true"></i> {{/hasicon}}{{label}}
+                                    {{#hasicon}}{{{iconsvg}}} {{/hasicon}}{{label}}
                                 </button>
                             {{/starters}}
                         </div>
@@ -211,7 +211,7 @@
             {{^consented}}
                 <div class="eledia_aitutor-consent" data-region="consent">
                     <p class="eledia_aitutor-consent-text">
-                        <i class="fa fa-shield" aria-hidden="true"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
                         {{#str}}consent_intro, block_eledia_aitutor{{/str}}
                     </p>
                     <button type="button" class="btn btn-link p-0 eledia_aitutor-consent-link" data-action="privacy">
@@ -245,7 +245,7 @@
                 <div class="eledia_aitutor-styles">
                     <span class="eledia_aitutor-stylechip eledia_aitutor-stylechip-locked"
                           title="{{#str}}answerstyle, block_eledia_aitutor{{/str}}">
-                        <i class="fa fa-lock" aria-hidden="true"></i> {{lockedlabel}}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> {{lockedlabel}}
                     </span>
                 </div>
             {{/stylelocked}}
@@ -262,7 +262,7 @@
                 <button type="submit" class="eledia_aitutor-send" data-action="send"
                         {{^consented}}disabled{{/consented}}{{#preview}} disabled{{/preview}}
                         aria-label="{{#str}}send, block_eledia_aitutor{{/str}}">
-                    <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
                 </button>
             </form>
 
@@ -274,14 +274,14 @@
                         {{#briefing}}
                             <button type="button" class="eledia_aitutor-starter eledia_aitutor-briefing"
                                     data-action="briefing">
-                                <i class="fa fa-sun-o" aria-hidden="true"></i> {{briefinglabel}}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> {{briefinglabel}}
                             </button>
                         {{/briefing}}
                         {{#starters}}
                             <button type="button" class="eledia_aitutor-starter"
                                     data-action="starter" data-prompt="{{prompt}}"
                                     {{#intent}}data-intent="{{intent}}"{{/intent}}>
-                                {{#hasicon}}<i class="fa {{icon}}" aria-hidden="true"></i> {{/hasicon}}{{label}}
+                                {{#hasicon}}{{{iconsvg}}} {{/hasicon}}{{label}}
                             </button>
                         {{/starters}}
                     </div>

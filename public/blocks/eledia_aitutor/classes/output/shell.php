@@ -141,25 +141,25 @@ final class shell {
         $items = [
             [
                 'key' => self::ACTIVE_CONFIGURATION,
-                'icon' => 'fa-th-large',
+                'icon' => 'th-large',
                 'label' => get_string('nav_configuration', 'block_eledia_aitutor'),
                 'url' => new moodle_url('/blocks/eledia_aitutor/configuration.php'),
             ],
             [
                 'key' => self::ACTIVE_SETTINGS,
-                'icon' => 'fa-sliders',
+                'icon' => 'sliders',
                 'label' => get_string('nav_settings', 'block_eledia_aitutor'),
                 'url' => new moodle_url('/blocks/eledia_aitutor/operator_settings.php'),
             ],
             [
                 'key' => self::ACTIVE_TUTORS,
-                'icon' => 'fa-comments',
+                'icon' => 'comments',
                 'label' => get_string('nav_tutors', 'block_eledia_aitutor'),
                 'url' => new moodle_url('/blocks/eledia_aitutor/manage_tutors.php'),
             ],
             [
                 'key' => self::ACTIVE_PREVIEW,
-                'icon' => 'fa-eye',
+                'icon' => 'eye',
                 'label' => get_string('nav_preview', 'block_eledia_aitutor'),
                 'url' => new moodle_url('/blocks/eledia_aitutor/view.php'),
             ],
@@ -167,19 +167,19 @@ final class shell {
         $integrations = [
             'local_literag' => [
                 'key' => 'literag',
-                'icon' => 'fa-database',
+                'icon' => 'database',
                 'label' => get_string('nav_literag', 'block_eledia_aitutor'),
                 'url' => new moodle_url('/admin/settings.php', ['section' => 'local_literag']),
             ],
             'local_ragingest' => [
                 'key' => 'ragingest',
-                'icon' => 'fa-upload',
+                'icon' => 'upload',
                 'label' => get_string('nav_ragingest', 'block_eledia_aitutor'),
                 'url' => new moodle_url('/admin/settings.php', ['section' => 'local_ragingest_settings']),
             ],
             'webservice_elediamcp' => [
                 'key' => 'elediamcp',
-                'icon' => 'fa-plug',
+                'icon' => 'plug',
                 'label' => get_string('nav_elediamcp', 'block_eledia_aitutor'),
                 'url' => new moodle_url('/webservice/elediamcp/configuration.php'),
             ],
@@ -260,19 +260,19 @@ final class shell {
         $items = [
             [
                 'key' => self::ACTIVE_INSTANCE_SETTINGS,
-                'icon' => 'fa-sliders',
+                'icon' => 'sliders',
                 'label' => get_string('nav_settings', 'block_eledia_aitutor'),
                 'url' => new moodle_url('/blocks/eledia_aitutor/edit_instance.php', ['blockid' => $blockid]),
             ],
             [
                 'key' => self::ACTIVE_INSTANCE_TUTOR,
-                'icon' => 'fa-comments',
+                'icon' => 'comments',
                 'label' => get_string('nav_instance_tutor', 'block_eledia_aitutor'),
                 'url' => new moodle_url('/blocks/eledia_aitutor/instance_tutor.php', ['blockid' => $blockid]),
             ],
             [
                 'key' => self::ACTIVE_INSTANCE_PREVIEW,
-                'icon' => 'fa-eye',
+                'icon' => 'eye',
                 'label' => get_string('nav_preview', 'block_eledia_aitutor'),
                 'url' => new moodle_url('/blocks/eledia_aitutor/view.php', $previewparams),
             ],
@@ -281,7 +281,7 @@ final class shell {
         if (\core_component::get_plugin_directory('webservice', 'elediamcp') !== null) {
             $items[] = [
                 'key' => self::ACTIVE_INSTANCE_MCP,
-                'icon' => 'fa-plug',
+                'icon' => 'plug',
                 'label' => get_string('nav_instance_mcp', 'block_eledia_aitutor'),
                 // Carry the blockid so the token page re-renders this instance shell.
                 'url' => new moodle_url('/webservice/elediamcp/token/index.php', ['blockid' => $blockid]),
@@ -322,10 +322,7 @@ final class shell {
             if ($item['key'] === $active) {
                 $attrs['aria-current'] = 'page';
             }
-            $label = html_writer::tag('i', '', [
-                'class' => 'fa ' . $item['icon'],
-                'aria-hidden' => 'true',
-            ]) . ' ' . s($item['label']);
+            $label = \block_eledia_aitutor\local\icon::render($item['icon']) . ' ' . s($item['label']);
             $html .= html_writer::tag('a', $label, $attrs);
         }
         $html .= html_writer::end_tag('nav');

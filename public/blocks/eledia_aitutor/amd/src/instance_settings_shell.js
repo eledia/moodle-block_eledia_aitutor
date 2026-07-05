@@ -27,14 +27,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([], function() {
+define(['block_eledia_aitutor/icons'], function(Icons) {
     const GROUP_RE = /^id_(quicksettings|insgroup_)/;
 
     const icon = function(name) {
-        const node = document.createElement('i');
-        node.className = 'fa ' + (name || 'fa-cog');
-        node.setAttribute('aria-hidden', 'true');
-        return node;
+        return Icons.create(name || 'cog');
     };
 
     const hubCard = function(card) {

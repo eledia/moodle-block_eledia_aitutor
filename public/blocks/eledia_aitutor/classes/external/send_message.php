@@ -21,6 +21,7 @@ namespace block_eledia_aitutor\external;
 use block_eledia_aitutor\local\branding;
 use block_eledia_aitutor\local\chat_mode;
 use block_eledia_aitutor\local\chat_service;
+use block_eledia_aitutor\local\error_message;
 use block_eledia_aitutor\local\security;
 use core_external\external_api;
 use core_external\external_function_parameters;
@@ -163,19 +164,33 @@ class send_message extends external_api {
         // tutor's voice; only populated sub-fields are sent to the RAG server.
         $persona = branding::persona((array) $blockconfig);
 
-        $result = chat_service::send(
-            (int) $USER->id,
-            $params['message'],
-            $courseid,
-            $conv,
-            $context,
-            null,
-            $effectivestyle,
-            $dailylimit,
-            $ragenabled,
-            $persona,
-            $params['intent'] !== '' ? $params['intent'] : null
-        );
+        try {
+            $result = chat_service::send(
+                (int) $USER->id,
+                $params['message'],
+                $courseid,
+                $conv,
+                $context,
+                null,
+                $effectivestyle,
+                $dailylimit,
+                $ragenabled,
+                $persona,
+                $params['intent'] !== '' ? $params['intent'] : null
+            );
+        } catch (\moodle_exception $e) {
+            // Replace the vague "temporarily unavailable" with a clearer,
+            // role-appropriate message. Intentional flow-control messages
+            // (daily limit, disabled chat, …) classify as "generic" and are
+            // rethrown untouched. chat_service already logged the failure.
+            if (error_message::phase($e) === 'generic') {
+                throw $e;
+            }
+            $candetail = has_capability('block/eledia_aitutor:manage', $context)
+                || has_capability('moodle/site:config', $context);
+            [$stringkey, $a] = error_message::for_exception($e, $candetail);
+            throw new moodle_exception($stringkey, 'block_eledia_aitutor', '', $a);
+        }
 
         return [
             'answerhtml' => $result['answerhtml'],
@@ -201,8 +216,12 @@ class send_message extends external_api {
             'answerhtml' => new external_value(PARAM_RAW, 'Sanitised HTML of the assistant answer'),
             'conversationid' => new external_value(PARAM_RAW, 'Server conversation id, or empty'),
             'iserror' => new external_value(PARAM_BOOL, 'Whether the tool reported an error'),
-            'answerorigin' => new external_value(PARAM_ALPHA, 'Answer origin: rag, mcp or general', VALUE_DEFAULT,
-                'general'),
+            'answerorigin' => new external_value(
+                PARAM_ALPHA,
+                'Answer origin: rag, mcp or general',
+                VALUE_DEFAULT,
+                'general'
+            ),
             'sources' => new external_multiple_structure(
                 new external_single_structure([
                     'title' => new external_value(PARAM_TEXT, 'Source title'),
@@ -214,8 +233,12 @@ class send_message extends external_api {
                 []
             ),
             'confirmation' => new external_single_structure([
-                'required' => new external_value(PARAM_BOOL, 'Whether the assistant needs an explicit confirmation',
-                    VALUE_DEFAULT, false),
+                'required' => new external_value(
+                    PARAM_BOOL,
+                    'Whether the assistant needs an explicit confirmation',
+                    VALUE_DEFAULT,
+                    false
+                ),
                 'yeslabel' => new external_value(PARAM_TEXT, 'Label for the confirm button', VALUE_DEFAULT, 'Ja'),
                 'nolabel' => new external_value(PARAM_TEXT, 'Label for the decline button', VALUE_DEFAULT, 'Nein'),
                 'yesmessage' => new external_value(PARAM_TEXT, 'Message sent when confirming', VALUE_DEFAULT, 'Ja'),

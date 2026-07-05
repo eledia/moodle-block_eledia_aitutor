@@ -745,6 +745,38 @@ a.eledia_aitutor-avatar:focus-visible {
     margin-bottom: 0;
 }
 
+/* Assistant markdown may emit h1–h6; without these they inherit the theme's
+   large heading sizes and dwarf the chat text. Scale them to the bubble. */
+.eledia_aitutor-markdown h1,
+.eledia_aitutor-markdown h2,
+.eledia_aitutor-markdown h3,
+.eledia_aitutor-markdown h4,
+.eledia_aitutor-markdown h5,
+.eledia_aitutor-markdown h6 {
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0.85em 0 0.3em;
+    color: inherit;
+}
+
+.eledia_aitutor-markdown h1 {
+    font-size: 1.15rem;
+}
+
+.eledia_aitutor-markdown h2 {
+    font-size: 1.05rem;
+}
+
+.eledia_aitutor-markdown h3 {
+    font-size: 1rem;
+}
+
+.eledia_aitutor-markdown h4,
+.eledia_aitutor-markdown h5,
+.eledia_aitutor-markdown h6 {
+    font-size: 0.95rem;
+}
+
 .eledia_aitutor-markdown pre {
     background: var(--eat-code-bg);
     padding: 0.6rem;

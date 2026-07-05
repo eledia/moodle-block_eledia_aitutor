@@ -469,11 +469,12 @@ class widget {
             if ($label === '' || $prompt === '') {
                 continue;
             }
+            $iconsvg = $icon !== '' ? icon::render($icon) : '';
             $starters[] = [
                 'label' => format_string($label),
                 'prompt' => format_string($prompt),
-                'hasicon' => $icon !== '',
-                'icon' => $icon,
+                'hasicon' => $iconsvg !== '',
+                'iconsvg' => $iconsvg,
                 'intent' => $intent === 'auto' ? '' : $intent,
             ];
             if (count($starters) >= 6) {

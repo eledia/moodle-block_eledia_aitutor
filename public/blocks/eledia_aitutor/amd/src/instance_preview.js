@@ -32,7 +32,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([], function() {
+define(['block_eledia_aitutor/icons'], function(Icons) {
     const ROOT_SELECTOR = '.eat-instance-preview .eledia_aitutor-root';
 
     /**
@@ -272,9 +272,9 @@ define([], function() {
         if (toggle) {
             toggle.addEventListener('click', function() {
                 const collapsed = panel.classList.toggle('eat-preview-float--collapsed');
-                const icon = toggle.querySelector('i');
+                const icon = toggle.querySelector('svg');
                 if (icon) {
-                    icon.className = collapsed ? 'fa fa-window-maximize' : 'fa fa-window-minimize';
+                    icon.replaceWith(Icons.create(collapsed ? 'window-maximize' : 'window-minimize'));
                 }
             });
         }

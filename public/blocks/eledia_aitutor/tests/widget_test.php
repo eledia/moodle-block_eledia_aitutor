@@ -235,7 +235,7 @@ final class widget_test extends \advanced_testcase {
 
         $this->assertStringContainsString('Open tasks', $html);
         $this->assertStringContainsString('data-prompt="Which tasks are currently open for me?"', $html);
-        $this->assertStringContainsString('fa fa-tasks', $html);
+        $this->assertStringContainsString('lucide-tasks', $html);
         $this->assertStringNotContainsString('data-prompt="Open tasks"', $html);
 
         // The 'action' intent segment lands as data-intent; the plain pill has none.

@@ -8,12 +8,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([], function() {
+define(['block_eledia_aitutor/icons'], function(Icons) {
     const icon = function(name) {
-        const node = document.createElement('i');
-        node.className = 'fa ' + name;
-        node.setAttribute('aria-hidden', 'true');
-        return node;
+        return Icons.create(name);
     };
 
     const isFormActionRow = function(node) {
@@ -86,7 +83,7 @@ define([], function() {
         const backbutton = document.createElement('button');
         backbutton.type = 'button';
         backbutton.className = 'eat-settings-backnav__button';
-        backbutton.appendChild(icon('fa-arrow-left'));
+        backbutton.appendChild(icon('arrow-left'));
         const text = document.createElement('span');
         text.textContent = label;
         backbutton.appendChild(text);

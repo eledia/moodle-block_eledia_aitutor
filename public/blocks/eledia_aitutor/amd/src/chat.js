@@ -35,6 +35,7 @@ import Modal from 'core/modal';
 import ModalSaveCancel from 'core/modal_save_cancel';
 import ModalEvents from 'core/modal_events';
 import {get_strings as getStrings, get_string as getString} from 'core/str';
+import Icons from 'block_eledia_aitutor/icons';
 
 /** @var {object} Cached localised strings. */
 let strings = {};
@@ -424,7 +425,7 @@ class TutorChat {
         if (!this.expandButton) {
             return;
         }
-        const icon = this.expandButton.querySelector('i');
+        const icon = this.expandButton.querySelector('svg');
         const label = this.expanded ? this.expandButton.dataset.labelCollapse : this.expandButton.dataset.labelExpand;
         this.expandButton.setAttribute('aria-pressed', this.expanded ? 'true' : 'false');
         if (label) {
@@ -432,8 +433,7 @@ class TutorChat {
             this.expandButton.setAttribute('title', label);
         }
         if (icon) {
-            icon.classList.toggle('fa-expand', !this.expanded);
-            icon.classList.toggle('fa-compress', this.expanded);
+            icon.replaceWith(Icons.create(this.expanded ? 'compress' : 'expand'));
         }
     }
 

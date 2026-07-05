@@ -81,7 +81,7 @@ $barrow = function (string $labelhtml, int $count, int $max): string {
 
 echo html_writer::start_div('eat-admin eat-report');
 echo html_writer::div(
-    html_writer::tag('i', '', ['class' => 'fa fa-chart-bar', 'aria-hidden' => 'true']) .
+    \block_eledia_aitutor\local\icon::render('chart-bar') .
     html_writer::span(get_string('report_intro', 'block_eledia_aitutor')),
     'eat-admin-intro'
 );
@@ -91,15 +91,15 @@ $summary = question_log::summary($course->id);
 // Summary stat cards.
 $groundedpct = $summary->total > 0 ? round($summary->grounded * 100 / $summary->total) : 0;
 $stats = [
-    ['fa-comments', (string) $summary->total, get_string('report_total', 'block_eledia_aitutor')],
-    ['fa-calendar-week', (string) $summary->last7, get_string('report_last7', 'block_eledia_aitutor')],
-    ['fa-book', $groundedpct . '%', get_string('report_grounded', 'block_eledia_aitutor')],
+    ['comments', (string) $summary->total, get_string('report_total', 'block_eledia_aitutor')],
+    ['calendar-week', (string) $summary->last7, get_string('report_last7', 'block_eledia_aitutor')],
+    ['book', $groundedpct . '%', get_string('report_grounded', 'block_eledia_aitutor')],
 ];
 echo html_writer::start_div('eat-stat-grid');
 foreach ($stats as [$icon, $value, $label]) {
     echo html_writer::div(
         html_writer::div(
-            html_writer::tag('i', '', ['class' => 'fa ' . $icon, 'aria-hidden' => 'true']),
+            \block_eledia_aitutor\local\icon::render($icon),
             'eat-stat-icon'
         ) .
         html_writer::div(

@@ -34,6 +34,7 @@ require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/classes/output/shell.php');
 
 use block_eledia_aitutor\form\tutor_import_form;
+use block_eledia_aitutor\local\icon;
 use block_eledia_aitutor\local\presets;
 use block_eledia_aitutor\local\tutor_apply;
 use block_eledia_aitutor\local\tutor_io;
@@ -118,7 +119,7 @@ echo $OUTPUT->heading(get_string('instancetutor_title', 'block_eledia_aitutor'))
 
 echo html_writer::start_div('eat-admin');
 echo html_writer::div(
-    html_writer::tag('i', '', ['class' => 'fa fa-paint-brush', 'aria-hidden' => 'true']) .
+    icon::render('paint-brush') .
     html_writer::span(get_string('instancetutor_intro', 'block_eledia_aitutor')),
     'eat-admin-intro'
 );
@@ -129,7 +130,7 @@ echo html_writer::start_div('eat-cards');
 echo html_writer::div(
     html_writer::tag(
         'h3',
-        html_writer::tag('i', '', ['class' => 'fa fa-download', 'aria-hidden' => 'true']) . ' ' .
+        icon::render('download') . ' ' .
         get_string('tutor_export', 'block_eledia_aitutor')
     ) .
     html_writer::tag('p', get_string('instancetutor_exporthelp', 'block_eledia_aitutor')) .
@@ -166,7 +167,7 @@ $applyform = html_writer::tag(
 echo html_writer::div(
     html_writer::tag(
         'h3',
-        html_writer::tag('i', '', ['class' => 'fa fa-magic', 'aria-hidden' => 'true']) . ' ' .
+        icon::render('magic') . ' ' .
         get_string('instancetutor_applyheading', 'block_eledia_aitutor')
     ) .
     html_writer::tag('p', get_string('instancetutor_applyhelp', 'block_eledia_aitutor')) .
@@ -180,7 +181,7 @@ echo html_writer::end_div(); // End of .eat-cards.
 echo html_writer::start_div('eat-card');
 echo html_writer::tag(
     'h3',
-    html_writer::tag('i', '', ['class' => 'fa fa-upload', 'aria-hidden' => 'true']) . ' ' .
+    icon::render('upload') . ' ' .
     get_string('tutor_import', 'block_eledia_aitutor')
 );
 echo html_writer::tag('p', get_string('tutor_import_help', 'block_eledia_aitutor'));
