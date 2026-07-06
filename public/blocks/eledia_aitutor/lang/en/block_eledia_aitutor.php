@@ -190,6 +190,7 @@ $string['copilot_generate'] = 'Generate analysis';
 $string['copilot_intro'] = 'Let the AI summarise what learners are struggling with and suggest concrete actions. The analysis uses the anonymised questions shown on this page.';
 $string['copilot_nodata'] = 'There are not enough logged questions yet to generate an analysis.';
 $string['copilot_prompt'] = 'You are a didactic analysis assistant for teachers. Analyse the following anonymised questions that learners asked the AI tutor in this course. Top topics of the last 30 days (topic: number of questions): {$a->hotspots} — Sample of recent questions (truncated): {$a->questions} — Write a compact analysis in Markdown with these sections: 1. What do learners apparently not understand (patterns, misconceptions)? 2. Which course contents are affected? 3. Three concrete, actionable recommendations for the teacher. Never name or guess individual learners; the data is anonymous.';
+$string['copilot_ready'] = 'Analysis ready.';
 $string['copilot_title'] = 'Copilot';
 $string['copilot_working'] = 'Analysing questions …';
 $string['copy'] = 'Copy answer';

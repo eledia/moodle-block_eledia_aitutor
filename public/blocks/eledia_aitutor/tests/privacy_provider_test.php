@@ -161,4 +161,69 @@ final class privacy_provider_test extends \core_privacy\tests\provider_testcase 
         $prefname = \block_eledia_aitutor\local\ltm::PREF;
         $this->assertTrue(empty($prefs->$prefname));
     }
+
+    /**
+     * Deleting a single user's data also erases their LTM consent preference
+     * (Art. 17 GDPR: the opt-in must not survive a deletion request).
+     */
+    public function test_delete_data_for_user_removes_ltm_preference(): void {
+        $this->resetAfterTest();
+        $prefname = \block_eledia_aitutor\local\ltm::PREF;
+        $alice = $this->getDataGenerator()->create_user();
+        $bob = $this->getDataGenerator()->create_user();
+        \block_eledia_aitutor\local\ltm::set_enabled((int) $alice->id, true);
+        \block_eledia_aitutor\local\ltm::set_enabled((int) $bob->id, true);
+
+        $contextlist = new approved_contextlist($alice, 'block_eledia_aitutor', [\core\context\system::instance()->id]);
+        provider::delete_data_for_user($contextlist);
+
+        // Alice's preference row is gone entirely; Bob's is untouched.
+        $this->assertNull(get_user_preferences($prefname, null, (int) $alice->id));
+        $this->assertEquals('1', get_user_preferences($prefname, null, (int) $bob->id));
+    }
+
+    /**
+     * Deleting a batch of users erases each user's LTM consent preference.
+     */
+    public function test_delete_data_for_users_removes_ltm_preference(): void {
+        $this->resetAfterTest();
+        $prefname = \block_eledia_aitutor\local\ltm::PREF;
+        $alice = $this->getDataGenerator()->create_user();
+        $bob = $this->getDataGenerator()->create_user();
+        $carol = $this->getDataGenerator()->create_user();
+        \block_eledia_aitutor\local\ltm::set_enabled((int) $alice->id, true);
+        \block_eledia_aitutor\local\ltm::set_enabled((int) $bob->id, true);
+        \block_eledia_aitutor\local\ltm::set_enabled((int) $carol->id, true);
+
+        $userlist = new \core_privacy\local\request\approved_userlist(
+            \core\context\system::instance(),
+            'block_eledia_aitutor',
+            [(int) $alice->id, (int) $bob->id]
+        );
+        provider::delete_data_for_users($userlist);
+
+        $this->assertNull(get_user_preferences($prefname, null, (int) $alice->id));
+        $this->assertNull(get_user_preferences($prefname, null, (int) $bob->id));
+        // Carol was not in the approved list, so her preference survives.
+        $this->assertEquals('1', get_user_preferences($prefname, null, (int) $carol->id));
+    }
+
+    /**
+     * Deleting all data in the system context erases the LTM preference for
+     * every user, regardless of the stored value (opt-in and opt-out alike).
+     */
+    public function test_delete_data_for_all_users_in_context_removes_ltm_preference(): void {
+        $this->resetAfterTest();
+        $prefname = \block_eledia_aitutor\local\ltm::PREF;
+        $alice = $this->getDataGenerator()->create_user();
+        $bob = $this->getDataGenerator()->create_user();
+        \block_eledia_aitutor\local\ltm::set_enabled((int) $alice->id, true);
+        // An explicit opt-out still writes a '0' row that must also be cleared.
+        \block_eledia_aitutor\local\ltm::set_enabled((int) $bob->id, false);
+
+        provider::delete_data_for_all_users_in_context(\core\context\system::instance());
+
+        $this->assertNull(get_user_preferences($prefname, null, (int) $alice->id));
+        $this->assertNull(get_user_preferences($prefname, null, (int) $bob->id));
+    }
 }

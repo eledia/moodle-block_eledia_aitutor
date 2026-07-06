@@ -141,8 +141,9 @@ class question_log {
             }
         }
 
+        // Sorting with usort() already reindexes $buckets to a 0-based list (no array_values needed).
         usort($buckets, static fn($a, $b) => $b->count <=> $a->count);
-        return array_slice(array_values($buckets), 0, $limit);
+        return array_slice($buckets, 0, $limit);
     }
 
     /**

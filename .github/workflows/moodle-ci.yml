@@ -53,6 +53,16 @@ jobs:
         php-version: ['8.2', '8.3', '8.4']
         database: ['pgsql', 'mariadb']
         moodle-branch: ['MOODLE_501_STABLE']
+        include:
+          # Also exercise the declared minimum (Moodle 4.5 LTS, $plugin->requires).
+          # 4.5 supports PHP up to 8.3, so pin these floor jobs to 8.3 rather than
+          # the matrix's 8.4.
+          - php-version: '8.3'
+            database: 'pgsql'
+            moodle-branch: 'MOODLE_405_STABLE'
+          - php-version: '8.3'
+            database: 'mariadb'
+            moodle-branch: 'MOODLE_405_STABLE'
 
     steps:
       - name: Checkout repository

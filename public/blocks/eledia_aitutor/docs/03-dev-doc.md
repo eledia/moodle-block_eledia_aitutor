@@ -159,6 +159,33 @@ Empfohlene Regeln fuer RAG-Server:
 
 ---
 
+## Capability-/Consent-Matrix der External-Funktionen
+
+Referenz fuer Reviews und neue External-Funktionen (Stand 2026-07-05). Alle
+Funktionen rufen zuerst `require_login()` und `self::validate_context($context)`
+auf; die Tabelle listet die zusaetzlichen Gates. „Consent" = Datenschutz-Erst-
+nutzungs-Gate (`consent::require_consent`), „Quota" = tageslimit (`usage`).
+
+| External-Funktion            | Capability                          | Consent | Quota | Anmerkung |
+|------------------------------|-------------------------------------|---------|-------|-----------|
+| `send_message`               | `block/eledia_aitutor:use`          | ja*     | ja*   | *innerhalb `chat_service::send()` (Consent-Gate + `usage::assert_within_limit`/`increment`) vor jedem RAG-Call |
+| `give_consent`               | `block/eledia_aitutor:use`          | schreibt| –     | setzt `consent::give()` |
+| `set_ltm`                    | `block/eledia_aitutor:use`          | indirekt| –     | Sync an RAG ist in `ltm::sync_to_rag()` durch Consent gegated; jeder Chat traegt den Consent ohnehin mit |
+| `get_history`                | `block/eledia_aitutor:viewhistory`  | ja      | –     | Consent direkt in der External geprueft |
+| `get_conversations`          | `block/eledia_aitutor:viewhistory`  | –       | –     | nur Metadaten der eigenen Konversationen |
+| `clear_conversation`         | `block/eledia_aitutor:deleteownhistory` | –   | –     | Loeschen der eigenen Historie |
+| `delete_my_data`             | `block/eledia_aitutor:deleteownhistory` | –   | –     | DSGVO-Selbstloeschung |
+| `generate_copilot_analysis`  | `block/eledia_aitutor:viewreports`  | –       | –     | Lehrenden-Copilot, kursbezogen |
+
+**Bewusste Asymmetrien** (kein Defekt, aber zu kennen): Das Consent-Gate sitzt
+fuer `send_message` in `chat_service` (naeher am RAG-Call), fuer `get_history`
+direkt in der External. `get_conversations` liefert nur eigene Metadaten und
+braucht daher kein Consent-Gate. Neue Funktionen, die Inhalte an den RAG-Server
+senden, MUESSEN das Consent-Gate durchlaufen; reine Moodle-lokale Lese-/Loesch-
+Funktionen brauchen es nicht. (Externer Review-Befund AIT-SEC-05 / AIT-IDEA-04.)
+
+---
+
 ## Lokaler Betrieb
 
 Im aktuellen lokalen Setup laeuft Moodle unter `http://localhost:8080`. Der

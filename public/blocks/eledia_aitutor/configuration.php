@@ -70,16 +70,34 @@ $ragingesthealth = [
     'message' => '',
 ];
 if ($ragingestavailable) {
-    try {
-        $ragingestclient = new \local_ragingest\api_client();
-        $ragingestresult = $ragingestclient->healthcheck();
-        $ragingesthealth['healthy'] = !empty($ragingestresult['success']);
+    // Cache the health result for 60s (mirrors the LLM check below): the call is a
+    // synchronous HTTP request that would otherwise block this admin page on every
+    // load until it times out whenever the ingest endpoint is unreachable.
+    $ragingestcached = json_decode((string) get_config('block_eledia_aitutor', 'ragingesthealthcache'), true);
+    if (
+        is_array($ragingestcached) && !empty($ragingestcached['checked']) &&
+            (time() - (int) $ragingestcached['checked']) < 60
+    ) {
+        $ragingesthealth['healthy'] = !empty($ragingestcached['healthy']);
         $ragingesthealth['state'] = $ragingesthealth['healthy'] ? 'ready' : 'error';
-        $ragingesthealth['message'] = $ragingesthealth['healthy']
-            ? 'OK'
-            : ($ragingestresult['error'] ?: ('HTTP ' . (int) ($ragingestresult['http_code'] ?? 0)));
-    } catch (\Throwable $exception) {
-        $ragingesthealth['message'] = $exception->getMessage();
+        $ragingesthealth['message'] = isset($ragingestcached['message']) ? (string) $ragingestcached['message'] : '';
+    } else {
+        try {
+            $ragingestclient = new \local_ragingest\api_client();
+            $ragingestresult = $ragingestclient->healthcheck();
+            $ragingesthealth['healthy'] = !empty($ragingestresult['success']);
+            $ragingesthealth['state'] = $ragingesthealth['healthy'] ? 'ready' : 'error';
+            $ragingesthealth['message'] = $ragingesthealth['healthy']
+                ? 'OK'
+                : ($ragingestresult['error'] ?: ('HTTP ' . (int) ($ragingestresult['http_code'] ?? 0)));
+        } catch (\Throwable $exception) {
+            $ragingesthealth['message'] = $exception->getMessage();
+        }
+        set_config('ragingesthealthcache', json_encode([
+            'checked' => time(),
+            'healthy' => $ragingesthealth['healthy'],
+            'message' => $ragingesthealth['message'],
+        ]), 'block_eledia_aitutor');
     }
 }
 

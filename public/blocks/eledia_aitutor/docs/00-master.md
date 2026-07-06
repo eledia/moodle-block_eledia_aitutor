@@ -125,6 +125,27 @@ Der Projekt-Root und der Plugin-`docs/`-Ordner bleiben frei von parallelen Guide
 
 ## 6. Aktueller Review-Stand
 
+### Stand 2026-07-05 (externer DevFlow-Review, Lauf 10 -- abgearbeitet in `task11`)
+
+- Die offenen Befunde aus dem externen Code-Review
+  (`00_Code-Review/moodle-block_elediaaitutor.md`) sind umgesetzt und im DevFlow
+  gespiegelt (`bug19`-`bug34`, AIT-DOC-01).
+- **Behoben:** LTM-Privacy-Loeschung (`bug19`, S1, DSGVO, + PHPUnit),
+  Overlay-Dialog-Semantik (`bug20`, S2, + Behat), Radiogroup-Tastatur (`bug21`),
+  History-`aria-expanded` (`bug22`), `--eat-muted`-Kontrast (`bug23`),
+  Copilot-Ansage (`bug24`), Confirmation-Buttons (`bug25`), redundantes
+  `array_values` (`bug26`), RagIngest-Healthcheck-Cache (`bug27`),
+  `requires` 4.5 + CI-Matrix (`bug28`), tote `MODIFIER_COMPACT` (`bug18`),
+  `icon.php`-Zeilenlaengen (`bug34`).
+- **Accepted/dokumentiert:** `usage`-Zaehler ist mit Unique-Index das korrekte
+  portable Idiom (`bug29`); `get_history`-User-Turns sind per `{{text}}`-Slot
+  escaped (`bug30`); Fokusring-Branding und Hero-`h1` sind `manual_check`
+  (`bug31`/`bug32`); Capability-/Consent-Matrix jetzt in `03-dev-doc.md`
+  (`bug33`, AIT-SEC-05).
+- Verifikation: `phpcs --standard=moodle` gesamt **0/0**, `grunt amd` (ESLint +
+  rollup) gruen, AMD-Builds neu erzeugt. PHPUnit/Behat laufen in der GitHub-CI
+  (lokaler Reinit durch fremde Plugins blockiert).
+
 ### Stand 2026-06-27 (CodeChecker)
 
 - Offizieller Moodle CodeChecker (`moodlehq/moodle-cs`, `phpcs --standard=moodle`)
@@ -134,8 +155,9 @@ Der Projekt-Root und der Plugin-`docs/`-Ordner bleiben frei von parallelen Guide
 - `bug02`-Reconciliation: Der in Runde 1 ergaenzte `MOODLE_INTERNAL`-Guard wurde
   in seiteneffektfreien/autoloaded Dateien wieder entfernt (sicherheitsneutral,
   vom Standard so verlangt).
-- Beifang `bug18` (S4, offen): `MODIFIER_COMPACT == 'full'` in `plugin_page.php`
-  -- moeglicher Copy-Paste-Fehler, zur Klaerung erfasst.
+- Beifang `bug18` (S4): `MODIFIER_COMPACT == 'full'` in `plugin_page.php`
+  -- moeglicher Copy-Paste-Fehler, zur Klaerung erfasst (inzwischen gefixt:
+  tote Konstante entfernt, siehe Stand 2026-07-05).
 - Submission-Ziel: Moodle Plugins Directory.
 
 ### Stand 2026-06-26 (Folge-Review)

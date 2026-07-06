@@ -88,10 +88,15 @@ Feature: eLeDia.ai Tutor chat block UI
     When I click on "[data-action=launch]" "css_element"
     Then ".eledia_aitutor-modal" "css_element" should be visible
     And "textarea[data-region=input]" "css_element" should be visible
+    # The open modal must expose itself as a modal dialog to assistive tech.
+    And "[data-region=panel][role=dialog][aria-modal=true]" "css_element" should exist
     # Use the header close button: the backdrop (also data-action=close) is overlapped
     # by the first-use consent panel and is not reliably clickable.
     When I click on "button[data-action=close]" "css_element"
     Then ".eledia_aitutor-modal" "css_element" should not be visible
+    # Once closed it is no longer a dialog, just a hidden region.
+    And "[data-region=panel][role=region]" "css_element" should exist
+    And "[data-region=panel][aria-modal]" "css_element" should not exist
 
   @javascript
   Scenario: The chat can be opened in full-screen mode

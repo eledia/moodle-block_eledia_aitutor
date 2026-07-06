@@ -190,6 +190,7 @@ $string['copilot_generate'] = 'Analyse erstellen';
 $string['copilot_intro'] = 'Lassen Sie die KI zusammenfassen, womit Lernende Schwierigkeiten haben, und konkrete Maßnahmen vorschlagen. Die Analyse nutzt die anonymisierten Fragen auf dieser Seite.';
 $string['copilot_nodata'] = 'Es liegen noch nicht genügend protokollierte Fragen für eine Analyse vor.';
 $string['copilot_prompt'] = 'Du bist ein didaktischer Analyse-Assistent für Lehrende. Analysiere die folgenden anonymisierten Fragen, die Lernende dem KI-Tutor in diesem Kurs gestellt haben. Top-Themen der letzten 30 Tage (Thema: Anzahl Fragen): {$a->hotspots} — Stichprobe der letzten Fragen (gekürzt): {$a->questions} — Erstelle eine kompakte Analyse in Markdown mit diesen Abschnitten: 1. Was verstehen die Lernenden offenbar nicht (Muster, Missverständnisse)? 2. Welche Kursinhalte sind betroffen? 3. Drei konkrete, umsetzbare Handlungsempfehlungen für die Lehrkraft. Nenne oder errate niemals einzelne Lernende; die Daten sind anonym.';
+$string['copilot_ready'] = 'Analyse fertig.';
 $string['copilot_title'] = 'Copilot';
 $string['copilot_working'] = 'Fragen werden analysiert …';
 $string['copy'] = 'Antwort kopieren';

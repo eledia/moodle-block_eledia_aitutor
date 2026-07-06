@@ -47,7 +47,9 @@
     --eat-line: #e7ebef;
     /* Text. */
     --eat-ink: #1e3f59;
-    --eat-muted: #748495;
+    /* Darkened from #748495 (~3.8:1) to meet WCAG 1.4.3 (>=4.5:1 on white and on
+       --eat-body-bg). */
+    --eat-muted: #626d7c;
     --eat-header-fg: #1e3f59;
     /* Bubbles: warm peach for the learner, clean white card for the tutor. */
     --eat-user-bg: #fce9db;

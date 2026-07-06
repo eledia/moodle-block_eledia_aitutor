@@ -39,8 +39,6 @@ final class plugin_page {
     public const MODIFIER_WIDE = 'wide';
     /** @var string Full-bleed shell width. */
     public const MODIFIER_FULL = 'full';
-    /** @var string Compact shell width. */
-    public const MODIFIER_COMPACT = 'full';
 
     /** @var bool Tracks the open shell wrapper. */
     private static bool $opened = false;

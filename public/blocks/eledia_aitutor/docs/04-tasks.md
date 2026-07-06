@@ -331,3 +331,49 @@ bleibt ueber den Ecken-Button erreichbar.
 - FAB fix erzwingen fuer sitewide, oder als Setting (`sitewidelauncherstyle`)?
   Empfehlung: fix `fab` — der sitewide-Launcher hat keinen sinnvollen Inline-Platz
   auf fremden Unterseiten. Kosmetisch, kein Bug; niedrige Prioritaet.
+
+### task11 Externen Code-Review (Lauf 10) abarbeiten
+Status:    done
+Feature:   -
+Prioritaet: P1
+Linked:    bug18, bug19, bug20, bug21, bug22, bug23, bug24, bug25, bug26, bug27, bug28, bug29, bug30, bug31, bug32, bug33, bug34
+
+**Ziel**
+Die offenen Befunde aus dem externen DevFlow-Code-Review
+(`00_Code-Review/moodle-block_elediaaitutor.md`) im Plugin umsetzen und im
+DevFlow spiegeln (AIT-DOC-01).
+
+**Umgesetzt 2026-07-05**
+- **AIT-SEC-03 / bug19 (S1):** LTM-Consent-Preference in allen drei Privacy-
+  Loeschpfaden entfernt (`unset_user_preference` bzw. `delete_records`), 3 PHPUnit-
+  Tests ergaenzt.
+- **AIT-A11Y-01 / bug20 (S2):** Overlay-Chat als Dialog (`role`/`aria-modal`
+  zustandsabhaengig via `updateDialogRole()`), Behat-Assertion.
+- **AIT-A11Y-02/03 / bug21,bug22:** Radiogroup-Tastatur (Roving-`tabindex` +
+  Pfeiltasten) und History-`aria-expanded`/`aria-controls`.
+- **AIT-A11Y-05 / bug23:** `--eat-muted` auf `#626d7c` (>=4.5:1); opacity-Teil
+  offen (visueller Audit).
+- **AIT-A11Y-08 / bug24:** Copilot-Abschluss via `copilot_ready` in aria-live.
+- **AIT-BUG-06 / bug25:** Confirmation-Buttons nach Wahl gesperrt + `aria-pressed`.
+- **AIT-BUG-03 / bug26:** redundantes `array_values` entfernt.
+- **AIT-BUG-07 / bug27:** RagIngest-Healthcheck 60-s-gecacht.
+- **AIT-STD-01 / bug28:** `requires` = 4.5 LTS, `supported` = [405,502], CI-Matrix
+  um `MOODLE_405_STABLE` erweitert.
+- **AIT-BUG-05 / bug18:** tote `MODIFIER_COMPACT`-Konstante entfernt.
+- **icon.php / bug34:** Zeilenlaengen-Sniffs am `PATHS`-Datenblock gezielt
+  deaktiviert; Plugin gesamt `phpcs` 0/0.
+- **AIT-SEC-05 / bug33:** Capability-/Consent-Matrix in `03-dev-doc.md`.
+
+**Bewusst nicht geaendert (dokumentiert)**
+- **bug29 (AIT-BUG-01):** `usage::increment` ist mit Unique-Index das korrekte
+  portable Moodle-Idiom (kein atomares UPSERT verfuegbar) -> accepted.
+- **bug30 (AIT-BUG-04):** User-Turns sind per `{{text}}`-Slot escaped; serverseitig
+  waere doppelt -> accepted.
+- **bug31/bug32 (AIT-A11Y-06/09):** manual_check (Fokusring-Branding,
+  Heading-Hierarchie kontextabhaengig) -> zur manuellen Klaerung dokumentiert.
+
+**Verifikation**
+- `phpcs --standard=moodle` gesamt: 0/0.
+- `grunt amd` (ESLint + rollup) gruen; Builds neu erzeugt.
+- PHPUnit fuer den Privacy-Provider konnte lokal nicht laufen (fremde Plugins
+  blockieren den Reinit); laeuft in GitHub-CI.

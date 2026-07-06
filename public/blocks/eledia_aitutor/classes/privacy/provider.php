@@ -280,6 +280,8 @@ class provider implements
         $DB->delete_records('block_eledia_aitutor_consent');
         $DB->delete_records('block_eledia_aitutor_usage');
         $DB->delete_records('block_eledia_aitutor_diag');
+        // Remove the LTM consent preference for every user (declared in get_metadata).
+        $DB->delete_records('user_preferences', ['name' => \block_eledia_aitutor\local\ltm::PREF]);
     }
 
     /**
@@ -293,11 +295,14 @@ class provider implements
         if (!self::contains_system_context($contextlist->get_contexts())) {
             return;
         }
-        $DB->delete_records('block_eledia_aitutor_conv', ['userid' => (int) $contextlist->get_user()->id]);
-        $DB->delete_records('block_eledia_aitutor_qlog', ['userid' => (int) $contextlist->get_user()->id]);
-        $DB->delete_records('block_eledia_aitutor_consent', ['userid' => (int) $contextlist->get_user()->id]);
-        $DB->delete_records('block_eledia_aitutor_usage', ['userid' => (int) $contextlist->get_user()->id]);
-        $DB->delete_records('block_eledia_aitutor_diag', ['userid' => (int) $contextlist->get_user()->id]);
+        $userid = (int) $contextlist->get_user()->id;
+        $DB->delete_records('block_eledia_aitutor_conv', ['userid' => $userid]);
+        $DB->delete_records('block_eledia_aitutor_qlog', ['userid' => $userid]);
+        $DB->delete_records('block_eledia_aitutor_consent', ['userid' => $userid]);
+        $DB->delete_records('block_eledia_aitutor_usage', ['userid' => $userid]);
+        $DB->delete_records('block_eledia_aitutor_diag', ['userid' => $userid]);
+        // Remove the LTM consent preference (declared in get_metadata, exported above).
+        unset_user_preference(\block_eledia_aitutor\local\ltm::PREF, $userid);
     }
 
     /**
@@ -321,6 +326,10 @@ class provider implements
         $DB->delete_records_select('block_eledia_aitutor_consent', "userid $insql", $params);
         $DB->delete_records_select('block_eledia_aitutor_usage', "userid $insql", $params);
         $DB->delete_records_select('block_eledia_aitutor_diag', "userid $insql", $params);
+        // Remove the LTM consent preference for each affected user (declared in get_metadata).
+        foreach ($userids as $userid) {
+            unset_user_preference(\block_eledia_aitutor\local\ltm::PREF, (int) $userid);
+        }
     }
 
     /**

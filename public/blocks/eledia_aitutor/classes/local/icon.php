@@ -31,7 +31,10 @@ namespace block_eledia_aitutor\local;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class icon {
-
+    // Each value is machine-generated SVG path geometry (Lucide) that cannot be
+    // meaningfully wrapped, so the line-length sniffs are disabled for this data
+    // block only.
+    // phpcs:disable moodle.Files.LineLength.MaxExceeded, moodle.Files.LineLength.TooLong
     /** @var array<string,string> Map of icon name => inner Lucide SVG paths. */
     private const PATHS = [
         'align-left' => '<path d="M15 12H3"/><path d="M17 18H3"/><path d="M21 6H3"/>',
@@ -127,6 +130,7 @@ final class icon {
         'wrench' => '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
 
     ];
+    // phpcs:enable moodle.Files.LineLength.MaxExceeded, moodle.Files.LineLength.TooLong
 
     /**
      * Render an inline Lucide SVG for the given icon name.

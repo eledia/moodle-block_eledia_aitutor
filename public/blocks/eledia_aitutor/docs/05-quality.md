@@ -505,7 +505,7 @@ Faelle (u. a. `manage_tutors.php`), Lang-String-Sortierung (2x 658 Strings) und
 
 Feature:  feat03
 Severity: S4
-Status:   open
+Status:   fixed
 Linked:   task07
 
 **Beschreibung**
@@ -518,3 +518,272 @@ Verhaltensaenderung waere.
 **Erwartet**
 Klaeren, ob `MODIFIER_COMPACT` einen eigenen Wert (`'compact'`) braucht oder die
 Konstante entfernt werden kann. Pruefen, wo die Konstante verwendet wird.
+
+**Stand 2026-07-05 (fixed)**
+Pruefung ergab: `MODIFIER_COMPACT` wird nirgends im Code verwendet (nur in Doku
+erwaehnt), steht nicht in der Modifier-Allowlist von `open()` und hat keinen
+`match`-Zweig. Die tote, irrefuehrende Konstante wurde ersatzlos entfernt. Keine
+Verhaltensaenderung. (Externer Review-Befund AIT-BUG-05.)
+
+### bug19 LTM-Einwilligungs-Preference wird bei Privacy-Loeschung nicht entfernt
+
+Feature:  feat04
+Severity: S1
+Status:   fixed
+Linked:   test07
+
+**Beschreibung**
+Die User-Preference `block_eledia_aitutor_ltm_enabled` (`ltm::PREF`) wurde in
+`get_metadata` deklariert und exportiert, aber in keinem der drei Loeschpfade des
+Privacy-Providers entfernt -- DSGVO-Loeschpflicht (Art. 17) nicht erfuellt.
+(Externer Review-Befund AIT-SEC-03.)
+
+**Stand 2026-07-05 (fixed)**
+`unset_user_preference()` in `delete_data_for_user`/`delete_data_for_users`
+je `$userid`; im Systemkontext-Pfad `delete_records('user_preferences', ...)`.
+PHPUnit-Tests (drei Pfade) in `tests/privacy_provider_test.php` ergaenzt.
+
+### bug20 Overlay-Chat ist modal, wird aber nicht als Dialog ausgezeichnet
+
+Feature:  feat01
+Severity: S2
+Status:   fixed
+Linked:   test08
+
+**Beschreibung**
+`open()`/`expand()` erzeugten modale Zustaende ohne `role="dialog"`/`aria-modal`;
+der Launch-Button kuendigte `aria-haspopup="dialog"` auf ein Nicht-Dialog-Ziel an
+(WCAG 4.1.2/1.3.1). (Externer Review-Befund AIT-A11Y-01.)
+
+**Stand 2026-07-05 (fixed)**
+Neue `updateDialogRole()` in `amd/src/chat.js` setzt zustandsabhaengig
+`role="dialog"` und `aria-modal` (nur bei echter Modalitaet: modal/fullscreen
+oder expandiert); Embedded/geschlossen bleibt `role="region"`. Behat-Assertion
+in `chat_ui.feature` ergaenzt. Fokus-Trap/Escape waren bereits vorhanden.
+
+### bug21 Antwortstil-Chips: ARIA-Radiogroup ohne Tastatur-Bedienung
+
+Feature:  feat01
+Severity: S3
+Status:   fixed
+Linked:   -
+
+**Beschreibung**
+Die Stil-Chips (`role="radiogroup"`/`role="radio"`) hatten keine Pfeiltasten-
+Navigation und kein Roving-`tabindex` (WCAG 2.1.1/4.1.2).
+(Externer Review-Befund AIT-A11Y-02.)
+
+**Stand 2026-07-05 (fixed)**
+Roving-`tabindex` (nur der gewaehlte Radio im Tab-Fluss) und `handleStyleKeys()`
+(Pfeiltasten mit Wraparound, Home/End; Auswahl checkt den Radio) in `chat.js`;
+`tabindex` initial im Template.
+
+### bug22 History-Toggle ohne `aria-expanded`/`aria-controls`
+
+Feature:  feat01
+Severity: S3
+Status:   fixed
+Linked:   -
+
+**Beschreibung**
+Der History-Button steuert ein ein-/ausblendbares Panel, meldete den Zustand aber
+nicht (WCAG 4.1.2). (Externer Review-Befund AIT-A11Y-03.)
+
+**Stand 2026-07-05 (fixed)**
+Button erhaelt `aria-controls="{uniqid}_history"` und `aria-expanded`, das in
+`toggleHistory()` synchron zum Panel-Zustand gesetzt wird; Panel bekommt die id.
+
+### bug23 Kontrast: `--eat-muted` unter 4.5:1
+
+Feature:  feat01
+Severity: S3
+Status:   fixed (Teil opacity: offen)
+Linked:   -
+
+**Beschreibung**
+`--eat-muted: #748495` ergab ~3.8:1 auf Weiss (WCAG 1.4.3). Zusaetzlich einzelne
+opacity-gedimmte Elemente. (Externer Review-Befund AIT-A11Y-05, Confidence med.)
+
+**Stand 2026-07-05**
+`--eat-muted` auf `#626d7c` abgedunkelt (>=4.5:1 auf Weiss und `--eat-body-bg`).
+Der opacity-Anteil betrifft ueberwiegend Icon-Buttons (Nicht-Text, 1.4.11/3:1 mit
+Labels); ein dedizierter visueller Kontrast-Audit der opacity-Werte steht noch aus.
+
+### bug24 Copilot-Ergebnis wird nach Generierung nicht angekuendigt
+
+Feature:  feat07
+Severity: S4
+Status:   fixed
+Linked:   -
+
+**Beschreibung**
+Nach Abschluss der Analyse wurde die aria-live-Statuszeile geleert und das Ergebnis
+(kein Live-Bereich) eingeblendet -- Screenreader erhielten kein Signal (WCAG 4.1.3).
+(Externer Review-Befund AIT-A11Y-08.)
+
+**Stand 2026-07-05 (fixed)**
+`copilot_report.js` setzt bei Erfolg die Statuszeile auf `copilot_ready`
+(neuer Lang-String de/en) statt sie zu leeren.
+
+### bug25 MCP-Confirmation-Buttons bleiben nach der Antwort aktiv
+
+Feature:  feat06
+Severity: S4
+Status:   fixed
+Linked:   -
+
+**Beschreibung**
+`confirmReply()` deaktivierte die Ja/Nein-Buttons nicht -> moeglicher Doppel-Trigger
+der (schreibenden) MCP-Aktion; fuer Screenreader unmarkiert.
+(Externer Review-Befund AIT-BUG-06.)
+
+**Stand 2026-07-05 (fixed)**
+Beim ersten Klick wird die Gruppe via `data-resolved` gesperrt, beide Buttons
+`disabled`; der gewaehlte Button erhaelt `aria-pressed="true"`.
+
+### bug26 Redundanter `array_values` in `question_log::hotspots`
+
+Feature:  feat07
+Severity: S4
+Status:   fixed
+Linked:   -
+
+**Beschreibung**
+`array_slice(array_values($buckets), ...)` -- `usort()` reindiziert bereits, der
+`array_values`-Aufruf war ein No-op. (Externer Review-Befund AIT-BUG-03.)
+
+**Stand 2026-07-05 (fixed)**
+`array_values` entfernt.
+
+### bug27 `configuration.php`: RagIngest-Healthcheck ungecacht und blockierend
+
+Feature:  feat08
+Severity: S4
+Status:   fixed
+Linked:   -
+
+**Beschreibung**
+Der synchrone `healthcheck()` lief bei jedem Aufruf der Admin-Seite ungecacht und
+blockierte bei nicht erreichbarem Endpoint bis zum Timeout (der LLM-Check daneben
+war 60 s gecacht). (Externer Review-Befund AIT-BUG-07.)
+
+**Stand 2026-07-05 (fixed)**
+60-s-Config-Cache (`ragingesthealthcache`) analog zum LLM-Check.
+
+### bug28 `requires` = 4.2, obwohl Hooks-API >=4.3 noetig und CI nur 5.1 testet
+
+Feature:  feat03
+Severity: S4
+Status:   fixed
+Linked:   -
+
+**Beschreibung**
+`version.php` deklarierte `requires = 2023041800` (4.2), der Code nutzt aber die
+Hooks-API (>=4.3), und die CI testete nur `MOODLE_501_STABLE`.
+(Externer Review-Befund AIT-STD-01.)
+
+**Stand 2026-07-05 (fixed)**
+`requires = 2024100700` (4.5 LTS), `supported = [405, 502]`; CI-Matrix um
+`MOODLE_405_STABLE` (PHP 8.3, pgsql + mariadb) erweitert.
+
+### bug29 `usage::increment` Quota-Zaehler nicht atomar
+
+Feature:  feat01
+Severity: S3
+Status:   accepted
+Linked:   -
+
+**Beschreibung**
+UPDATE-first + INSERT + Race-Catch statt eines atomaren UPSERT.
+(Externer Review-Befund AIT-BUG-01.)
+
+**Stand 2026-07-05 (accepted)**
+Moodle bietet kein portables atomares UPSERT. Die Tabelle hat den Unique-Index
+`userid-daykey`, wodurch der Race-Catch (INSERT -> Duplicate -> UPDATE) korrekt
+und ohne verlorene Zaehlung arbeitet. Das ist das akzeptierte portable Idiom;
+keine Aenderung.
+
+### bug30 `get_history` liefert User-Turns als PARAM_RAW
+
+Feature:  feat01
+Severity: S4
+Status:   accepted
+Linked:   -
+
+**Beschreibung**
+User-Turns werden als `PARAM_RAW` zurueckgegeben; Sicherheit haengt daran, dass
+`loadConversation()` sie in den escapten `{{text}}`-Slot mappt.
+(Externer Review-Befund AIT-BUG-04.)
+
+**Stand 2026-07-05 (accepted)**
+Der Client mappt User-Inhalte nachweislich in `{{text}}` (escaped), Assistant-HTML
+in `{{{html}}}`. Serverseitiges Escaping wuerde doppelt escapen. Sicher per Vertrag;
+Code und Kommentare dokumentieren die Zuordnung. Keine Aenderung.
+
+### bug31 Fokusring-Kontrast bei kundenspezifischem Branding
+
+Feature:  feat01
+Severity: S4
+Status:   manual
+Linked:   -
+
+**Beschreibung**
+`--eat-focus-ring` ist accent-abgeleitet (35 % transparent) und koennte bei
+bestimmten Custom-Accents unter 3:1 liegen (WCAG 1.4.11).
+(Externer Review-Befund AIT-A11Y-06, manual_check.)
+
+**Stand 2026-07-05 (manual)**
+Branding-/design-abhaengig; erfordert visuelle Pruefung gegen reale Custom-Paletten
+statt einer blinden Token-Aenderung. Empfehlung fuers Design-Review: garantierten
+Mindestkontrast des Fokusindikators sicherstellen (hoehere Opacity oder solider
+Outline-Fallback).
+
+### bug32 AI-Home ohne `<h1>`: Hero beginnt bei `<h2>`
+
+Feature:  feat05
+Severity: S4
+Status:   manual
+Linked:   -
+
+**Beschreibung**
+Der Hero-Gruss (`{{#dashboardmode}}`) rendert als `<h2>` (WCAG 1.3.1/2.4.6, Best
+Practice). (Externer Review-Befund AIT-A11Y-09, manual_check.)
+
+**Stand 2026-07-05 (manual)**
+Die korrekte Heading-Ebene haengt vom Seitenkontext ab: dieselbe Vorlage wird
+eingebettet (Moodle-Seite hat bereits `<h1>`) und potenziell als eigenstaendige
+AI-Home genutzt. Ein blindes `<h1>` wuerde auf gemeinsamen Seiten doppelte h1
+erzeugen. Zu klaeren, ob eine dedizierte Standalone-AI-Home existiert, die den
+Hero als `<h1>` fuehren sollte.
+
+### bug33 Capability-/Consent-Matrix der External-Funktionen uneinheitlich
+
+Feature:  feat01
+Severity: S4
+Status:   documented
+Linked:   -
+
+**Beschreibung**
+Die Anforderungs-Matrix (Capabilities + Consent-Gate) der External-Funktionen ist
+uneinheitlich gewachsen. (Externer Review-Befund AIT-SEC-05 / AIT-IDEA-04.)
+
+**Stand 2026-07-05 (documented)**
+Als Referenz-Tabelle in `docs/03-dev-doc.md` festgehalten; eine spaetere
+Vereinheitlichung kann daran ausgerichtet werden.
+
+### bug34 `icon.php`: Zeilenlaengen-Verstoesse (SVG-Pfaddaten)
+
+Feature:  feat01
+Severity: S4
+Status:   fixed
+Linked:   -
+
+**Beschreibung**
+Das `PATHS`-Array (maschinengenerierte Lucide-SVG-Geometrie) verletzte die
+Zeilenlaengen-Sniffs (34 Errors + 28 Warnings); zusaetzlich eine Leerzeile nach
+der Klassen-Klammer.
+
+**Stand 2026-07-05 (fixed)**
+Gezielte `phpcs:disable`-Annotation nur um das `PATHS`-Datenblock
+(`moodle.Files.LineLength.*`, mit Begruendung); Leerzeile entfernt. Plugin
+gesamt: `phpcs` 0/0.

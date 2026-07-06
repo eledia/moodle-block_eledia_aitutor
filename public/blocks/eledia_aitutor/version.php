@@ -26,12 +26,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2026070214;
-$plugin->requires = 2023041800;
-$plugin->supported = [402, 502];
+$plugin->version = 2026070500;
+$plugin->requires = 2024100700;
+$plugin->supported = [405, 502];
 $plugin->component = 'block_eledia_aitutor';
 $plugin->maturity = MATURITY_BETA;
-$plugin->release = '0.18.5';
+$plugin->release = '0.18.6';
 // The MCP web service plugin is a mandatory runtime integration but is enforced
 // at runtime (admin config error + user-facing unavailable message) rather than
 // as an install-time dependency, so the block still installs standalone. See

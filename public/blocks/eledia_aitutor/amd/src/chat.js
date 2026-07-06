@@ -99,6 +99,7 @@ class TutorChat {
         this.composer = root.querySelector('[data-region="composer"]');
         this.backdrop = root.querySelector('.eledia_aitutor-backdrop');
         this.historyPanel = root.querySelector('[data-region="history"]');
+        this.historyButton = root.querySelector('[data-action="history"]');
         this.expandButton = root.querySelector('[data-action="expand"]');
 
         this.bind();
@@ -201,6 +202,7 @@ class TutorChat {
             const active = chip.dataset.style === stored;
             chip.classList.toggle('eledia_aitutor-stylechip-active', active);
             chip.setAttribute('aria-checked', active ? 'true' : 'false');
+            chip.tabIndex = active ? 0 : -1;
         });
     }
 
@@ -267,6 +269,12 @@ class TutorChat {
                     accept.disabled = !consentCheck.checked;
                 }
             });
+        }
+
+        // Arrow-key navigation for the answer-style radiogroup.
+        const styles = this.panel.querySelector('[data-region="styles"][role="radiogroup"]');
+        if (styles) {
+            styles.addEventListener('keydown', (e) => this.handleStyleKeys(e));
         }
 
         // Escape closes overlay modes and Tab is trapped while open. Bound to the
@@ -384,6 +392,7 @@ class TutorChat {
         document.body.classList.add('eledia_aitutor-noscroll', 'eledia_aitutor-expanded-open');
         this.expanded = true;
         this.updateExpandButton();
+        this.updateDialogRole();
         window.setTimeout(() => this.input && this.input.focus(), 50);
     }
 
@@ -414,6 +423,7 @@ class TutorChat {
         this.expandPlaceholder = null;
         this.expanded = false;
         this.updateExpandButton();
+        this.updateDialogRole();
     }
 
     /**
@@ -434,6 +444,37 @@ class TutorChat {
         }
         if (icon) {
             icon.replaceWith(Icons.create(this.expanded ? 'compress' : 'expand'));
+        }
+    }
+
+    /**
+     * Reflect the panel's current modality to assistive technology.
+     *
+     * The panel is a plain region only when embedded inline (and not expanded)
+     * or when a closed overlay is hidden. Any visible overlay -- or any expanded
+     * state -- is a dialog. It is a *modal* dialog (aria-modal="true") whenever
+     * the page behind it is inert: the modal and fullscreen display modes, and
+     * every expanded state (which adds a backdrop and scroll lock). The docked
+     * panel leaves the page interactive, so it stays a non-modal dialog. The
+     * accessible name comes from the panel's existing aria-label (the persona).
+     *
+     * @return {void}
+     */
+    updateDialogRole() {
+        const inlineregion = !this.isOverlay() && !this.expanded;
+        const closedoverlay = this.isOverlay() && this.isHidden();
+        if (inlineregion || closedoverlay) {
+            this.panel.setAttribute('role', 'region');
+            this.panel.removeAttribute('aria-modal');
+            return;
+        }
+        this.panel.setAttribute('role', 'dialog');
+        if (this.expanded
+                || this.config.displaymode === 'modal'
+                || this.config.displaymode === 'fullscreen') {
+            this.panel.setAttribute('aria-modal', 'true');
+        } else {
+            this.panel.removeAttribute('aria-modal');
         }
     }
 
@@ -461,6 +502,7 @@ class TutorChat {
         if (this.launch) {
             this.launch.setAttribute('aria-expanded', 'true');
         }
+        this.updateDialogRole();
         window.setTimeout(() => this.input && this.input.focus(), 50);
     }
 
@@ -481,6 +523,7 @@ class TutorChat {
             this.backdrop.setAttribute('hidden', 'hidden');
         }
         document.body.classList.remove('eledia_aitutor-noscroll');
+        this.updateDialogRole();
         const launch = this.launch;
         if (launch) {
             launch.setAttribute('aria-expanded', 'false');
@@ -743,13 +786,28 @@ class TutorChat {
     /**
      * Send a structured confirmation reply from a rendered assistant button.
      *
+     * The confirmation may trigger a state-changing (write) MCP action, so the
+     * whole button group is locked on the first choice: both buttons are
+     * disabled and the group is marked resolved, which prevents a double
+     * trigger and tells assistive tech the prompt has been answered. The chosen
+     * button is flagged with aria-pressed so screen-reader users can tell which
+     * option was taken.
+     *
      * @param {HTMLElement} el The clicked confirmation button.
      * @return {void}
      */
     confirmReply(el) {
         const message = el.getAttribute('data-message') || '';
-        if (!message || this.busy || !this.consented) {
+        const group = el.closest('[data-region="confirmation-actions"]');
+        if (!message || this.busy || !this.consented || (group && group.dataset.resolved)) {
             return;
+        }
+        if (group) {
+            group.dataset.resolved = 'true';
+            group.querySelectorAll('button').forEach((btn) => {
+                btn.disabled = true;
+                btn.setAttribute('aria-pressed', btn === el ? 'true' : 'false');
+            });
         }
         this.input.value = message;
         this.autoGrow();
@@ -940,9 +998,11 @@ class TutorChat {
      * Select an answer style chip.
      *
      * @param {HTMLElement} el The clicked chip.
+     * @param {boolean} refocusinput Whether to return focus to the composer
+     *        (true for pointer clicks, false for keyboard radio navigation).
      * @return {void}
      */
-    setStyle(el) {
+    setStyle(el, refocusinput = true) {
         const style = el.dataset.style;
         if (!style || !this.config.allowstylechange) {
             return;
@@ -952,13 +1012,51 @@ class TutorChat {
             const active = chip === el;
             chip.classList.toggle('eledia_aitutor-stylechip-active', active);
             chip.setAttribute('aria-checked', active ? 'true' : 'false');
+            // Roving tabindex: only the checked radio is in the tab sequence.
+            chip.tabIndex = active ? 0 : -1;
         });
         try {
             window.sessionStorage.setItem('eledia_aitutor_style_' + this.config.contextid, style);
         } catch (e) {
             // Storage unavailable (private mode): the choice still applies for this page.
         }
-        this.input.focus();
+        // A pointer selection returns focus to the composer to keep typing;
+        // keyboard navigation (see handleStyleKeys) keeps focus on the chip.
+        if (refocusinput) {
+            this.input.focus();
+        }
+    }
+
+    /**
+     * Keyboard support for the answer-style radiogroup (WCAG 2.1.1 / ARIA radio
+     * pattern): arrow keys move selection between chips with wraparound, Home/End
+     * jump to the ends. Selecting a radio also checks it, matching the pattern.
+     *
+     * @param {KeyboardEvent} e The keydown event on the radiogroup.
+     * @return {void}
+     */
+    handleStyleKeys(e) {
+        if (['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown', 'Home', 'End'].indexOf(e.key) === -1) {
+            return;
+        }
+        const chips = Array.from(this.panel.querySelectorAll('[data-action="style"]'));
+        if (!chips.length) {
+            return;
+        }
+        e.preventDefault();
+        const current = chips.indexOf(document.activeElement);
+        let next;
+        if (e.key === 'Home') {
+            next = 0;
+        } else if (e.key === 'End') {
+            next = chips.length - 1;
+        } else {
+            const back = e.key === 'ArrowLeft' || e.key === 'ArrowUp';
+            const base = current === -1 ? 0 : current;
+            next = (base + (back ? -1 : 1) + chips.length) % chips.length;
+        }
+        this.setStyle(chips[next], false);
+        chips[next].focus();
     }
 
     /**
@@ -1187,6 +1285,9 @@ class TutorChat {
             }
         } else {
             this.historyPanel.setAttribute('hidden', 'hidden');
+        }
+        if (this.historyButton) {
+            this.historyButton.setAttribute('aria-expanded', willShow ? 'true' : 'false');
         }
     }
 

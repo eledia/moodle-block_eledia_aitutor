@@ -120,7 +120,8 @@
                     {{#historyenabled}}
                         <button type="button" class="btn btn-icon eledia_aitutor-iconbtn"
                                 data-action="history" aria-label="{{#str}}history, block_eledia_aitutor{{/str}}"
-                                title="{{#str}}history, block_eledia_aitutor{{/str}}">
+                                title="{{#str}}history, block_eledia_aitutor{{/str}}"
+                                aria-expanded="false" aria-controls="{{uniqid}}_history">
                             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="lucide"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         </button>
                     {{/historyenabled}}
@@ -168,6 +169,7 @@
 
             {{#historyenabled}}
                 <div class="eledia_aitutor-history" data-region="history" hidden
+                     id="{{uniqid}}_history"
                      role="region" aria-label="{{#str}}history, block_eledia_aitutor{{/str}}">
                     <div class="eledia_aitutor-history-empty" data-region="history-empty">
                         {{#str}}nohistory, block_eledia_aitutor{{/str}}
@@ -237,6 +239,7 @@
                     {{#styles}}
                         <button type="button" class="eledia_aitutor-stylechip{{#active}} eledia_aitutor-stylechip-active{{/active}}"
                                 role="radio" aria-checked="{{#active}}true{{/active}}{{^active}}false{{/active}}"
+                                tabindex="{{#active}}0{{/active}}{{^active}}-1{{/active}}"
                                 data-action="style" data-style="{{key}}">{{label}}</button>
                     {{/styles}}
                 </div>

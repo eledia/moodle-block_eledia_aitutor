@@ -55,11 +55,14 @@ export default {
             Ajax.call([{
                 methodname: 'block_eledia_aitutor_generate_copilot_analysis',
                 args: {courseid: courseid},
-            }])[0].then((response) => {
-                status.textContent = '';
+            }])[0].then(async(response) => {
                 result.innerHTML = response.analysishtml;
                 result.hidden = false;
                 button.disabled = false;
+                // Announce completion via the aria-live status region (WCAG 4.1.3):
+                // the freshly rendered result is not itself a live region, so a
+                // screen reader would otherwise get no signal that it is ready.
+                status.textContent = await getString('copilot_ready', 'block_eledia_aitutor');
                 return null;
             }).catch(async(error) => {
                 status.textContent = (error && error.message)
